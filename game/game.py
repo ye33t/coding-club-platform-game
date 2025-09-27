@@ -2,8 +2,10 @@
 
 import pygame
 import sys
+import os
 from .display import Display
 from .constants import FPS, BACKGROUND_COLOR, WHITE, TILES_HORIZONTAL, TILES_VERTICAL, TILE_SIZE
+from .sprites import sprites
 
 
 class Game:
@@ -19,6 +21,16 @@ class Game:
 
         # Initialize font for debug info
         self.font = pygame.font.Font(None, 16)
+
+        # Load sprite sheets
+        assets_path = os.path.join(os.path.dirname(__file__), "assets")
+        sprites.load_sheets(assets_path)
+
+        # Format: (sprite_name, tile_x, tile_y) where y is from bottom of screen
+        # y=0 is the very bottom, y=27 is the top (screen is 28 tiles tall)
+        self.test_sprites = [
+            ("small_mario_stand", 6, 2),   # Mario standing 2 tiles from bottom
+        ]
 
     def handle_events(self):
         """Process pygame events."""
@@ -47,6 +59,22 @@ class Game:
 
         # Get the surface to draw on
         surface = self.display.get_native_surface()
+
+        # Draw test sprites using tile coordinates
+        for item in self.test_sprites:
+            sprite_name, tile_x, tile_y = item
+            # Determine which sheet the sprite belongs to
+            if "mario" in sprite_name or "luigi" in sprite_name or "peach" in sprite_name:
+                sheet = "characters"
+            elif "goomba" in sprite_name or "koopa" in sprite_name:
+                sheet = "enemies"
+            elif "coin" in sprite_name or "mushroom" in sprite_name or "star" in sprite_name:
+                sheet = "other"
+            else:
+                sheet = "characters"  # default
+
+            # Draw sprite at tile position (bottom-aligned)
+            sprites.draw_at_tile(surface, sheet, sprite_name, tile_x, tile_y)
 
         # Draw tile grid (for visualization)
         if self.show_debug:
