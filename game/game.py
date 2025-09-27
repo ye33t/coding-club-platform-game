@@ -26,10 +26,20 @@ class Game:
         assets_path = os.path.join(os.path.dirname(__file__), "assets")
         sprites.load_sheets(assets_path)
 
-        # Format: (sprite_name, tile_x, tile_y) where y is from bottom of screen
-        # y=0 is the very bottom, y=27 is the top (screen is 28 tiles tall)
-        self.test_sprites = [
-            ("small_mario_stand", 0, 0),   # Mario standing 2 tiles from bottom
+        # Mario animation state (now in pixels for smooth movement)
+        self.mario_x = 0.0  # X position in pixels (float for smooth movement)
+        self.mario_y = 16.0  # Y position in pixels from bottom (fixed at 2 tiles = 16 pixels)
+        self.mario_frame = 0  # Current animation frame
+        self.mario_anim_timer = 0.0  # Timer for animation
+        self.mario_speed = 64.0  # Movement speed in pixels per second (8 tiles/sec * 8 pixels/tile)
+        self.frame_duration = 0.1  # Time per animation frame in seconds
+
+        # Animation frames for walking
+        self.walk_frames = [
+            "small_mario_stand",
+            "small_mario_walk1",
+            "small_mario_walk2",
+            "small_mario_walk1",
         ]
 
     def handle_events(self):
@@ -49,8 +59,21 @@ class Game:
 
     def update(self, dt):
         """Update game state."""
-        # Game logic will go here
-        pass
+        # Move Mario to the right (in pixels)
+        self.mario_x += self.mario_speed * dt
+
+        # Wrap around when Mario goes off screen
+        from .constants import NATIVE_WIDTH
+        if self.mario_x > NATIVE_WIDTH:
+            self.mario_x = -16  # Start just off the left side (2 tiles width)
+
+        # Update animation timer
+        self.mario_anim_timer += dt
+
+        # Switch to next frame when timer expires
+        if self.mario_anim_timer >= self.frame_duration:
+            self.mario_anim_timer = 0.0
+            self.mario_frame = (self.mario_frame + 1) % len(self.walk_frames)
 
     def draw(self):
         """Draw everything to the screen."""
@@ -60,21 +83,9 @@ class Game:
         # Get the surface to draw on
         surface = self.display.get_native_surface()
 
-        # Draw test sprites using tile coordinates
-        for item in self.test_sprites:
-            sprite_name, tile_x, tile_y = item
-            # Determine which sheet the sprite belongs to
-            if "mario" in sprite_name or "luigi" in sprite_name or "peach" in sprite_name:
-                sheet = "characters"
-            elif "goomba" in sprite_name or "koopa" in sprite_name:
-                sheet = "enemies"
-            elif "coin" in sprite_name or "mushroom" in sprite_name or "star" in sprite_name:
-                sheet = "other"
-            else:
-                sheet = "characters"  # default
-
-            # Draw sprite at tile position (bottom-aligned)
-            sprites.draw_at_tile(surface, sheet, sprite_name, tile_x, tile_y)
+        # Draw animated Mario at pixel position for smooth movement
+        current_sprite = self.walk_frames[self.mario_frame]
+        sprites.draw_at_position(surface, "characters", current_sprite, int(self.mario_x), int(self.mario_y))
 
         # Draw tile grid (for visualization)
         if self.show_debug:

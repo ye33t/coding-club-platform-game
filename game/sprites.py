@@ -129,25 +129,41 @@ class SpriteManager:
             tile_x: X position in tiles (left edge)
             tile_y: Y position in tiles from bottom (bottom edge of sprite)
         """
+        # Convert tile coordinates to pixel coordinates
+        pixel_x = tile_x * TILE_SIZE
+        pixel_y = tile_y * TILE_SIZE
+
+        # Use draw_at_position to do the actual drawing
+        self.draw_at_position(surface, sheet_name, sprite_name, pixel_x, pixel_y)
+
+    def draw_at_position(self, surface, sheet_name, sprite_name, x, y):
+        """Draw a sprite at pixel coordinates with bottom-left alignment.
+
+        Uses bottom-up coordinate system where y=0 is at the bottom of the screen.
+
+        Args:
+            surface: Surface to draw on
+            sheet_name: Name of the sprite sheet
+            sprite_name: Name of the sprite
+            x: X position in pixels (left edge)
+            y: Y position in pixels from bottom (bottom edge of sprite)
+        """
         sprite = self.get(sheet_name, sprite_name)
         if not sprite:
             return
 
-        # Get screen height in tiles
-        from .constants import TILES_VERTICAL
+        # Get screen height in pixels
+        from .constants import NATIVE_HEIGHT
 
         # Convert from bottom-up to top-down coordinates
-        # tile_y is from bottom, so flip it
-        screen_tile_y = TILES_VERTICAL - tile_y
-
-        # Convert tile position to pixels (now in screen coordinates)
-        pixel_x, pixel_y = tiles_to_pixels(tile_x, screen_tile_y)
+        # y is from bottom, so flip it
+        screen_y = NATIVE_HEIGHT - y
 
         # Adjust Y for bottom alignment (draw from top of sprite)
         sprite_height = sprite.get_height()
-        draw_y = pixel_y - sprite_height
+        draw_y = screen_y - sprite_height
 
-        surface.blit(sprite, (pixel_x, draw_y))
+        surface.blit(sprite, (x, draw_y))
 
     def preload_sprites(self, sheet_name, sprite_names=None):
         """Preload sprites into cache for faster access.

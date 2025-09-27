@@ -9,6 +9,20 @@
 CHARACTERS = {
     # Small Mario (2x2 tile space)
     "small_mario_stand": (0, 24, 2, 2),
+    "small_mario_walk1": (20, 24, 2, 2),
+    "small_mario_walk2": (38, 24, 2, 2),
+    "small_mario_run1": (56, 24, 2, 2),
+    "small_mario_run2": (76, 24, 2, 2),
+    "small_mario_run3": (96, 24, 2, 2),
+    "small_mario_die": (116, 24, 2, 2),
+    "small_mario_bounce1": (136, 24, 2, 2),
+    "small_mario_bounce2": (154, 24, 2, 2),
+    "small_mario_jump1": (174, 24, 2, 2),
+    "small_mario_jump2": (192, 24, 2, 2),
+    "small_mario_jump3": (210, 24, 2, 2),
+    "small_mario_jump4": (228, 24, 2, 2),
+    "small_mario_jump5": (246, 24, 2, 2),
+    # "circle": (264, 16, 1, 1),
 }
 
 BLOCKS = {
