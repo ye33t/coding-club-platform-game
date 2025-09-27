@@ -29,7 +29,7 @@ class Game:
         # Format: (sprite_name, tile_x, tile_y) where y is from bottom of screen
         # y=0 is the very bottom, y=27 is the top (screen is 28 tiles tall)
         self.test_sprites = [
-            ("small_mario_stand", 6, 2),   # Mario standing 2 tiles from bottom
+            ("small_mario_stand", 0, 0),   # Mario standing 2 tiles from bottom
         ]
 
     def handle_events(self):

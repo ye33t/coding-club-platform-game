@@ -78,12 +78,12 @@ class SpriteManager:
             return None
 
         # Extract sprite using definition
-        # Format: (x, y, actual_width, actual_height, tile_width, tile_height)
+        # Format: (x, y, tile_width, tile_height)
         sprite_def = SPRITE_SHEETS[sheet_name][sprite_name]
-        if len(sprite_def) == 6:
-            x, y, actual_width, actual_height, tile_width, tile_height = sprite_def
-            # Extract the actual sprite (no padding)
-            sprite = self.sheets[sheet_name].get_sprite(x, y, actual_width, actual_height)
+        if len(sprite_def) == 4:
+            x, y, tile_width, tile_height = sprite_def
+            # Extract sprite using bottom-left coordinates
+            sprite = self.sheets[sheet_name].get_sprite(x, y, tile_width, tile_height)
         else:
             print(f"Warning: Invalid sprite definition format for {sprite_name}")
             return None
@@ -107,13 +107,13 @@ class SpriteManager:
             return None
 
         sprite_def = SPRITE_SHEETS[sheet_name][sprite_name]
-        if len(sprite_def) == 6:
-            x, y, actual_width, actual_height, tile_width, tile_height = sprite_def
+        if len(sprite_def) == 4:
+            x, y, tile_width, tile_height = sprite_def
             return {
-                "pixel_width": actual_width,
-                "pixel_height": actual_height,
                 "tile_width": tile_width,
                 "tile_height": tile_height,
+                "pixel_width": tile_width * TILE_SIZE,
+                "pixel_height": tile_height * TILE_SIZE,
             }
         return None
 
