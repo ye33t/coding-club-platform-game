@@ -21,7 +21,7 @@ WHITE = (255, 255, 255)
 TRANSPARENT = (0, 41, 140)  # Dark blue transparency color
 
 # NES-style dark gray background (similar to NES palette entry $00)
-BACKGROUND_COLOR = (124, 124, 124)
+BACKGROUND_COLOR = (146, 144, 255)
 
 
 # Coordinate conversion helpers

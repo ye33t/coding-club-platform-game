@@ -20,8 +20,12 @@ class Display:
         self.window_width = NATIVE_WIDTH * self.scale
         self.window_height = NATIVE_HEIGHT * self.scale
 
-        # Create the window
-        self.screen = pygame.display.set_mode((self.window_width, self.window_height))
+        # Create the window with V-sync enabled
+        self.screen = pygame.display.set_mode(
+            (self.window_width, self.window_height),
+            pygame.DOUBLEBUF | pygame.HWSURFACE,
+            vsync=1
+        )
         pygame.display.set_caption("NES Platform Game")
 
         # Create native resolution surface for pixel-perfect rendering
@@ -47,7 +51,11 @@ class Display:
             self.scale = new_scale
             self.window_width = NATIVE_WIDTH * self.scale
             self.window_height = NATIVE_HEIGHT * self.scale
-            self.screen = pygame.display.set_mode((self.window_width, self.window_height))
+            self.screen = pygame.display.set_mode(
+                (self.window_width, self.window_height),
+                pygame.DOUBLEBUF | pygame.HWSURFACE,
+                vsync=1
+            )
 
     def get_native_surface(self):
         """Get the native resolution surface for drawing."""
