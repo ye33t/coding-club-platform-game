@@ -29,8 +29,10 @@ class Display:
         pygame.display.set_caption("NES Platform Game")
 
         # Create native resolution surface for pixel-perfect rendering
-        self.native_surface = pygame.Surface((NATIVE_WIDTH, NATIVE_HEIGHT))
-        self.native_surface = self.native_surface.convert()
+        # Use convert() to optimize the surface for fast blitting
+        self.native_surface = pygame.Surface((NATIVE_WIDTH, NATIVE_HEIGHT)).convert()
+        # Set the surface to use per-pixel alpha if needed
+        self.native_surface.set_alpha(None)
 
     def clear(self, color=BLACK):
         """Clear the native surface."""
@@ -38,8 +40,11 @@ class Display:
 
     def present(self):
         """Scale and present the native surface to the screen."""
-        # Scale up the native surface to window size (nearest neighbor for pixel-perfect)
-        scaled = pygame.transform.scale(self.native_surface, (self.window_width, self.window_height))
+        # Clear the screen first to prevent ghosting
+        self.screen.fill(BLACK)
+        # Scale up the native surface to window size using nearest neighbor for pixel-perfect scaling
+        # In pygame 2.1+, scale uses nearest neighbor by default for integer scales
+        scaled = pygame.transform.scale_by(self.native_surface, self.scale)
         self.screen.blit(scaled, (0, 0))
         pygame.display.flip()
 
