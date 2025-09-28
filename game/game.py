@@ -72,8 +72,11 @@ class Game:
         # Get the surface to draw on
         surface = self.display.get_native_surface()
 
-        # Draw Mario using his own draw method
-        self.mario.draw(surface)
+        # Draw level tiles
+        self.draw_level(surface)
+
+        # Draw Mario at screen position (transform from world to screen)
+        self.draw_mario(surface)
 
         # Draw tile grid (for visualization)
         if self.show_debug:
@@ -82,6 +85,57 @@ class Game:
 
         # Present the scaled result
         self.display.present()
+
+    def draw_level(self, surface):
+        """Draw the visible level tiles."""
+        # Get visible tiles from level
+        visible_tiles = self.world.level.get_visible_tiles(self.world.camera.x)
+
+        for tile_x, tile_y, tile_type in visible_tiles:
+            # Convert tile position to world pixels
+            world_x = tile_x * TILE_SIZE
+            world_y = tile_y * TILE_SIZE
+
+            # Transform to screen coordinates
+            screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
+
+            # Draw the tile (using simple colored rectangles for now)
+            if tile_type == 1:  # TILE_GROUND
+                color = (139, 69, 19)  # Brown
+            elif tile_type == 2:  # TILE_BRICK
+                color = (178, 34, 34)  # Brick red
+            else:
+                color = (100, 100, 100)  # Gray
+
+            # Remember: screen_y is from bottom, need to convert for pygame
+            from .constants import NATIVE_HEIGHT
+
+            pygame_y = NATIVE_HEIGHT - screen_y - TILE_SIZE
+
+            pygame.draw.rect(surface, color, (screen_x, pygame_y, TILE_SIZE, TILE_SIZE))
+
+    def draw_mario(self, surface):
+        """Draw Mario at his screen position."""
+        # Transform Mario's world position to screen position
+        screen_x, screen_y = self.world.camera.world_to_screen(
+            self.mario.state.x, self.mario.state.y
+        )
+
+        # Get sprite name
+        sprite_name = self.mario._get_sprite_name()
+        if sprite_name:
+            # Use reflection when facing left
+            reflected = not self.mario.state.facing_right
+
+            # Draw at screen position (not world position)
+            sprites.draw_at_position(
+                surface,
+                "characters",
+                sprite_name,
+                int(screen_x),
+                int(screen_y),
+                reflected,
+            )
 
     def draw_tile_grid(self, surface):
         """Draw the 8x8 tile grid for debugging."""
@@ -111,7 +165,8 @@ class Game:
             f"Resolution: {surface.get_width()}x{surface.get_height()}",
             f"Tiles: {TILES_HORIZONTAL}x{TILES_VERTICAL}",
             f"Scale: {self.display.scale}x",
-            f"Mario: ({self.mario.state.x:.1f}, {self.mario.state.y:.1f})",
+            f"Camera X: {self.world.camera.x:.1f}",
+            f"Mario World: ({self.mario.state.x:.1f}, {self.mario.state.y:.1f})",
             f"Velocity: ({self.mario.state.vx:.1f}, {self.mario.state.vy:.1f})",
             f"Action: {self.mario.state.action}",
             f"On Ground: {self.mario.state.on_ground}",

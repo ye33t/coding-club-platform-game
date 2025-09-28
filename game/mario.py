@@ -1,7 +1,7 @@
 """Mario character management with intent-based architecture."""
 
-from dataclasses import dataclass
 from copy import deepcopy
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import pygame
@@ -115,13 +115,18 @@ class Mario:
         if new_state.action != self.state.action:
             # Set animation length for the new action
             if new_state.action in self.animations:
-                new_state.animation_length = len(self.animations[new_state.action]["sprites"])
+                new_state.animation_length = len(
+                    self.animations[new_state.action]["sprites"]
+                )
             else:
                 new_state.animation_length = 1
             new_state.frame = 0
 
         # Also reset walking/running animations when changing direction while moving
-        elif new_state.action in ["walking", "running"] and self.state.action in ["walking", "running"]:
+        elif new_state.action in ["walking", "running"] and self.state.action in [
+            "walking",
+            "running",
+        ]:
             # Reset if direction changed
             if (new_state.vx > 0) != (self.state.vx > 0) and abs(new_state.vx) > 1.0:
                 new_state.frame = 0

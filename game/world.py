@@ -1,6 +1,8 @@
 """World physics and game logic."""
 
-from .constants import NATIVE_WIDTH
+from .camera import Camera
+from .constants import TILE_SIZE
+from .level import Level
 from .mario import Mario, MarioIntent, MarioState
 
 # Physics constants
@@ -17,8 +19,9 @@ class World:
 
     def __init__(self):
         """Initialize the world."""
-        # For now, simple ground at y=16 (2 tiles from bottom)
-        self.ground_level = 16.0
+        # Create level and camera
+        self.level = Level(width_in_screens=3)  # 3 screens wide for testing
+        self.camera = Camera()
 
     def process_mario(self, mario: Mario, keys, dt: float):
         """Process Mario's intent and update his state."""
@@ -37,12 +40,15 @@ class World:
         # Step 5: Update Mario's animation
         mario.update_animation()
 
+        # Step 6: Update camera based on Mario's new position
+        self.camera.update(mario.state.x, self.level.width_pixels)
+
     def resolve_intent(
         self, state: MarioState, intent: MarioIntent, dt: float
     ) -> MarioState:
         """Turn intent into reality with physics and game rules."""
         # Clone the state to work with
-        new_state = state.clone()
+        new_state: MarioState = state.clone()
 
         # Handle horizontal movement intent
         target_vx = 0.0
@@ -87,16 +93,31 @@ class World:
         new_state.y += new_state.vy * dt
 
         # Check world boundaries
-        if new_state.x < 0:
-            new_state.x = 0
+        # Mario can't go left of the camera position (ratcheting)
+        if new_state.x < self.camera.x:
+            new_state.x = self.camera.x
             new_state.vx = 0
-        elif new_state.x > NATIVE_WIDTH - 16:  # Mario is 2 tiles wide
-            new_state.x = NATIVE_WIDTH - 16
+        elif new_state.x > self.level.width_pixels - 16:  # Mario is 2 tiles wide
+            new_state.x = self.level.width_pixels - 16
             new_state.vx = 0
 
-        # Simple ground collision
-        if new_state.y <= self.ground_level:
-            new_state.y = self.ground_level
+        # Tile-based collision detection
+        # Mario is 2 tiles wide, 2 tiles tall
+        mario_width = 2 * TILE_SIZE
+
+        # Check for ground collision
+        # Check one pixel below Mario's feet
+        ground_check_y = new_state.y - 1
+        if (
+            self.level.get_tile_at_position(new_state.x, ground_check_y) != 0
+            or self.level.get_tile_at_position(
+                new_state.x + mario_width - 1, ground_check_y
+            )
+            != 0
+        ):
+            # Snap to top of tile
+            tile_y = int(ground_check_y // TILE_SIZE)
+            new_state.y = (tile_y + 1) * TILE_SIZE
             new_state.vy = 0
             new_state.on_ground = True
         else:
