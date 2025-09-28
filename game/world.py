@@ -35,11 +35,21 @@ class World:
         # Step 3: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
 
-        # Step 4: Push state back to Mario
+        # Step 4: Check if reset is needed
+        if processed_context.state.should_reset:
+            # Reset Mario to starting position
+            from .mario import MarioState
+            mario.state = MarioState(x=50.0, y=16.0)
+            # Reset camera to beginning (both position and ratchet)
+            self.camera.x = 0
+            self.camera.max_x = 0
+            return  # Skip the rest of the update
+
+        # Step 5: Push state back to Mario
         mario.apply_state(processed_context.state)
 
-        # Step 5: Update Mario's animation
+        # Step 6: Update Mario's animation
         mario.update_animation()
 
-        # Step 6: Update camera based on Mario's new position
+        # Step 7: Update camera based on Mario's new position
         self.camera.update(mario.state.x, self.level.width_pixels)

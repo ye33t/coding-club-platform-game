@@ -20,6 +20,10 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
         state = context.state
         level = context.level
 
+        # Skip collision detection if dying
+        if state.is_dying:
+            return context
+
         # Only check if moving left
         if state.vx >= 0:
             return context

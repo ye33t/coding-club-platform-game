@@ -6,11 +6,14 @@ from .action import ActionProcessor
 from .base import PhysicsContext, PhysicsProcessor
 from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
+from .death_physics import DeathPhysicsProcessor
+from .death_trigger import DeathTriggerProcessor
 from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .left_wall_collision import LeftWallCollisionProcessor
 from .movement import MovementProcessor
+from .reset import ResetProcessor
 from .right_wall_collision import RightWallCollisionProcessor
 from .velocity import VelocityProcessor
 
@@ -20,15 +23,18 @@ class PhysicsPipeline:
 
     The pipeline processes physics in this order:
     1. Intent - Convert player input to target states
-    2. Movement - Apply friction/deceleration
-    3. Gravity - Apply gravity and handle jumping
-    4. Velocity - Update position from velocity
-    5. Boundaries - Enforce world boundaries
-    6. LeftWallCollision - Detect and resolve left wall hits
-    7. RightWallCollision - Detect and resolve right wall hits
-    8. CeilingCollision - Detect and resolve ceiling hits
-    9. GroundCollision - Detect and resolve ground/slopes
-    10. Action - Determine action from final state
+    2. DeathPhysics - Handle death animation physics (early to override others)
+    3. Movement - Apply friction/deceleration
+    4. Gravity - Apply gravity and handle jumping
+    5. Velocity - Update position from velocity
+    6. DeathTrigger - Check if Mario fell below screen
+    7. Reset - Check if death animation complete
+    8. Boundaries - Enforce world boundaries
+    9. LeftWallCollision - Detect and resolve left wall hits
+    10. RightWallCollision - Detect and resolve right wall hits
+    11. CeilingCollision - Detect and resolve ceiling hits
+    12. GroundCollision - Detect and resolve ground/slopes
+    13. Action - Determine action from final state
 
     This order ensures that:
     - Input is processed first
@@ -42,9 +48,12 @@ class PhysicsPipeline:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
             IntentProcessor(),
+            DeathPhysicsProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
+            DeathTriggerProcessor(),
+            ResetProcessor(),
             BoundaryProcessor(),
             LeftWallCollisionProcessor(),
             RightWallCollisionProcessor(),

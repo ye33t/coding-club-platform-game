@@ -43,6 +43,11 @@ class MarioState:
     facing_right: bool = True
     on_ground: bool = True
 
+    # Death state
+    is_dying: bool = False
+    death_leap_velocity: float = 0.0  # Initial upward velocity for death animation
+    should_reset: bool = False  # Flag to trigger reset after death
+
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
     frame: int = 0

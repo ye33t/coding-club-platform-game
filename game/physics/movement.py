@@ -19,6 +19,10 @@ class MovementProcessor(PhysicsProcessor):
         state = context.state
         intent = context.intent
 
+        # Skip movement processing if dying
+        if state.is_dying:
+            return context
+
         # If no horizontal movement intent, apply friction
         if not intent.move_left and not intent.move_right:
             state.vx *= FRICTION

@@ -23,6 +23,10 @@ class IntentProcessor(PhysicsProcessor):
         state = context.state
         intent = context.intent
 
+        # Ignore all input if dying
+        if state.is_dying:
+            return context
+
         # Calculate target horizontal velocity based on intent
         target_vx = 0.0
 

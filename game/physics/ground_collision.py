@@ -20,6 +20,10 @@ class GroundCollisionProcessor(PhysicsProcessor):
         state = context.state
         level = context.level
 
+        # Skip collision detection if dying
+        if state.is_dying:
+            return context
+
         highest_ground = -1.0  # Start with invalid value
         found_ground = False
 

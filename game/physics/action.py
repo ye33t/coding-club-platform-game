@@ -31,7 +31,9 @@ class ActionProcessor(PhysicsProcessor):
 
     def _determine_action(self, state) -> str:
         """Determine Mario's action based on his physics state."""
-        if not state.on_ground:
+        if state.is_dying:
+            return "dying"
+        elif not state.on_ground:
             return "jumping"
         elif abs(state.vx) > RUN_THRESHOLD:
             return "running"

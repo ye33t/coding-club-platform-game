@@ -20,6 +20,10 @@ class CeilingCollisionProcessor(PhysicsProcessor):
         state = context.state
         level = context.level
 
+        # Skip collision detection if dying
+        if state.is_dying:
+            return context
+
         # Only check ceiling if moving upward
         if state.vy <= 0:
             return context
