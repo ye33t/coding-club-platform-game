@@ -52,6 +52,9 @@ class MarioState:
     frame: int = 0
     animation_length: int = 1  # Total frames in current animation
 
+    # Input tracking
+    input_duration: int = 0  # Frames current direction has been held
+
     def clone(self):
         """Create a deep copy of this state."""
         return deepcopy(self)

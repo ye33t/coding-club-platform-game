@@ -46,7 +46,9 @@ class CeilingCollisionProcessor(PhysicsProcessor):
             if tile_type != 0 and level.is_solid(tile_type):
                 # Mario's head penetrated into a solid tile
                 # Push him back down but allow slight penetration for better feel
-                mario_state.y = (tile_y * TILE_SIZE) - mario_state.height + PENETRATION_ALLOWANCE
+                mario_state.y = (
+                    (tile_y * TILE_SIZE) - mario_state.height + PENETRATION_ALLOWANCE
+                )
                 mario_state.vy = 0  # Stop upward movement
                 break
 

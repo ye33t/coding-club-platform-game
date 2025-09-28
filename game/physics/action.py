@@ -19,22 +19,41 @@ class ActionProcessor(PhysicsProcessor):
         """Determine action from state."""
         mario_state = context.mario_state
 
-        # Clear skidding if velocity is low
-        if mario_state.action == "skidding" and abs(mario_state.vx) < 10:
-            mario_state.action = ""  # Clear action, will be re-determined
+        # Clear skidding if:
+        # 1. Velocity is low (stopped or nearly stopped)
+        # 2. Mario has changed direction (velocity crosses zero)
+        if mario_state.action == "skidding":
+            velocity_is_low = abs(mario_state.vx) < 10
+
+            # Check if Mario has crossed zero velocity
+            # When this happens, update facing direction
+            if abs(mario_state.vx) < 1.0:
+                # Mario has essentially stopped - update facing based on intent
+                if context.mario_intent.move_right:
+                    mario_state.facing_right = True
+                elif context.mario_intent.move_left:
+                    mario_state.facing_right = False
+                mario_state.action = ""  # Clear action, will be re-determined
+            elif velocity_is_low:
+                mario_state.action = ""  # Clear action, will be re-determined
 
         # Only update action if not skidding
         if mario_state.action != "skidding":
-            mario_state.action = self._determine_action(mario_state)
+            mario_state.action = self._determine_action(
+                mario_state, context.mario_intent
+            )
 
         return context
 
-    def _determine_action(self, mario_state) -> str:
-        """Determine Mario's action based on his physics state."""
+    def _determine_action(self, mario_state, mario_intent) -> str:
+        """Determine Mario's action based on his physics state and input."""
         if mario_state.is_dying:
             return "dying"
         elif not mario_state.on_ground:
             return "jumping"
+        elif not mario_intent.move_left and not mario_intent.move_right:
+            # No input = idle animation, even if still sliding from momentum
+            return "idle"
         elif abs(mario_state.vx) > RUN_THRESHOLD:
             return "running"
         elif abs(mario_state.vx) > 1.0:

@@ -33,7 +33,9 @@ class DeathTriggerProcessor(PhysicsProcessor):
             # 0 = u² - 2g*h => u = sqrt(2gh)
             # But we'll use a simple fixed velocity for predictable behavior
             mario_state.death_leap_velocity = 150.0  # Will jump approximately 3 tiles
-            mario_state.vy = mario_state.death_leap_velocity  # Start the leap immediately
+            mario_state.vy = (
+                mario_state.death_leap_velocity
+            )  # Start the leap immediately
             mario_state.on_ground = False
 
         return context

@@ -2,7 +2,7 @@
 
 from .base import PhysicsContext, PhysicsProcessor
 
-FRICTION = 0.85  # Speed multiplier when decelerating
+FRICTION = 0.90  # Speed multiplier when decelerating
 
 
 class MovementProcessor(PhysicsProcessor):
