@@ -1,16 +1,34 @@
-[project]
+[tool.poetry]
 name = "game"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Brian Tyler",email = "brian@hackf5.io"}
-]
-requires-python = "^3.13"
-dependencies = [
-    "pygame (>=2.6.1,<3.0.0)"
-]
+authors = ["Brian Tyler <brian@hackf5.io>"]
+packages = [{include = "game"}]
 
+[tool.poetry.dependencies]
+python = "^3.13"
+pygame = "^2.6.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.0.0"
+isort = "^5.13.0"
+flake8 = "^7.0.0"
+mypy = "^1.8.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

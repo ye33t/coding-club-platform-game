@@ -1,13 +1,14 @@
 """Display management with NES-style scaling."""
 
 import pygame
+
 from .constants import (
-    NATIVE_WIDTH,
-    NATIVE_HEIGHT,
-    DEFAULT_SCALE,
-    MIN_SCALE,
-    MAX_SCALE,
     BLACK,
+    DEFAULT_SCALE,
+    MAX_SCALE,
+    MIN_SCALE,
+    NATIVE_HEIGHT,
+    NATIVE_WIDTH,
 )
 
 
@@ -24,7 +25,7 @@ class Display:
         self.screen = pygame.display.set_mode(
             (self.window_width, self.window_height),
             pygame.DOUBLEBUF | pygame.HWSURFACE,
-            vsync=1
+            vsync=1,
         )
         pygame.display.set_caption("NES Platform Game")
 
@@ -42,12 +43,12 @@ class Display:
         """Scale and present the native surface to the screen."""
         # Clear the screen first to prevent ghosting
         self.screen.fill(BLACK)
-        # Scale up the native surface to window size using nearest neighbor for pixel-perfect scaling
-        # In pygame 2.1+, scale uses nearest neighbor by default for integer scales
+        # Scale up the native surface to window size using nearest neighbor
+        # for pixel-perfect scaling. In pygame 2.1+, scale uses nearest
+        # neighbor by default for integer scales
         scaled = pygame.transform.scale_by(self.native_surface, self.scale)
         self.screen.blit(scaled, (0, 0))
         pygame.display.flip()
-
 
     def change_scale(self, delta):
         """Change the window scale by delta."""
@@ -59,7 +60,7 @@ class Display:
             self.screen = pygame.display.set_mode(
                 (self.window_width, self.window_height),
                 pygame.DOUBLEBUF | pygame.HWSURFACE,
-                vsync=1
+                vsync=1,
             )
 
     def get_native_surface(self):

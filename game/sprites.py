@@ -1,10 +1,10 @@
 """Global sprite manager for all sprite sheets."""
 
 import os
-import pygame
-from .sprite_sheet import SpriteSheet
+
+from .constants import TILE_SIZE, TRANSPARENT
 from .sprite_definitions import SPRITE_SHEETS
-from .constants import TILE_SIZE, tiles_to_pixels, TRANSPARENT
+from .sprite_sheet import SpriteSheet
 
 
 class SpriteManager:
@@ -73,8 +73,13 @@ class SpriteManager:
             return None
 
         # Check if sprite definition exists
-        if sheet_name not in SPRITE_SHEETS or sprite_name not in SPRITE_SHEETS[sheet_name]:
-            print(f"Warning: Sprite '{sprite_name}' not defined in sheet '{sheet_name}'")
+        if (
+            sheet_name not in SPRITE_SHEETS
+            or sprite_name not in SPRITE_SHEETS[sheet_name]
+        ):
+            print(
+                f"Warning: Sprite '{sprite_name}' not defined in sheet '{sheet_name}'"
+            )
             return None
 
         # Extract sprite using definition
@@ -103,7 +108,10 @@ class SpriteManager:
         Returns:
             Dict with sprite info or None if not found
         """
-        if sheet_name not in SPRITE_SHEETS or sprite_name not in SPRITE_SHEETS[sheet_name]:
+        if (
+            sheet_name not in SPRITE_SHEETS
+            or sprite_name not in SPRITE_SHEETS[sheet_name]
+        ):
             return None
 
         sprite_def = SPRITE_SHEETS[sheet_name][sprite_name]

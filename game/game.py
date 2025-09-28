@@ -1,12 +1,21 @@
 """Main game class with NES-style game loop."""
 
-import pygame
-import sys
 import os
+import sys
+
+import pygame
+
+from .constants import (
+    BACKGROUND_COLOR,
+    FPS,
+    TILE_SIZE,
+    TILES_HORIZONTAL,
+    TILES_VERTICAL,
+    WHITE,
+)
 from .display import Display
-from .constants import FPS, BACKGROUND_COLOR, WHITE, TILES_HORIZONTAL, TILES_VERTICAL, TILE_SIZE
-from .sprites import sprites
 from .mario import Mario, MarioState
+from .sprites import sprites
 from .world import World
 
 
@@ -78,15 +87,21 @@ class Game:
         """Draw the 8x8 tile grid for debugging."""
         # Draw vertical lines
         for x in range(0, TILES_HORIZONTAL + 1):
-            pygame.draw.line(surface, (100, 100, 100),
-                           (x * TILE_SIZE, 0),
-                           (x * TILE_SIZE, TILES_VERTICAL * TILE_SIZE))
+            pygame.draw.line(
+                surface,
+                (100, 100, 100),
+                (x * TILE_SIZE, 0),
+                (x * TILE_SIZE, TILES_VERTICAL * TILE_SIZE),
+            )
 
         # Draw horizontal lines
         for y in range(0, TILES_VERTICAL + 1):
-            pygame.draw.line(surface, (100, 100, 100),
-                           (0, y * TILE_SIZE),
-                           (TILES_HORIZONTAL * TILE_SIZE, y * TILE_SIZE))
+            pygame.draw.line(
+                surface,
+                (100, 100, 100),
+                (0, y * TILE_SIZE),
+                (TILES_HORIZONTAL * TILE_SIZE, y * TILE_SIZE),
+            )
 
     def draw_debug_info(self, surface):
         """Draw debug information."""

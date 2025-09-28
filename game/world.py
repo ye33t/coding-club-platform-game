@@ -1,9 +1,9 @@
 """World physics and game logic."""
 
 from copy import copy
-from .mario import Mario, MarioIntent, MarioState
-from .constants import NATIVE_WIDTH, NATIVE_HEIGHT
 
+from .constants import NATIVE_WIDTH
+from .mario import Mario, MarioIntent, MarioState
 
 # Physics constants
 GRAVITY = 400.0  # pixels per second squared
@@ -39,7 +39,9 @@ class World:
         # Step 5: Update Mario's animation
         mario.update_animation()
 
-    def resolve_intent(self, state: MarioState, intent: MarioIntent, dt: float) -> MarioState:
+    def resolve_intent(
+        self, state: MarioState, intent: MarioIntent, dt: float
+    ) -> MarioState:
         """Turn intent into reality with physics and game rules."""
         new_state = copy(state)
 

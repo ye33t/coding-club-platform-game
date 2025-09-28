@@ -1,12 +1,14 @@
 """Mario character management with intent-based architecture."""
 
-import pygame
 from dataclasses import dataclass
+from typing import Any, Dict, List
+
+import pygame
+
 from .sprites import sprites
-from .constants import FPS
 
 
-def repeat(sprite: str, times: int) -> list:
+def repeat(sprite: str, times: int) -> List[str]:
     """Helper to repeat a sprite n times in animation."""
     return [sprite] * times
 
@@ -14,6 +16,7 @@ def repeat(sprite: str, times: int) -> list:
 @dataclass
 class MarioIntent:
     """What Mario wants to do based on input."""
+
     move_left: bool = False
     move_right: bool = False
     run: bool = False
@@ -24,6 +27,7 @@ class MarioIntent:
 @dataclass
 class MarioState:
     """Mario's actual state in the world."""
+
     # Position and physics
     x: float = 0.0
     y: float = 16.0  # Start 2 tiles from bottom
@@ -48,35 +52,39 @@ class Mario:
         self.size = "small"  # small, big, fire
 
         # Animation configurations (each element = 1 frame at 60 FPS)
-        self.animations = {
+        self.animations: Dict[str, Dict[str, Any]] = {
             "idle": {
                 "sprites": repeat("small_mario_stand", 60),  # Hold for 1 second
-                "loop": True
+                "loop": True,
             },
             "walking": {
-                "sprites": repeat("small_mario_walk1", 6) + repeat("small_mario_walk2", 6),  # 12 frames total
-                "loop": True
+                "sprites": repeat("small_mario_walk1", 6)
+                + repeat("small_mario_walk2", 6),  # 12 frames total
+                "loop": True,
             },
             "running": {
-                "sprites": repeat("small_mario_run1", 3) + repeat("small_mario_run2", 3),  # 6 frames total
-                "loop": True
+                "sprites": repeat("small_mario_run1", 3)
+                + repeat("small_mario_run2", 3),  # 6 frames total
+                "loop": True,
             },
             "jumping": {
-                "sprites": (repeat("small_mario_jump1", 4) +
-                           repeat("small_mario_jump2", 4) +
-                           repeat("small_mario_jump3", 4) +
-                           repeat("small_mario_jump4", 4) +
-                           repeat("small_mario_jump5", 4)),  # 20 frames total
-                "loop": False
+                "sprites": (
+                    repeat("small_mario_jump1", 4)
+                    + repeat("small_mario_jump2", 4)
+                    + repeat("small_mario_jump3", 4)
+                    + repeat("small_mario_jump4", 4)
+                    + repeat("small_mario_jump5", 4)
+                ),  # 20 frames total
+                "loop": False,
             },
             "skidding": {
                 "sprites": repeat("small_mario_skid", 12),  # Hold for 0.2 seconds
-                "loop": True
+                "loop": True,
             },
             "dying": {
                 "sprites": repeat("small_mario_die", 60),  # Hold for 1 second
-                "loop": False
-            }
+                "loop": False,
+            },
         }
 
     def read_input(self, keys) -> MarioIntent:
@@ -125,8 +133,9 @@ class Mario:
                 # TODO: Add sprite flipping support
                 pass
 
-            sprites.draw_at_position(surface, "characters", sprite_name,
-                                   draw_x, int(self.state.y))
+            sprites.draw_at_position(
+                surface, "characters", sprite_name, draw_x, int(self.state.y)
+            )
 
     def _get_sprite_name(self) -> str:
         """Get the current sprite name based on state."""
@@ -134,9 +143,9 @@ class Mario:
             return f"{self.size}_mario_stand"
 
         anim = self.animations[self.state.action]
-        sprites = anim["sprites"]
+        sprite_list: List[str] = anim["sprites"]
 
         # Ensure frame is valid
-        frame = min(self.state.frame, len(sprites) - 1)
+        frame = min(self.state.frame, len(sprite_list) - 1)
 
-        return sprites[frame]
+        return sprite_list[frame]

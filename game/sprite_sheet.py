@@ -1,7 +1,7 @@
 """Sprite sheet loading and extraction."""
 
 import pygame
-import os
+
 from .constants import TILE_SIZE
 
 
@@ -13,13 +13,14 @@ class SpriteSheet:
 
         Args:
             filepath: Path to the sprite sheet image
-            colorkey: Color to treat as transparent (RGB tuple) or 'auto' for top-left pixel
+            colorkey: Color to treat as transparent (RGB tuple) or 'auto'
+                for top-left pixel
         """
         self.sheet = pygame.image.load(filepath).convert()
         self.colorkey = colorkey
         self.sprite_cache = {}
 
-        if colorkey == 'auto':
+        if colorkey == "auto":
             # Use top-left pixel as transparent color
             self.colorkey = self.sheet.get_at((0, 0))[:3]
 

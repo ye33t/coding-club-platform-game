@@ -2,14 +2,16 @@
 """Semi-automated sprite extraction tool for sprite sheets."""
 
 import math
-import pygame
 import sys
 from collections import deque
+
+import pygame
 
 # Colors to ignore
 TRANSPARENT_BLUE = (0, 41, 140)
 WHITE = (255, 255, 255)
 IGNORE_COLORS = [TRANSPARENT_BLUE, WHITE]
+
 
 def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):
     """
@@ -76,8 +78,14 @@ def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):
             # Check 4-connected neighbors
             for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
                 nx, ny = x + dx, y + dy
-                if (nx >= x1 and nx < x2 and ny >= y1 and ny < y2 and
-                    not visited[ny][nx] and is_valid_pixel(nx, ny)):
+                if (
+                    nx >= x1
+                    and nx < x2
+                    and ny >= y1
+                    and ny < y2
+                    and not visited[ny][nx]
+                    and is_valid_pixel(nx, ny)
+                ):
                     visited[ny][nx] = True
                     queue.append((nx, ny))
 
@@ -106,7 +114,9 @@ def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):
                 width_tiles = math.ceil(pixel_width / 8)
                 height_tiles = math.ceil(pixel_height / 8)
 
-                sprites.append((bottom_left_x, bottom_left_y, width_tiles, height_tiles))
+                sprites.append(
+                    (bottom_left_x, bottom_left_y, width_tiles, height_tiles)
+                )
 
     return sprites
 
