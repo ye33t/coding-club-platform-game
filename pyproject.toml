@@ -5,6 +5,10 @@ description = ""
 authors = ["Brian Tyler <brian@hackf5.io>"]
 packages = [{include = "game"}]
 
+[tool.poetry.scripts]
+format = "format:main"
+game = "main:main"
+
 [tool.poetry.dependencies]
 python = "^3.13"
 pygame = "^2.6.1"

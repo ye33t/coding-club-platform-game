@@ -127,14 +127,12 @@ class Mario:
         """Draw Mario at current state."""
         sprite_name = self._get_sprite_name()
         if sprite_name:
-            # Flip x coordinate if facing left
+            # Use reflection when facing left
             draw_x = int(self.state.x)
-            if not self.state.facing_right:
-                # TODO: Add sprite flipping support
-                pass
+            reflected = not self.state.facing_right
 
             sprites.draw_at_position(
-                surface, "characters", sprite_name, draw_x, int(self.state.y)
+                surface, "characters", sprite_name, draw_x, int(self.state.y), reflected
             )
 
     def _get_sprite_name(self) -> str:

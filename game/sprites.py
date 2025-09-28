@@ -2,6 +2,8 @@
 
 import os
 
+import pygame
+
 from .constants import TILE_SIZE, TRANSPARENT
 from .sprite_definitions import SPRITE_SHEETS
 from .sprite_sheet import SpriteSheet
@@ -125,7 +127,9 @@ class SpriteManager:
             }
         return None
 
-    def draw_at_tile(self, surface, sheet_name, sprite_name, tile_x, tile_y):
+    def draw_at_tile(
+        self, surface, sheet_name, sprite_name, tile_x, tile_y, reflected=False
+    ):
         """Draw a sprite at tile coordinates with bottom-left alignment.
 
         Uses bottom-up coordinate system where y=0 is at the bottom of the screen.
@@ -136,15 +140,18 @@ class SpriteManager:
             sprite_name: Name of the sprite
             tile_x: X position in tiles (left edge)
             tile_y: Y position in tiles from bottom (bottom edge of sprite)
+            reflected: If True, flip the sprite horizontally
         """
         # Convert tile coordinates to pixel coordinates
         pixel_x = tile_x * TILE_SIZE
         pixel_y = tile_y * TILE_SIZE
 
         # Use draw_at_position to do the actual drawing
-        self.draw_at_position(surface, sheet_name, sprite_name, pixel_x, pixel_y)
+        self.draw_at_position(
+            surface, sheet_name, sprite_name, pixel_x, pixel_y, reflected
+        )
 
-    def draw_at_position(self, surface, sheet_name, sprite_name, x, y):
+    def draw_at_position(self, surface, sheet_name, sprite_name, x, y, reflected=False):
         """Draw a sprite at pixel coordinates with bottom-left alignment.
 
         Uses bottom-up coordinate system where y=0 is at the bottom of the screen.
@@ -155,6 +162,7 @@ class SpriteManager:
             sprite_name: Name of the sprite
             x: X position in pixels (left edge)
             y: Y position in pixels from bottom (bottom edge of sprite)
+            reflected: If True, flip the sprite horizontally
         """
         sprite = self.get(sheet_name, sprite_name)
         if not sprite:
@@ -162,6 +170,10 @@ class SpriteManager:
 
         # Get screen height in pixels
         from .constants import NATIVE_HEIGHT
+
+        # Flip horizontally if reflected
+        if reflected:
+            sprite = pygame.transform.flip(sprite, True, False)
 
         # Convert from bottom-up to top-down coordinates
         # y is from bottom, so flip it
