@@ -35,6 +35,10 @@ class MarioState:
     vx: float = 0.0
     vy: float = 0.0
 
+    # Dimensions (in pixels)
+    width: float = 16.0  # 2 tiles wide
+    height: float = 16.0  # 2 tiles tall
+
     # Status
     facing_right: bool = True
     on_ground: bool = True

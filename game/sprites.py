@@ -51,9 +51,7 @@ class SpriteManager:
             filepath = os.path.join(assets_path, filename)
 
             if os.path.exists(filepath):
-                self.sheets[sheet_name] = SpriteSheet(
-                    filepath, colorkey
-                )
+                self.sheets[sheet_name] = SpriteSheet(filepath, colorkey)
                 self.sprites[sheet_name] = {}
                 print(f"Loaded sprite sheet: {sheet_name}")
             else:
