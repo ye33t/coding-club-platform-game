@@ -1,7 +1,5 @@
 """World physics and game logic."""
 
-from copy import copy
-
 from .constants import NATIVE_WIDTH
 from .mario import Mario, MarioIntent, MarioState
 
@@ -43,7 +41,8 @@ class World:
         self, state: MarioState, intent: MarioIntent, dt: float
     ) -> MarioState:
         """Turn intent into reality with physics and game rules."""
-        new_state = copy(state)
+        # Clone the state to work with
+        new_state = state.clone()
 
         # Handle horizontal movement intent
         target_vx = 0.0

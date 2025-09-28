@@ -1,6 +1,7 @@
 """Mario character management with intent-based architecture."""
 
 from dataclasses import dataclass
+from copy import deepcopy
 from typing import Any, Dict, List
 
 import pygame
@@ -41,6 +42,17 @@ class MarioState:
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
     frame: int = 0
+    animation_length: int = 1  # Total frames in current animation
+
+    def clone(self):
+        """Create a deep copy of this state."""
+        return deepcopy(self)
+
+    def get_animation_progress(self) -> float:
+        """Get the current animation progress as a percentage (0.0 to 1.0)."""
+        if self.animation_length <= 1:
+            return 1.0
+        return self.frame / (self.animation_length - 1)
 
 
 class Mario:
@@ -99,9 +111,20 @@ class Mario:
 
     def apply_state(self, new_state: MarioState):
         """Accept the authoritative state from the world."""
-        # Check if action changed to reset animation
+        # Check if action changed
         if new_state.action != self.state.action:
+            # Set animation length for the new action
+            if new_state.action in self.animations:
+                new_state.animation_length = len(self.animations[new_state.action]["sprites"])
+            else:
+                new_state.animation_length = 1
             new_state.frame = 0
+
+        # Also reset walking/running animations when changing direction while moving
+        elif new_state.action in ["walking", "running"] and self.state.action in ["walking", "running"]:
+            # Reset if direction changed
+            if (new_state.vx > 0) != (self.state.vx > 0) and abs(new_state.vx) > 1.0:
+                new_state.frame = 0
 
         self.state = new_state
 
