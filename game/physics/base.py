@@ -16,11 +16,11 @@ class PhysicsContext:
     allowing processors to access and modify the state and access level data.
     """
 
-    state: MarioState  # The current/evolving state of Mario
-    intent: MarioIntent  # What the player wants Mario to do
-    dt: float  # Delta time for this frame
+    mario: MarioState  # The current/evolving state of Mario
+    mario_intent: MarioIntent  # What the player wants Mario to do
     level: Level  # Level data for collision detection
     camera: Camera  # Camera for boundary checks
+    dt: float  # Delta time for this frame
 
     # Future extensibility - these will be added as needed:
     # enemies: List[Enemy] = field(default_factory=list)

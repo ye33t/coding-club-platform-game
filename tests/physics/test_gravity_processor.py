@@ -18,7 +18,7 @@ class TestGravityProcessor:
 
         # Gravity pulls down (negative velocity)
         expected_vy = -GRAVITY * basic_context.dt
-        assert result.state.vy == pytest.approx(expected_vy)
+        assert result.mario.vy == pytest.approx(expected_vy)
 
     def test_no_gravity_when_on_ground(self, basic_context):
         """Gravity should not apply when Mario is on ground."""
@@ -29,7 +29,7 @@ class TestGravityProcessor:
         result = processor.process(basic_context)
 
         # Velocity should remain unchanged
-        assert result.state.vy == 0
+        assert result.mario.vy == 0
 
     def test_jump_initiates_when_on_ground(self, basic_context):
         """Jump should give upward velocity when on ground."""
@@ -42,8 +42,8 @@ class TestGravityProcessor:
 
         # Should have jump velocity (gravity also applied in same frame)
         expected_vy = JUMP_VELOCITY - (GRAVITY * basic_context.dt)
-        assert result.state.vy == pytest.approx(expected_vy)
-        assert not result.state.on_ground
+        assert result.mario.vy == pytest.approx(expected_vy)
+        assert not result.mario.on_ground
 
     def test_no_jump_when_in_air(self, basic_context):
         """Can't jump when already in the air."""
@@ -56,8 +56,8 @@ class TestGravityProcessor:
 
         # Velocity should only be affected by gravity, not jump
         expected_vy = -50 - (GRAVITY * basic_context.dt)
-        assert result.state.vy == pytest.approx(expected_vy)
-        assert not result.state.on_ground
+        assert result.mario.vy == pytest.approx(expected_vy)
+        assert not result.mario.on_ground
 
     def test_gravity_accumulates_over_time(self, basic_context):
         """Gravity should make Mario fall faster over time."""
@@ -70,7 +70,7 @@ class TestGravityProcessor:
         context = basic_context
         for _ in range(5):
             context = processor.process(context)
-            velocities.append(context.state.vy)
+            velocities.append(context.mario.vy)
 
         # Each velocity should be more negative than the last
         for i in range(1, len(velocities)):

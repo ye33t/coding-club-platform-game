@@ -19,7 +19,7 @@ class TestMovementProcessor:
 
         # Should be slowed by friction
         expected_vx = 100.0 * FRICTION
-        assert result.state.vx == pytest.approx(expected_vx)
+        assert result.mario.vx == pytest.approx(expected_vx)
 
     def test_no_friction_when_moving(self, basic_context):
         """Friction should not apply when player is actively moving."""
@@ -30,7 +30,7 @@ class TestMovementProcessor:
         result = processor.process(basic_context)
 
         # Velocity should be unchanged (IntentProcessor handles acceleration)
-        assert result.state.vx == 100.0
+        assert result.mario.vx == 100.0
 
     def test_stops_at_low_velocity(self, basic_context):
         """Should stop completely when velocity is very small."""
@@ -42,7 +42,7 @@ class TestMovementProcessor:
         result = processor.process(basic_context)
 
         # Should be stopped completely
-        assert result.state.vx == 0.0
+        assert result.mario.vx == 0.0
 
     def test_friction_works_both_directions(self, basic_context):
         """Friction should work for both left and right movement."""
@@ -53,12 +53,12 @@ class TestMovementProcessor:
         basic_context.intent.move_left = False
         basic_context.intent.move_right = False
         result = processor.process(basic_context)
-        assert 0 < result.state.vx < 100.0
+        assert 0 < result.mario.vx < 100.0
 
         # Test moving left
         basic_context.state.vx = -100.0
         result = processor.process(basic_context)
-        assert -100.0 < result.state.vx < 0
+        assert -100.0 < result.mario.vx < 0
 
     def test_friction_applied_multiple_times(self, basic_context):
         """Friction should compound over multiple frames."""
@@ -74,4 +74,4 @@ class TestMovementProcessor:
 
         # Should be significantly slower
         expected_vx = 100.0 * (FRICTION**3)
-        assert context.state.vx == pytest.approx(expected_vx)
+        assert context.mario.vx == pytest.approx(expected_vx)

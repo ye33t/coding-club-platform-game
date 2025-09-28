@@ -15,7 +15,7 @@ class DeathPhysicsProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process death physics."""
-        state = context.state
+        state = context.mario
 
         # Only process if dying
         if not state.is_dying:

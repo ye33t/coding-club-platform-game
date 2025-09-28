@@ -16,7 +16,7 @@ class ResetProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if reset should be triggered."""
-        state = context.state
+        state = context.mario
 
         # Only check if currently dying
         if not state.is_dying:

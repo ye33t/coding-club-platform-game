@@ -13,7 +13,7 @@ class BoundaryProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Enforce boundaries."""
-        state = context.state
+        state = context.mario
         camera = context.camera
         level = context.level
 

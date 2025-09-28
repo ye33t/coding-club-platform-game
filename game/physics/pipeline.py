@@ -79,13 +79,13 @@ class PhysicsPipeline:
                 if self.debug:
                     processor_name = processor.__class__.__name__
                     print(f"Processing: {processor_name}")
-                    self._debug_state(context.state, f"Before {processor_name}")
+                    self._debug_state(context.mario, f"Before {processor_name}")
 
                 context = processor.process(context)
 
                 if self.debug:
                     name = processor.__class__.__name__
-                    self._debug_state(context.state, f"After {name}")
+                    self._debug_state(context.mario, f"After {name}")
 
         return context
 

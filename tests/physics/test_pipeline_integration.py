@@ -16,8 +16,8 @@ class TestPhysicsPipeline:
         initial_y = 100.0
         state = MarioState(x=100, y=initial_y, vy=0)
         context = PhysicsContext(
-            state=state,
-            intent=MarioIntent(),
+            mario=state,
+            mario_intent=MarioIntent(),
             dt=1 / 60,
             level=empty_level,
             camera=camera,
@@ -28,18 +28,18 @@ class TestPhysicsPipeline:
             context = pipeline.process(context)
 
         # Mario should have fallen
-        assert context.state.y < initial_y
-        assert context.state.vy < 0  # Falling velocity
-        assert not context.state.on_ground
-        assert context.state.action == "jumping"  # In air
+        assert context.mario.y < initial_y
+        assert context.mario.vy < 0  # Falling velocity
+        assert not context.mario.on_ground
+        assert context.mario.action == "jumping"  # In air
 
     def test_mario_lands_on_ground(self, level_with_ground, camera):
         """Mario should stop falling when hitting ground."""
         pipeline = PhysicsPipeline()
         state = MarioState(x=100, y=TILE_SIZE * 3, vy=-100)  # Falling fast
         context = PhysicsContext(
-            state=state,
-            intent=MarioIntent(),
+            mario=state,
+            mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_ground,
             camera=camera,
@@ -48,14 +48,14 @@ class TestPhysicsPipeline:
         # Process until Mario lands
         for _ in range(10):
             context = pipeline.process(context)
-            if context.state.on_ground:
+            if context.mario.on_ground:
                 break
 
         # Should be on ground
-        assert context.state.on_ground
-        assert context.state.vy == 0
-        assert context.state.y == TILE_SIZE * 2  # Top of ground
-        assert context.state.action == "idle"
+        assert context.mario.on_ground
+        assert context.mario.vy == 0
+        assert context.mario.y == TILE_SIZE * 2  # Top of ground
+        assert context.mario.action == "idle"
 
     def test_complete_jump_cycle(self, level_with_ground, camera):
         """Test a complete jump from ground back to ground."""
@@ -63,8 +63,8 @@ class TestPhysicsPipeline:
         state = MarioState(x=100, y=TILE_SIZE * 2, on_ground=True)
         intent = MarioIntent(jump=True)
         context = PhysicsContext(
-            state=state,
-            intent=intent,
+            mario=state,
+            mario_intent=intent,
             dt=1 / 60,
             level=level_with_ground,
             camera=camera,
@@ -72,25 +72,25 @@ class TestPhysicsPipeline:
 
         # Initial jump
         context = pipeline.process(context)
-        assert context.state.vy > 0  # Moving up
-        assert not context.state.on_ground
-        max_height = context.state.y
+        assert context.mario.vy > 0  # Moving up
+        assert not context.mario.on_ground
+        max_height = context.mario.y
 
         # Continue jumping for a few frames
         for _ in range(5):
             context = pipeline.process(context)
-            max_height = max(max_height, context.state.y)
+            max_height = max(max_height, context.mario.y)
 
         # Stop jumping and let Mario fall
-        context.intent.jump = False
+        context.mario_intent.jump = False
         for _ in range(60):  # Process up to 1 second
             context = pipeline.process(context)
-            if context.state.on_ground:
+            if context.mario.on_ground:
                 break
 
         # Should be back on ground
-        assert context.state.on_ground
-        assert context.state.y == TILE_SIZE * 2
+        assert context.mario.on_ground
+        assert context.mario.y == TILE_SIZE * 2
         assert max_height > TILE_SIZE * 2  # Did go up
 
     def test_horizontal_movement_with_friction(self, level_with_ground, camera):
@@ -99,8 +99,8 @@ class TestPhysicsPipeline:
         state = MarioState(x=100, y=TILE_SIZE * 2, on_ground=True)
         intent = MarioIntent(move_right=True)
         context = PhysicsContext(
-            state=state,
-            intent=intent,
+            mario=state,
+            mario_intent=intent,
             dt=1 / 60,
             level=level_with_ground,
             camera=camera,
@@ -110,22 +110,22 @@ class TestPhysicsPipeline:
         for _ in range(5):
             context = pipeline.process(context)
 
-        assert context.state.x > 100  # Moved right
-        assert context.state.vx > 0  # Moving right
-        assert context.state.action == "walking"
+        assert context.mario.x > 100  # Moved right
+        assert context.mario.vx > 0  # Moving right
+        assert context.mario.action == "walking"
 
         # Stop moving and let friction slow Mario
-        context.intent.move_right = False
-        initial_vx = context.state.vx
+        context.mario_intent.move_right = False
+        initial_vx = context.mario.vx
 
         for _ in range(30):
             context = pipeline.process(context)
-            if context.state.vx == 0:
+            if context.mario.vx == 0:
                 break
 
         # Should have stopped
-        assert context.state.vx == 0
-        assert context.state.action == "idle"
+        assert context.mario.vx == 0
+        assert context.mario.action == "idle"
 
     def test_wall_blocks_movement(self, level_with_platform, camera):
         """Walls should block horizontal movement."""
@@ -140,8 +140,8 @@ class TestPhysicsPipeline:
         )
         intent = MarioIntent(move_right=True)
         context = PhysicsContext(
-            state=state,
-            intent=intent,
+            mario=state,
+            mario_intent=intent,
             dt=1 / 60,
             level=level_with_platform,
             camera=camera,
@@ -152,9 +152,9 @@ class TestPhysicsPipeline:
             context = pipeline.process(context)
 
         # Should be stopped at wall edge
-        assert context.state.x < 10 * TILE_SIZE  # Can't pass through wall
+        assert context.mario.x < 10 * TILE_SIZE  # Can't pass through wall
         # Check that we're close to the wall (within Mario's width)
-        assert context.state.x >= (10 * TILE_SIZE) - context.state.width - 1
+        assert context.mario.x >= (10 * TILE_SIZE) - context.mario.width - 1
 
     def test_ceiling_collision(self, level_with_platform, camera):
         """Mario should hit ceiling when jumping into platform from below."""
@@ -167,8 +167,8 @@ class TestPhysicsPipeline:
             on_ground=False,
         )
         context = PhysicsContext(
-            state=state,
-            intent=MarioIntent(),
+            mario=state,
+            mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_platform,
             camera=camera,
@@ -178,10 +178,10 @@ class TestPhysicsPipeline:
         max_y = state.y
         for _ in range(10):
             context = pipeline.process(context)
-            if context.state.vy <= 0:  # Hit ceiling and falling
+            if context.mario.vy <= 0:  # Hit ceiling and falling
                 break
-            max_y = max(max_y, context.state.y)
+            max_y = max(max_y, context.mario.y)
 
         # Should have hit ceiling and stopped upward movement
-        assert context.state.vy <= 0  # No longer moving up
+        assert context.mario.vy <= 0  # No longer moving up
         assert max_y < 5 * TILE_SIZE  # Didn't pass through platform

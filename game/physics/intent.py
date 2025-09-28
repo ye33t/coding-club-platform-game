@@ -20,8 +20,8 @@ class IntentProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process player intent."""
-        state = context.state
-        intent = context.intent
+        state = context.mario
+        intent = context.mario_intent
 
         # Ignore all input if dying
         if state.is_dying:

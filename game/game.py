@@ -62,7 +62,7 @@ class Game:
         keys = pygame.key.get_pressed()
 
         # Let the world process Mario's intent and update his state
-        self.world.process_mario(self.mario, keys, dt)
+        self.world.update(self.mario, keys, dt)
 
     def draw(self):
         """Draw everything to the screen."""

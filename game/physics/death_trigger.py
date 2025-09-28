@@ -17,7 +17,7 @@ class DeathTriggerProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if Mario should die."""
-        state = context.state
+        state = context.mario
 
         # Don't re-trigger if already dying
         if state.is_dying:

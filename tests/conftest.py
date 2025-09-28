@@ -89,8 +89,8 @@ def mario_intent():
 def basic_context(empty_level, camera, mario_state, mario_intent):
     """Create a basic physics context with real objects."""
     return PhysicsContext(
-        state=mario_state,
-        intent=mario_intent,
+        mario=mario_state,
+        mario_intent=mario_intent,
         dt=1 / 60,  # Standard 60 FPS frame time
         level=empty_level,
         camera=camera,

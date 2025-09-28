@@ -17,7 +17,7 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve ceiling collisions."""
-        state = context.state
+        state = context.mario
         level = context.level
 
         # Skip collision detection if dying

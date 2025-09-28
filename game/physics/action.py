@@ -17,7 +17,7 @@ class ActionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Determine action from state."""
-        state = context.state
+        state = context.mario
 
         # Clear skidding if velocity is low
         if state.action == "skidding" and abs(state.vx) < 10:

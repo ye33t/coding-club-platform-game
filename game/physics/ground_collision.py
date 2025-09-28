@@ -17,7 +17,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve ground collisions including slopes."""
-        state = context.state
+        state = context.mario
         level = context.level
 
         # Skip collision detection if dying

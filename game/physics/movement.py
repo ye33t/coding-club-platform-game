@@ -16,8 +16,8 @@ class MovementProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process movement physics."""
-        state = context.state
-        intent = context.intent
+        state = context.mario
+        intent = context.mario_intent
 
         # Skip movement processing if dying
         if state.is_dying:

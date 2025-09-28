@@ -17,8 +17,8 @@ class GravityProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process gravity and jumping."""
-        state = context.state
-        intent = context.intent
+        state = context.mario
+        intent = context.mario_intent
         dt = context.dt
 
         # Skip normal gravity if dying (DeathPhysicsProcessor handles it)
