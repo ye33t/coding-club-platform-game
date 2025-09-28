@@ -13,22 +13,22 @@ class BoundaryProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Enforce boundaries."""
-        state = context.mario
-        camera = context.camera
+        mario_state = context.mario_state
+        camera_state = context.camera_state
         level = context.level
 
         # Skip boundary enforcement if dying (allow falling off screen)
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         # Mario can't go left of the camera position (ratcheting)
-        if state.x < camera.x:
-            state.x = camera.x
-            state.vx = 0
+        if mario_state.x < camera_state.x:
+            mario_state.x = camera_state.x
+            mario_state.vx = 0
 
         # Mario can't go past the right edge of the level
-        if state.x > level.width_pixels - state.width:
-            state.x = level.width_pixels - state.width
-            state.vx = 0
+        if mario_state.x > level.width_pixels - mario_state.width:
+            mario_state.x = level.width_pixels - mario_state.width
+            mario_state.vx = 0
 
         return context

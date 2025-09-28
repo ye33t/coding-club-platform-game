@@ -17,19 +17,19 @@ class TestGroundCollisionProcessor:
         processor = GroundCollisionProcessor()
         state = MarioState(x=100, y=TILE_SIZE * 2 - 1, vy=-50)  # Just above ground
         context = PhysicsContext(
-            mario=state,
+            mario_state=state,
             mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_ground,
-            camera=camera,
+            camera_state=camera.state,
         )
 
         result = processor.process(context)
 
-        assert result.mario.on_ground
-        assert result.mario.vy == 0
+        assert result.mario_state.on_ground
+        assert result.mario_state.vy == 0
         # Should be snapped to top of ground
-        assert result.mario.y == TILE_SIZE * 2
+        assert result.mario_state.y == TILE_SIZE * 2
 
     def test_no_ground_when_in_air(self, empty_level, camera):
         """Should not detect ground when Mario is in the air."""
@@ -39,18 +39,18 @@ class TestGroundCollisionProcessor:
         processor = GroundCollisionProcessor()
         state = MarioState(x=100, y=100, vy=-50)  # High in the air
         context = PhysicsContext(
-            mario=state,
+            mario_state=state,
             mario_intent=MarioIntent(),
             dt=1 / 60,
             level=empty_level,
-            camera=camera,
+            camera_state=camera.state,
         )
 
         result = processor.process(context)
 
-        assert not result.mario.on_ground
+        assert not result.mario_state.on_ground
         # Velocity should be unchanged
-        assert result.mario.vy == -50
+        assert result.mario_state.vy == -50
 
     def test_detects_platform(self, level_with_platform, camera):
         """Should detect platform tiles as ground."""
@@ -61,18 +61,18 @@ class TestGroundCollisionProcessor:
         # Mario above the platform at tile position 5
         state = MarioState(x=12 * TILE_SIZE, y=6 * TILE_SIZE - 1, vy=-50)
         context = PhysicsContext(
-            mario=state,
+            mario_state=state,
             mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_platform,
-            camera=camera,
+            camera_state=camera.state,
         )
 
         result = processor.process(context)
 
-        assert result.mario.on_ground
-        assert result.mario.vy == 0
-        assert result.mario.y == 6 * TILE_SIZE
+        assert result.mario_state.on_ground
+        assert result.mario_state.vy == 0
+        assert result.mario_state.y == 6 * TILE_SIZE
 
     def test_only_applies_when_falling(self, level_with_ground, camera):
         """Ground collision should only apply when falling (vy <= 0)."""
@@ -83,18 +83,18 @@ class TestGroundCollisionProcessor:
         # Mario moving upward through ground level
         state = MarioState(x=100, y=TILE_SIZE * 2 - 1, vy=100)  # Jumping up
         context = PhysicsContext(
-            mario=state,
+            mario_state=state,
             mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_ground,
-            camera=camera,
+            camera_state=camera.state,
         )
 
         result = processor.process(context)
 
         # Should not snap to ground when moving upward
-        assert not result.mario.on_ground
-        assert result.mario.vy == 100  # Velocity unchanged
+        assert not result.mario_state.on_ground
+        assert result.mario_state.vy == 100  # Velocity unchanged
 
     def test_samples_multiple_points(self, level_with_platform, camera):
         """Should sample left, center, and right of Mario."""
@@ -109,15 +109,15 @@ class TestGroundCollisionProcessor:
             vy=-50,
         )
         context = PhysicsContext(
-            mario=state,
+            mario_state=state,
             mario_intent=MarioIntent(),
             dt=1 / 60,
             level=level_with_platform,
-            camera=camera,
+            camera_state=camera.state,
         )
 
         result = processor.process(context)
 
         # Should still detect ground from right edge sample
-        assert result.mario.on_ground
-        assert result.mario.y == 6 * TILE_SIZE
+        assert result.mario_state.on_ground
+        assert result.mario_state.y == 6 * TILE_SIZE

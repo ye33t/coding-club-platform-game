@@ -17,21 +17,21 @@ class GravityProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process gravity and jumping."""
-        state = context.mario
+        mario_state = context.mario_state
         intent = context.mario_intent
         dt = context.dt
 
         # Skip normal gravity if dying (DeathPhysicsProcessor handles it)
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         # Handle jump initiation
-        if intent.jump and state.on_ground:
-            state.vy = JUMP_VELOCITY
-            state.on_ground = False
+        if intent.jump and mario_state.on_ground:
+            mario_state.vy = JUMP_VELOCITY
+            mario_state.on_ground = False
 
         # Apply gravity when not on ground
-        if not state.on_ground:
-            state.vy -= GRAVITY * dt
+        if not mario_state.on_ground:
+            mario_state.vy -= GRAVITY * dt
 
         return context

@@ -17,25 +17,25 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve ceiling collisions."""
-        state = context.mario
+        mario_state = context.mario_state
         level = context.level
 
         # Skip collision detection if dying
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         # Only check ceiling if moving upward
-        if state.vy <= 0:
+        if mario_state.vy <= 0:
             return context
 
         # Allow a few pixels of penetration for better game feel
-        head_y = state.y + state.height - PENETRATION_ALLOWANCE
+        head_y = mario_state.y + mario_state.height - PENETRATION_ALLOWANCE
 
         # Sample points across Mario's width for ceiling
         ceiling_sample_points = [
-            state.x + 1,  # Slightly inset to avoid edge issues
-            state.x + state.width / 2,
-            state.x + state.width - 2,
+            mario_state.x + 1,  # Slightly inset to avoid edge issues
+            mario_state.x + mario_state.width / 2,
+            mario_state.x + mario_state.width - 2,
         ]
 
         for sample_x in ceiling_sample_points:
@@ -46,8 +46,8 @@ class CeilingCollisionProcessor(PhysicsProcessor):
             if tile_type != 0 and level.is_solid(tile_type):
                 # Mario's head penetrated into a solid tile
                 # Push him back down but allow slight penetration for better feel
-                state.y = (tile_y * TILE_SIZE) - state.height + PENETRATION_ALLOWANCE
-                state.vy = 0  # Stop upward movement
+                mario_state.y = (tile_y * TILE_SIZE) - mario_state.height + PENETRATION_ALLOWANCE
+                mario_state.vy = 0  # Stop upward movement
                 break
 
         return context

@@ -17,26 +17,26 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve left wall collisions."""
-        state = context.mario
+        mario_state = context.mario_state
         level = context.level
 
         # Skip collision detection if dying
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         # Only check if moving left
-        if state.vx >= 0:
+        if mario_state.vx >= 0:
             return context
 
         # Sample points along Mario's left edge
-        left_x = state.x
+        left_x = mario_state.x
 
         # Check at multiple heights (bottom, middle, top)
         # Skip the very bottom to allow walking up single-pixel steps
         sample_heights = [
-            state.y + 2,  # Near bottom (with 2 pixel tolerance)
-            state.y + state.height / 2,  # Middle
-            state.y + state.height - 2,  # Near top
+            mario_state.y + 2,  # Near bottom (with 2 pixel tolerance)
+            mario_state.y + mario_state.height / 2,  # Middle
+            mario_state.y + mario_state.height - 2,  # Near top
         ]
 
         for sample_y in sample_heights:
@@ -58,8 +58,8 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
                 if TileCollision.is_solid_at(tile_type, x_offset, y_offset):
                     # Hit a wall on the left
                     # Push Mario to the right edge of the tile
-                    state.x = (tile_x + 1) * TILE_SIZE
-                    state.vx = 0  # Stop horizontal movement
+                    mario_state.x = (tile_x + 1) * TILE_SIZE
+                    mario_state.vx = 0  # Stop horizontal movement
                     break
 
         return context

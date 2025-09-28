@@ -17,27 +17,27 @@ class ActionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Determine action from state."""
-        state = context.mario
+        mario_state = context.mario_state
 
         # Clear skidding if velocity is low
-        if state.action == "skidding" and abs(state.vx) < 10:
-            state.action = ""  # Clear action, will be re-determined
+        if mario_state.action == "skidding" and abs(mario_state.vx) < 10:
+            mario_state.action = ""  # Clear action, will be re-determined
 
         # Only update action if not skidding
-        if state.action != "skidding":
-            state.action = self._determine_action(state)
+        if mario_state.action != "skidding":
+            mario_state.action = self._determine_action(mario_state)
 
         return context
 
-    def _determine_action(self, state) -> str:
+    def _determine_action(self, mario_state) -> str:
         """Determine Mario's action based on his physics state."""
-        if state.is_dying:
+        if mario_state.is_dying:
             return "dying"
-        elif not state.on_ground:
+        elif not mario_state.on_ground:
             return "jumping"
-        elif abs(state.vx) > RUN_THRESHOLD:
+        elif abs(mario_state.vx) > RUN_THRESHOLD:
             return "running"
-        elif abs(state.vx) > 1.0:
+        elif abs(mario_state.vx) > 1.0:
             return "walking"
         else:
             return "idle"

@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from ..camera import Camera
+from ..camera import CameraState
 from ..level import Level
 from ..mario import MarioIntent, MarioState
 
@@ -16,10 +16,10 @@ class PhysicsContext:
     allowing processors to access and modify the state and access level data.
     """
 
-    mario: MarioState  # The current/evolving state of Mario
+    mario_state: MarioState  # The current/evolving state of Mario
     mario_intent: MarioIntent  # What the player wants Mario to do
     level: Level  # Level data for collision detection
-    camera: Camera  # Camera for boundary checks
+    camera_state: CameraState  # Camera state for boundary checks
     dt: float  # Delta time for this frame
 
     # Future extensibility - these will be added as needed:

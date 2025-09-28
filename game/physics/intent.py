@@ -20,11 +20,11 @@ class IntentProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process player intent."""
-        state = context.mario
+        mario_state = context.mario_state
         intent = context.mario_intent
 
         # Ignore all input if dying
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         # Calculate target horizontal velocity based on intent
@@ -34,29 +34,29 @@ class IntentProcessor(PhysicsProcessor):
             target_vx = RUN_SPEED if intent.run else WALK_SPEED
 
             # Check for skidding (trying to reverse direction quickly)
-            if state.vx < -SKID_THRESHOLD and state.on_ground:
-                state.action = "skidding"
+            if mario_state.vx < -SKID_THRESHOLD and mario_state.on_ground:
+                mario_state.action = "skidding"
             else:
-                state.facing_right = True
+                mario_state.facing_right = True
 
         elif intent.move_left:
             target_vx = -(RUN_SPEED if intent.run else WALK_SPEED)
 
             # Check for skidding
-            if state.vx > SKID_THRESHOLD and state.on_ground:
-                state.action = "skidding"
+            if mario_state.vx > SKID_THRESHOLD and mario_state.on_ground:
+                mario_state.action = "skidding"
             else:
-                state.facing_right = False
+                mario_state.facing_right = False
 
         # Store target velocity for the movement processor
         # Using a simple approach: directly set velocity
         # A more sophisticated approach would use acceleration
         if target_vx != 0:
-            state.vx = target_vx
+            mario_state.vx = target_vx
 
         # Handle jump intent
         # Just mark if we should jump - GravityProcessor will handle it
-        if intent.jump and state.on_ground:
+        if intent.jump and mario_state.on_ground:
             # Set a flag that GravityProcessor will read
             # For now, we'll use the intent directly in GravityProcessor
             pass

@@ -21,33 +21,25 @@ class World:
     def update(self, mario: Mario, keys, dt: float):
         """Process Mario's intent and update his state."""
         # Step 1: Get Mario's intent from input
-        mario_intent = mario.read_input(keys)
+        mario_intent = mario.get_intent(keys)
 
-        # Step 2: Create physics context
+        # Step 2: Create physics context with cloned states
         context = PhysicsContext(
-            mario=mario.state.clone(),  # Work with a copy
+            mario_state=mario.state.clone(),  # Work with a copy
             mario_intent=mario_intent,
             level=self.level,
-            camera=self.camera,
+            camera_state=self.camera.state.clone(),  # Work with a copy
             dt=dt,
         )
 
         # Step 3: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
 
-        # Step 4: Check if reset is needed
-        if processed_context.mario.should_reset:
-            # Reset Mario to starting position
-            from .mario import MarioState
+        # Step 4: Push state back to Mario
+        mario.apply_state(processed_context.mario_state)
 
-            mario.state = MarioState(x=50.0, y=16.0)
-            # Reset camera to beginning (both position and ratchet)
-            self.camera.x = 0
-            self.camera.max_x = 0
-            return  # Skip the rest of the update
-
-        # Step 5: Push state back to Mario
-        mario.apply_state(processed_context.mario)
+        # Step 5: Apply camera state changes
+        self.camera.apply_state(processed_context.camera_state)
 
         # Step 6: Update Mario's animation
         mario.update_animation()

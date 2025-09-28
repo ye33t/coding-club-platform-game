@@ -79,13 +79,13 @@ class PhysicsPipeline:
                 if self.debug:
                     processor_name = processor.__class__.__name__
                     print(f"Processing: {processor_name}")
-                    self._debug_state(context.mario, f"Before {processor_name}")
+                    self._debug_state(context.mario_state, f"Before {processor_name}")
 
                 context = processor.process(context)
 
                 if self.debug:
                     name = processor.__class__.__name__
-                    self._debug_state(context.mario, f"After {name}")
+                    self._debug_state(context.mario_state, f"After {name}")
 
         return context
 
@@ -113,10 +113,10 @@ class PhysicsPipeline:
             p for p in self.processors if not isinstance(p, processor_type)
         ]
 
-    def _debug_state(self, state, label: str) -> None:
+    def _debug_state(self, mario_state, label: str) -> None:
         """Debug helper to print state."""
         print(
-            f"  {label}: pos=({state.x:.1f}, {state.y:.1f}), "
-            f"vel=({state.vx:.1f}, {state.vy:.1f}), "
-            f"on_ground={state.on_ground}, action={state.action}"
+            f"  {label}: pos=({mario_state.x:.1f}, {mario_state.y:.1f}), "
+            f"vel=({mario_state.vx:.1f}, {mario_state.vy:.1f}), "
+            f"on_ground={mario_state.on_ground}, action={mario_state.action}"
         )

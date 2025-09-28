@@ -46,7 +46,6 @@ class MarioState:
     # Death state
     is_dying: bool = False
     death_leap_velocity: float = 0.0  # Initial upward velocity for death animation
-    should_reset: bool = False  # Flag to trigger reset after death
 
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
@@ -108,7 +107,7 @@ class Mario:
             },
         }
 
-    def read_input(self, keys) -> MarioIntent:
+    def get_intent(self, keys) -> MarioIntent:
         """Process raw input into intent."""
         intent = MarioIntent()
         intent.move_left = keys[pygame.K_LEFT]

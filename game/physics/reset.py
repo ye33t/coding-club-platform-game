@@ -1,22 +1,29 @@
 """Detect when death animation is complete and trigger reset."""
 
+from ..camera import CameraState
+from ..mario import MarioState
 from .base import PhysicsContext, PhysicsProcessor
 
 # How far below screen Mario must fall before reset
 RESET_THRESHOLD_Y = -200.0
 
+# Starting position for Mario
+MARIO_START_X = 50.0
+MARIO_START_Y = 16.0
+
 
 class ResetProcessor(PhysicsProcessor):
-    """Detects when death animation is complete and triggers reset.
+    """Detects when death animation is complete and resets the game state.
 
     This processor:
     - Checks if dying Mario has fallen far enough
-    - Sets should_reset flag when threshold reached
+    - Resets Mario to starting position
+    - Resets camera to origin
     """
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
-        """Check if reset should be triggered."""
-        state = context.mario
+        """Check if reset should be triggered and perform reset."""
+        state = context.mario_state
 
         # Only check if currently dying
         if not state.is_dying:
@@ -24,6 +31,9 @@ class ResetProcessor(PhysicsProcessor):
 
         # Check if Mario has fallen far enough to reset
         if state.y < RESET_THRESHOLD_Y:
-            state.should_reset = True
+            # Reset Mario to starting position
+            context.mario_state = MarioState(x=MARIO_START_X, y=MARIO_START_Y)
+            # Reset camera to beginning (both position and ratchet)
+            context.camera_state = CameraState(x=0, max_x=0)
 
         return context

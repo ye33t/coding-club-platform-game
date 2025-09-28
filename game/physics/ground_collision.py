@@ -17,11 +17,11 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve ground collisions including slopes."""
-        state = context.mario
+        mario_state = context.mario_state
         level = context.level
 
         # Skip collision detection if dying
-        if state.is_dying:
+        if mario_state.is_dying:
             return context
 
         highest_ground = -1.0  # Start with invalid value
@@ -29,9 +29,9 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
         # Sample at left edge, center, and right edge
         sample_points = [
-            state.x,
-            state.x + state.width / 2,
-            state.x + state.width - 1,
+            mario_state.x,
+            mario_state.x + mario_state.width / 2,
+            mario_state.x + mario_state.width - 1,
         ]
 
         for sample_x in sample_points:
@@ -40,7 +40,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
             # Check tiles from 2 below to 1 above Mario's position
             # This ensures we catch slopes that extend into adjacent tiles
-            base_tile_y = int(state.y // TILE_SIZE)
+            base_tile_y = int(mario_state.y // TILE_SIZE)
 
             for check_y in range(base_tile_y - 2, base_tile_y + 2):
                 if check_y < 0 or check_y >= level.height_tiles:
@@ -60,10 +60,10 @@ class GroundCollisionProcessor(PhysicsProcessor):
                         # Check if Mario is within collision range of this ground
                         # Allow a small margin for floating point precision
                         if (
-                            abs(state.y - world_ground_y) <= 2.0
-                            or state.y < world_ground_y
+                            abs(mario_state.y - world_ground_y) <= 2.0
+                            or mario_state.y < world_ground_y
                         ):
-                            if state.y <= world_ground_y + 1:
+                            if mario_state.y <= world_ground_y + 1:
                                 found_ground = True
                                 if (
                                     highest_ground < 0
@@ -72,11 +72,11 @@ class GroundCollisionProcessor(PhysicsProcessor):
                                     highest_ground = world_ground_y
 
         # Apply ground collision
-        if found_ground and state.vy <= 0:
-            state.y = highest_ground
-            state.vy = 0
-            state.on_ground = True
+        if found_ground and mario_state.vy <= 0:
+            mario_state.y = highest_ground
+            mario_state.vy = 0
+            mario_state.on_ground = True
         else:
-            state.on_ground = False
+            mario_state.on_ground = False
 
         return context

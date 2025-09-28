@@ -15,19 +15,19 @@ class DeathPhysicsProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process death physics."""
-        state = context.mario
+        mario_state = context.mario_state
 
         # Only process if dying
-        if not state.is_dying:
+        if not mario_state.is_dying:
             return context
 
         # Apply gravity to make Mario fall after the leap
-        state.vy -= GRAVITY * context.dt
+        mario_state.vy -= GRAVITY * context.dt
 
         # No horizontal movement during death
-        state.vx = 0
+        mario_state.vx = 0
 
         # Ensure we stay in dying state
-        state.on_ground = False
+        mario_state.on_ground = False
 
         return context

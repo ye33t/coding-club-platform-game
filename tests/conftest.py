@@ -2,7 +2,7 @@
 
 import pytest
 
-from game.camera import Camera
+from game.camera import Camera, CameraState
 from game.constants import TILE_SIZE
 from game.level import TILE_EMPTY, TILE_GROUND, TILE_SLOPE_UP, Level
 from game.mario import MarioIntent, MarioState
@@ -74,6 +74,12 @@ def camera():
 
 
 @pytest.fixture
+def camera_state():
+    """Create a camera state at origin."""
+    return CameraState()
+
+
+@pytest.fixture
 def mario_state():
     """Create a basic Mario state."""
     return MarioState(x=100.0, y=50.0, vx=0.0, vy=0.0)
@@ -86,12 +92,12 @@ def mario_intent():
 
 
 @pytest.fixture
-def basic_context(empty_level, camera, mario_state, mario_intent):
+def basic_context(empty_level, camera_state, mario_state, mario_intent):
     """Create a basic physics context with real objects."""
     return PhysicsContext(
-        mario=mario_state,
+        mario_state=mario_state,
         mario_intent=mario_intent,
         dt=1 / 60,  # Standard 60 FPS frame time
         level=empty_level,
-        camera=camera,
+        camera_state=camera_state,
     )
