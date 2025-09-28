@@ -37,7 +37,7 @@ class World:
         mario.apply_state(new_state)
 
         # Step 5: Update Mario's animation
-        mario.update_animation(dt)
+        mario.update_animation()
 
     def resolve_intent(self, state: MarioState, intent: MarioIntent, dt: float) -> MarioState:
         """Turn intent into reality with physics and game rules."""
