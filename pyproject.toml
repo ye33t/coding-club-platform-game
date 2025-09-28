@@ -8,6 +8,9 @@ packages = [{include = "game"}]
 [tool.poetry.scripts]
 format = "format:main"
 game = "main:main"
+test = "pytest:main"
+test-v = "pytest:main"
+coverage = "pytest:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -18,6 +21,8 @@ black = "^24.0.0"
 isort = "^5.13.0"
 flake8 = "^7.0.0"
 mypy = "^1.8.0"
+pytest = "^8.4.2"
+pytest-cov = "^7.0.0"
 
 [tool.black]
 line-length = 88

@@ -1,0 +1,97 @@
+"""Shared test fixtures using real objects."""
+
+import pytest
+
+from game.camera import Camera
+from game.constants import TILE_SIZE
+from game.level import TILE_EMPTY, TILE_GROUND, TILE_SLOPE_UP, Level
+from game.mario import MarioIntent, MarioState
+from game.physics import PhysicsContext
+
+
+@pytest.fixture
+def empty_level():
+    """Create a real empty level for testing."""
+    level = Level(width_in_screens=2)
+    # Clear the entire level
+    for y in range(level.height_tiles):
+        for x in range(level.width_tiles):
+            level.tiles[y][x] = TILE_EMPTY
+    return level
+
+
+@pytest.fixture
+def level_with_ground():
+    """Create a level with just ground at bottom."""
+    level = Level(width_in_screens=2)
+    # Clear the level first
+    for y in range(level.height_tiles):
+        for x in range(level.width_tiles):
+            level.tiles[y][x] = TILE_EMPTY
+    # Add ground at the bottom
+    for x in range(level.width_tiles):
+        level.tiles[0][x] = TILE_GROUND
+        level.tiles[1][x] = TILE_GROUND
+    return level
+
+
+@pytest.fixture
+def level_with_platform():
+    """Create a level with ground and a platform."""
+    level = Level(width_in_screens=2)
+    # Clear the level first
+    for y in range(level.height_tiles):
+        for x in range(level.width_tiles):
+            level.tiles[y][x] = TILE_EMPTY
+    # Add ground at the bottom
+    for x in range(level.width_tiles):
+        level.tiles[0][x] = TILE_GROUND
+        level.tiles[1][x] = TILE_GROUND
+    # Add a platform at height 5
+    for x in range(10, 15):
+        level.tiles[5][x] = TILE_GROUND
+    return level
+
+
+@pytest.fixture
+def level_with_slope():
+    """Create a level with a slope."""
+    level = empty_level()
+    # Add ground
+    for x in range(level.width_tiles):
+        level.tiles[0][x] = TILE_GROUND
+    # Add a slope going up
+    level.tiles[1][10] = TILE_SLOPE_UP
+    level.tiles[2][11] = TILE_SLOPE_UP
+    level.tiles[3][12] = TILE_SLOPE_UP
+    return level
+
+
+@pytest.fixture
+def camera():
+    """Create a real camera at origin."""
+    return Camera()
+
+
+@pytest.fixture
+def mario_state():
+    """Create a basic Mario state."""
+    return MarioState(x=100.0, y=50.0, vx=0.0, vy=0.0)
+
+
+@pytest.fixture
+def mario_intent():
+    """Create an empty Mario intent."""
+    return MarioIntent()
+
+
+@pytest.fixture
+def basic_context(empty_level, camera, mario_state, mario_intent):
+    """Create a basic physics context with real objects."""
+    return PhysicsContext(
+        state=mario_state,
+        intent=mario_intent,
+        dt=1 / 60,  # Standard 60 FPS frame time
+        level=empty_level,
+        camera=camera,
+    )
