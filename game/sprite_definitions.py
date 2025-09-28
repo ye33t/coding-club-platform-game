@@ -12,7 +12,7 @@ CHARACTERS = {
     "small_mario_walk1": (20, 24, 2, 2),
     "small_mario_walk2": (38, 24, 2, 2),
     "small_mario_run1": (56, 24, 2, 2),
-    "small_mario_turn": (76, 24, 2, 2),
+    "small_mario_skid": (76, 24, 2, 2),
     "small_mario_run2": (96, 24, 2, 2),
     "small_mario_die": (116, 24, 2, 2),
     "small_mario_bounce1": (136, 24, 2, 2),
