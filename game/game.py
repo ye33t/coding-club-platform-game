@@ -91,6 +91,9 @@ class Game:
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_tiles(self.world.camera.x)
 
+        from .constants import NATIVE_HEIGHT
+        from .level import TILE_SLOPE_DOWN, TILE_SLOPE_UP
+
         for tile_x, tile_y, tile_type in visible_tiles:
             # Convert tile position to world pixels
             world_x = tile_x * TILE_SIZE
@@ -99,7 +102,10 @@ class Game:
             # Transform to screen coordinates
             screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
 
-            # Draw the tile (using simple colored rectangles for now)
+            # Remember: screen_y is from bottom, need to convert for pygame
+            pygame_y = NATIVE_HEIGHT - screen_y - TILE_SIZE
+
+            # Choose color based on tile type
             if tile_type == 1:  # TILE_GROUND
                 color = (139, 69, 19)  # Brown
             elif tile_type == 2:  # TILE_BRICK
@@ -107,12 +113,30 @@ class Game:
             else:
                 color = (100, 100, 100)  # Gray
 
-            # Remember: screen_y is from bottom, need to convert for pygame
-            from .constants import NATIVE_HEIGHT
-
-            pygame_y = NATIVE_HEIGHT - screen_y - TILE_SIZE
-
-            pygame.draw.rect(surface, color, (screen_x, pygame_y, TILE_SIZE, TILE_SIZE))
+            # Draw the tile shape
+            if tile_type == TILE_SLOPE_UP:
+                # 45° slope ascending left to right
+                # Triangle: bottom-left, bottom-right, top-right
+                points = [
+                    (screen_x, pygame_y + TILE_SIZE),  # bottom-left
+                    (screen_x + TILE_SIZE, pygame_y + TILE_SIZE),  # bottom-right
+                    (screen_x + TILE_SIZE, pygame_y),  # top-right
+                ]
+                pygame.draw.polygon(surface, color, points)
+            elif tile_type == TILE_SLOPE_DOWN:
+                # 45° slope descending left to right
+                # Triangle: bottom-left, bottom-right, top-left
+                points = [
+                    (screen_x, pygame_y + TILE_SIZE),  # bottom-left
+                    (screen_x + TILE_SIZE, pygame_y + TILE_SIZE),  # bottom-right
+                    (screen_x, pygame_y),  # top-left
+                ]
+                pygame.draw.polygon(surface, color, points)
+            else:
+                # Regular rectangle for other tiles
+                pygame.draw.rect(
+                    surface, color, (screen_x, pygame_y, TILE_SIZE, TILE_SIZE)
+                )
 
     def draw_mario(self, surface):
         """Draw Mario at his screen position."""

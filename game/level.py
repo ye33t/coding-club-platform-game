@@ -9,6 +9,8 @@ TILE_EMPTY = 0
 TILE_GROUND = 1
 TILE_BRICK = 2
 TILE_PIPE = 3
+TILE_SLOPE_UP = 4  # 45° slope ascending left to right
+TILE_SLOPE_DOWN = 5  # 45° slope descending left to right
 
 
 class Level:
@@ -60,13 +62,20 @@ class Level:
         for x in range(25, 32):
             self.tiles[8][x] = TILE_BRICK
 
-        # Platform 3 (stairs)
-        for x in range(35, 40):
-            self.tiles[4][x] = TILE_BRICK
-        for x in range(36, 40):
-            self.tiles[5][x] = TILE_BRICK
-        for x in range(37, 40):
-            self.tiles[6][x] = TILE_BRICK
+        # Add slopes (creating a hill)
+        # Slope up
+        self.tiles[2][45] = TILE_SLOPE_UP
+        self.tiles[3][46] = TILE_SLOPE_UP
+        self.tiles[4][47] = TILE_SLOPE_UP
+
+        # Flat top
+        for x in range(48, 52):
+            self.tiles[5][x] = TILE_GROUND
+
+        # Slope down
+        self.tiles[4][52] = TILE_SLOPE_DOWN
+        self.tiles[3][53] = TILE_SLOPE_DOWN
+        self.tiles[2][54] = TILE_SLOPE_DOWN
 
     def get_tile(self, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.
@@ -107,7 +116,13 @@ class Level:
         Returns:
             True if tile blocks movement
         """
-        return tile_type in [TILE_GROUND, TILE_BRICK, TILE_PIPE]
+        return tile_type in [
+            TILE_GROUND,
+            TILE_BRICK,
+            TILE_PIPE,
+            TILE_SLOPE_UP,
+            TILE_SLOPE_DOWN,
+        ]
 
     def get_visible_tiles(self, camera_x: float) -> List[Tuple[int, int, int]]:
         """Get all tiles visible in the current camera view.

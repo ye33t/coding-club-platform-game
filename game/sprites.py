@@ -36,7 +36,7 @@ class SpriteManager:
         Args:
             assets_path: Path to the assets directory
         """
-        # Define sheet files and their transparency colors
+
         sheet_configs = {
             "characters": ("characters.png", TRANSPARENT),
             "blocks": ("blocks.png", "auto"),
@@ -45,11 +45,15 @@ class SpriteManager:
             "other": ("other.png", TRANSPARENT),
         }
 
-        for sheet_name, (filename, colorkey) in sheet_configs.items():
+        for sheet_name, config in sheet_configs.items():
+            filename = config[0]
+            colorkey = config[1]
             filepath = os.path.join(assets_path, filename)
 
             if os.path.exists(filepath):
-                self.sheets[sheet_name] = SpriteSheet(filepath, colorkey)
+                self.sheets[sheet_name] = SpriteSheet(
+                    filepath, colorkey
+                )
                 self.sprites[sheet_name] = {}
                 print(f"Loaded sprite sheet: {sheet_name}")
             else:

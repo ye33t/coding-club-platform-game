@@ -1,6 +1,7 @@
 """World physics and game logic."""
 
 from .camera import Camera
+from .collision_shapes import TileCollision
 from .constants import TILE_SIZE
 from .level import Level
 from .mario import Mario, MarioIntent, MarioState
@@ -101,23 +102,87 @@ class World:
             new_state.x = self.level.width_pixels - 16
             new_state.vx = 0
 
-        # Tile-based collision detection
+        # Height-based collision detection for slopes and regular tiles
         # Mario is 2 tiles wide, 2 tiles tall
         mario_width = 2 * TILE_SIZE
+        mario_height = 2 * TILE_SIZE
 
-        # Check for ground collision
-        # Check one pixel below Mario's feet
-        ground_check_y = new_state.y - 1
-        if (
-            self.level.get_tile_at_position(new_state.x, ground_check_y) != 0
-            or self.level.get_tile_at_position(
-                new_state.x + mario_width - 1, ground_check_y
-            )
-            != 0
-        ):
-            # Snap to top of tile
-            tile_y = int(ground_check_y // TILE_SIZE)
-            new_state.y = (tile_y + 1) * TILE_SIZE
+        # Check ceiling collision (when moving upward)
+        if new_state.vy > 0:
+            # Check for ceiling collision at Mario's NEW head position
+            # Allow 2 pixels of penetration for better game feel
+            head_y = new_state.y + mario_height - 2
+
+            # Sample points across Mario's width for ceiling
+            ceiling_sample_points = [
+                new_state.x + 1,  # Slightly inset to avoid edge issues
+                new_state.x + mario_width / 2,
+                new_state.x + mario_width - 2,
+            ]
+
+            for sample_x in ceiling_sample_points:
+                tile_x = int(sample_x // TILE_SIZE)
+                tile_y = int(head_y // TILE_SIZE)
+
+                tile_type = self.level.get_tile(tile_x, tile_y)
+                if tile_type != 0 and self.level.is_solid(tile_type):
+                    # Mario's head penetrated into a solid tile
+                    # Push him back down but allow slight penetration for better feel
+                    new_state.y = (tile_y * TILE_SIZE) - mario_height + 2
+                    new_state.vy = 0  # Stop upward movement
+                    break
+
+        # Check ground collision by sampling multiple points along Mario's width
+        highest_ground = -1.0  # Start with invalid value
+        found_ground = False
+
+        # Sample at left edge, center, and right edge
+        sample_points = [
+            new_state.x,
+            new_state.x + mario_width / 2,
+            new_state.x + mario_width - 1,
+        ]
+
+        for sample_x in sample_points:
+            # Get tile coordinates
+            tile_x = int(sample_x // TILE_SIZE)
+
+            # Check tiles from 2 below to 1 above Mario's position
+            # This ensures we catch slopes that extend into adjacent tiles
+            base_tile_y = int(new_state.y // TILE_SIZE)
+
+            for check_y in range(base_tile_y - 2, base_tile_y + 2):
+                if check_y < 0 or check_y >= self.level.height_tiles:
+                    continue
+
+                tile_type = self.level.get_tile(tile_x, check_y)
+                if tile_type != 0:
+                    # Calculate position within tile
+                    x_offset = sample_x - (tile_x * TILE_SIZE)
+
+                    # Get ground height at this position
+                    ground_height = TileCollision.get_ground_height(tile_type, x_offset)
+                    if ground_height is not None:
+                        # Convert to world coordinates
+                        world_ground_y = check_y * TILE_SIZE + ground_height
+
+                        # Check if Mario is within collision range of this ground
+                        # Allow a small margin for floating point precision
+                        if (
+                            abs(new_state.y - world_ground_y) <= 2.0
+                            or new_state.y < world_ground_y
+                        ):
+                            if new_state.y <= world_ground_y + 1:
+                                found_ground = True
+                                if (
+                                    highest_ground < 0
+                                    or world_ground_y > highest_ground
+                                ):
+                                    highest_ground = world_ground_y
+
+        # Apply ground collision
+        if found_ground and new_state.vy <= 0:
+            new_state.y = highest_ground
             new_state.vy = 0
             new_state.on_ground = True
         else:

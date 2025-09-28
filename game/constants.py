@@ -18,10 +18,7 @@ FPS = 60  # NES runs at ~60 FPS (actually 60.0988 for NTSC)
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-TRANSPARENT = (0, 41, 140)  # Dark blue transparency color
-
-# NES-style dark gray background (similar to NES palette entry $00)
-BACKGROUND_COLOR = (146, 144, 255)
+BACKGROUND_COLOR = TRANSPARENT = (146, 144, 255)  # Light purple (NES background color)
 
 
 # Coordinate conversion helpers
