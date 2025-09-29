@@ -10,7 +10,7 @@ import pygame
 # Colors to ignore
 TRANSPARENT_BLUE = (0, 41, 140)
 WHITE = (255, 255, 255)
-IGNORE_COLORS = [TRANSPARENT_BLUE, WHITE]
+IGNORE_COLORS = [TRANSPARENT_BLUE]
 
 
 def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):

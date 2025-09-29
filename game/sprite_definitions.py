@@ -27,6 +27,15 @@ CHARACTERS = {
 
 BLOCKS = {
     # Ground blocks (2x2 tile space, actual size 16x16)
+}
+
+ENEMIES = {
+    # Goomba (2x2 tile space)
+    "goomba_walk1": (0, 16, 2, 2),
+}
+
+BACKGROUND = {
+    # Terrain
     "ground": (0, 32, 2, 2),
     "brick_top": (17, 32, 2, 2),
     "brick": (34, 32, 2, 2),
@@ -57,6 +66,7 @@ BLOCKS = {
     "sand": (51, 83, 2, 2),
     "sand_dune": (68, 83, 2, 2),
     
+    # Decorations
     "treetop_left": (0, 212, 2, 2),
     "treetop_center": (17, 212, 2, 2),
     "treetop_right": (34, 212, 2, 2),
@@ -90,16 +100,18 @@ BLOCKS = {
     "pipe_horizontal_bottom": (102, 263, 2, 2),
     "pipe_junction_bottom": (119, 263, 2, 2),
     "flagpole": (136, 263, 2, 2),
-}
-
-ENEMIES = {
-    # Goomba (2x2 tile space)
-    "goomba_walk1": (0, 16, 2, 2),
-}
-
-BACKGROUND = {
+    
     # Clouds
-    "cloud_small": (0, 32, 4, 3),
+    "cloud_top_left": (298, 32, 2, 2),
+    "cloud_top": (315, 32, 2, 2),
+    "cloud_top_right": (332, 32, 2, 2),
+    "water_top": (349, 32, 2, 2),
+    "cloud_block": (366, 32, 2, 2),
+    "cloud_bottom_left": (298, 49, 2, 2),
+    "cloud_bottom": (315, 49, 2, 2),
+    "cloud_bottom_right": (332, 49, 2, 2),
+    "water": (349, 49, 2, 2),
+    "piano": (366, 49, 2, 2),
 }
 
 OTHER = {

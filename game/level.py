@@ -3,6 +3,7 @@
 from typing import List, Optional, Tuple
 
 from .constants import TILE_SIZE, TILES_HORIZONTAL, TILES_VERTICAL
+from .tile_definitions import TileDefinition, get_tile_definition
 
 # Tile types
 TILE_EMPTY = 0
@@ -148,6 +149,17 @@ class Level:
                     visible_tiles.append((tile_x, tile_y, tile_type))
 
         return visible_tiles
+
+    def get_tile_definition(self, tile_type: int) -> Optional[TileDefinition]:
+        """Get the definition for a tile type.
+
+        Args:
+            tile_type: The tile type ID
+
+        Returns:
+            TileDefinition for this tile, or None if not found
+        """
+        return get_tile_definition(tile_type)
 
     def check_collision(
         self, x: float, y: float, width: float, height: float
