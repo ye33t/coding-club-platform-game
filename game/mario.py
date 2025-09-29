@@ -113,11 +113,11 @@ class Mario:
     def get_intent(self, keys) -> MarioIntent:
         """Process raw input into intent."""
         intent = MarioIntent()
-        intent.move_left = keys[pygame.K_LEFT]
-        intent.move_right = keys[pygame.K_RIGHT]
-        intent.run = keys[pygame.K_LSHIFT]
-        intent.jump = keys[pygame.K_SPACE]
-        intent.duck = keys[pygame.K_DOWN]
+        intent.move_left = keys[pygame.K_a]
+        intent.move_right = keys[pygame.K_d]
+        intent.run = keys[pygame.K_j]
+        intent.jump = keys[pygame.K_k]
+        intent.duck = keys[pygame.K_s]
         return intent
 
     def apply_state(self, new_state: MarioState):
