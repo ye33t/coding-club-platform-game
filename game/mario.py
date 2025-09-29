@@ -42,6 +42,7 @@ class MarioState:
     # Status
     facing_right: bool = True
     on_ground: bool = True
+    is_jumping: bool = False  # True when in a player-initiated jump
 
     # Death state
     is_dying: bool = False
@@ -82,23 +83,21 @@ class Mario:
             },
             "walking": {
                 "sprites": repeat("small_mario_walk1", 6)
-                + repeat("small_mario_walk2", 6),  # 12 frames total
+                + repeat("small_mario_walk2", 6)
+                + repeat("small_mario_walk3", 6),  # 18 frames total
                 "loop": True,
             },
             "running": {
-                "sprites": repeat("small_mario_run1", 3)
-                + repeat("small_mario_run2", 3),  # 6 frames total
+                # Same frames as walking, just faster
+                "sprites": repeat("small_mario_walk1", 3)
+                + repeat("small_mario_walk2", 3)
+                + repeat("small_mario_walk3", 3),  # 9 frames total
                 "loop": True,
             },
             "jumping": {
-                "sprites": (
-                    repeat("small_mario_jump1", 4)
-                    + repeat("small_mario_jump2", 4)
-                    + repeat("small_mario_jump3", 4)
-                    + repeat("small_mario_jump4", 4)
-                    + repeat("small_mario_jump5", 4)
-                ),  # 20 frames total
-                "loop": False,
+                # Single static jump frame
+                "sprites": repeat("small_mario_jump", 60),  # Hold entire jump
+                "loop": True,
             },
             "skidding": {
                 "sprites": repeat("small_mario_skid", 12),  # Hold for 0.2 seconds

@@ -4,8 +4,6 @@ from ..constants import BLOCK_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
-PENETRATION_ALLOWANCE = BLOCK_SIZE // 2  # Allow slight penetration for better feel
-
 
 class CeilingCollisionProcessor(PhysicsProcessor):
     """Handles ceiling collision detection and resolution.
@@ -13,7 +11,7 @@ class CeilingCollisionProcessor(PhysicsProcessor):
     This processor:
     - Detects when Mario's head hits a ceiling using quadrant masks
     - Stops upward movement
-    - Pushes Mario down to valid position
+    - Pushes Mario down flush with ceiling (no penetration)
     """
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
@@ -29,8 +27,8 @@ class CeilingCollisionProcessor(PhysicsProcessor):
         if mario_state.vy <= 0:
             return context
 
-        # Allow a few pixels of penetration for better game feel
-        head_y = mario_state.y + mario_state.height - PENETRATION_ALLOWANCE
+        # Check Mario's head position (top of hitbox)
+        head_y = mario_state.y + mario_state.height
 
         # Sample points across Mario's width for ceiling
         ceiling_sample_points = [
@@ -58,11 +56,8 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
             # Check if this quadrant is solid
             if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-                # Mario's head penetrated into a solid tile
-                # Push him back down but allow slight penetration for better feel
-                mario_state.y = (
-                    (tile_y * BLOCK_SIZE) - mario_state.height + PENETRATION_ALLOWANCE
-                )
+                # Mario's head hit a ceiling - push him down flush with block
+                mario_state.y = (tile_y * BLOCK_SIZE) - mario_state.height
                 mario_state.vy = 0  # Stop upward movement
                 break
 
