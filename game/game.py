@@ -8,6 +8,7 @@ import pygame
 from .constants import (
     BACKGROUND_COLOR,
     FPS,
+    NATIVE_HEIGHT,
     TILE_SIZE,
     TILES_HORIZONTAL,
     TILES_VERTICAL,
@@ -38,7 +39,9 @@ class Game:
         sprites.load_sheets(assets_path)
 
         # Create Mario and World
-        self.mario = Mario(MarioState(x=50.0, y=16.0))  # Start Mario at x=50
+        # Spawn Mario in the air - gravity will naturally drop him to the ground
+        spawn_y = NATIVE_HEIGHT / 2  # Halfway up the screen
+        self.mario = Mario(MarioState(x=50.0, y=spawn_y))
         self.world = World()
 
     def handle_events(self):
@@ -88,6 +91,8 @@ class Game:
 
     def draw_level(self, surface):
         """Draw the visible level tiles."""
+        from .constants import BLOCK_SIZE
+
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_tiles(self.world.camera.x)
 
@@ -97,9 +102,9 @@ class Game:
             if not tile_def or not tile_def["sprite_name"]:
                 continue  # Skip empty tiles or tiles without sprites
 
-            # Convert tile position to world pixels
-            world_x = tile_x * TILE_SIZE
-            world_y = tile_y * TILE_SIZE
+            # Convert block position to world pixels (each block is 16x16 pixels)
+            world_x = tile_x * BLOCK_SIZE
+            world_y = tile_y * BLOCK_SIZE
 
             # Transform to screen coordinates
             screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)

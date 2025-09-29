@@ -7,6 +7,11 @@ TILE_SIZE = 8  # NES uses 8x8 pixel tiles
 TILES_HORIZONTAL = NATIVE_WIDTH // TILE_SIZE  # 32 tiles
 TILES_VERTICAL = NATIVE_HEIGHT // TILE_SIZE  # 28 tiles
 
+# Game block size (our sprites are 2x2 tiles = 16x16 pixels)
+BLOCK_SIZE = 16  # Each game block is 2x2 NES tiles
+BLOCKS_HORIZONTAL = NATIVE_WIDTH // BLOCK_SIZE  # 16 blocks
+BLOCKS_VERTICAL = NATIVE_HEIGHT // BLOCK_SIZE  # 14 blocks
+
 # Display scaling
 DEFAULT_SCALE = 3  # 3x scaling (768x672 window)
 MIN_SCALE = 1

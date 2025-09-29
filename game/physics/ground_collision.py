@@ -1,7 +1,7 @@
 """Handle ground collision detection and resolution."""
 
-from ..collision_shapes import TileCollision
-from ..constants import TILE_SIZE
+from ..constants import BLOCK_SIZE
+from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
 
@@ -9,14 +9,13 @@ class GroundCollisionProcessor(PhysicsProcessor):
     """Handles ground collision detection and resolution.
 
     This processor:
-    - Detects ground beneath Mario (including slopes)
+    - Detects ground beneath Mario using quadrant-based collision
     - Sets on_ground flag
     - Snaps Mario to ground surface
-    - Handles slope physics
     """
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
-        """Check and resolve ground collisions including slopes."""
+        """Check and resolve ground collisions using quadrant masks."""
         mario_state = context.mario_state
         level = context.level
 
@@ -27,7 +26,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
         highest_ground = -1.0  # Start with invalid value
         found_ground = False
 
-        # Sample at left edge, center, and right edge
+        # Sample at left edge, center, and right edge of Mario's feet
         sample_points = [
             mario_state.x,
             mario_state.x + mario_state.width / 2,
@@ -35,41 +34,42 @@ class GroundCollisionProcessor(PhysicsProcessor):
         ]
 
         for sample_x in sample_points:
-            # Get tile coordinates
-            tile_x = int(sample_x // TILE_SIZE)
+            # Get block coordinates (each block is 16x16 pixels)
+            tile_x = int(sample_x // BLOCK_SIZE)
+            base_tile_y = int(mario_state.y // BLOCK_SIZE)
 
-            # Check tiles from 2 below to 1 above Mario's position
-            # This ensures we catch slopes that extend into adjacent tiles
-            base_tile_y = int(mario_state.y // TILE_SIZE)
-
-            for check_y in range(base_tile_y - 2, base_tile_y + 2):
+            # Check the tile Mario is in and one below
+            for check_y in [base_tile_y, base_tile_y - 1]:
                 if check_y < 0 or check_y >= level.height_tiles:
                     continue
 
                 tile_type = level.get_tile(tile_x, check_y)
-                if tile_type != 0:
-                    # Calculate position within tile
-                    x_offset = sample_x - (tile_x * TILE_SIZE)
+                tile_def = level.get_tile_definition(tile_type)
 
-                    # Get ground height at this position
-                    ground_height = TileCollision.get_ground_height(tile_type, x_offset)
-                    if ground_height is not None:
-                        # Convert to world coordinates
-                        world_ground_y = check_y * TILE_SIZE + ground_height
+                if not tile_def or tile_def["collision_mask"] == 0:
+                    continue
 
-                        # Check if Mario is within collision range of this ground
-                        # Allow a small margin for floating point precision
-                        if (
-                            abs(mario_state.y - world_ground_y) <= 2.0
-                            or mario_state.y < world_ground_y
-                        ):
-                            if mario_state.y <= world_ground_y + 1:
-                                found_ground = True
-                                if (
-                                    highest_ground < 0
-                                    or world_ground_y > highest_ground
-                                ):
-                                    highest_ground = world_ground_y
+                # Each block has 4 quadrants (8x8 pixels each)
+                # Check which quadrant of the tile we're sampling
+                x_in_tile = sample_x - (tile_x * BLOCK_SIZE)
+                quadrant_x = 0 if x_in_tile < (BLOCK_SIZE / 2) else 1
+
+                # Check both top and bottom quadrants
+                for quadrant_y in [0, 1]:  # 0=bottom, 1=top
+                    if not is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
+                        continue
+
+                    # Calculate world Y of this quadrant's top edge
+                    quadrant_top_y = (
+                        check_y * BLOCK_SIZE + (quadrant_y + 1) * (BLOCK_SIZE / 2)
+                    )
+
+                    # Check if Mario's feet are within collision range
+                    if abs(mario_state.y - quadrant_top_y) <= 2.0 or mario_state.y < quadrant_top_y:
+                        if mario_state.y <= quadrant_top_y + 1:
+                            found_ground = True
+                            if highest_ground < 0 or quadrant_top_y > highest_ground:
+                                highest_ground = quadrant_top_y
 
         # Apply ground collision
         if found_ground and mario_state.vy <= 0:

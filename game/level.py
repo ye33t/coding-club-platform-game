@@ -2,34 +2,34 @@
 
 from typing import List, Optional, Tuple
 
-from .constants import TILE_SIZE, TILES_HORIZONTAL, TILES_VERTICAL
+from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
 from .tile_definitions import TileDefinition, get_tile_definition
 
-# Tile types
-TILE_EMPTY = 0
-TILE_GROUND = 1
-TILE_BRICK = 2
-TILE_PIPE = 3
-TILE_SLOPE_UP = 4  # 45° slope ascending left to right
-TILE_SLOPE_DOWN = 5  # 45° slope descending left to right
+# Tile types (imported from tile_definitions for consistency)
+from .tile_definitions import TILE_BRICK, TILE_EMPTY, TILE_GROUND, TILE_PIPE
 
 
 class Level:
-    """Manages level geometry and tile data."""
+    """Manages level geometry and tile data.
+
+    Note: The level grid represents game blocks (16x16 pixels each),
+    not individual NES tiles (8x8 pixels). Each block is a 2x2 tile sprite.
+    """
 
     def __init__(self, width_in_screens: int = 2):
         """Initialize level with specified width.
 
         Args:
-            width_in_screens: Level width in screen units (each screen = 32 tiles)
+            width_in_screens: Level width in screen units (each screen = 16 blocks)
         """
-        self.width_tiles = width_in_screens * TILES_HORIZONTAL
-        self.height_tiles = TILES_VERTICAL
-        self.width_pixels = self.width_tiles * TILE_SIZE
-        self.height_pixels = self.height_tiles * TILE_SIZE
+        self.width_tiles = width_in_screens * BLOCKS_HORIZONTAL
+        self.height_tiles = BLOCKS_VERTICAL
+        self.width_pixels = self.width_tiles * BLOCK_SIZE
+        self.height_pixels = self.height_tiles * BLOCK_SIZE
 
         # Initialize tile data (2D array)
         # tiles[y][x] where y=0 is bottom of screen
+        # Each entry represents a 16x16 pixel block
         self.tiles: List[List[int]] = []
         for y in range(self.height_tiles):
             row = [TILE_EMPTY] * self.width_tiles
@@ -63,21 +63,6 @@ class Level:
         for x in range(25, 32):
             self.tiles[8][x] = TILE_BRICK
 
-        # Add slopes (creating a hill)
-        # Slope up
-        self.tiles[2][45] = TILE_SLOPE_UP
-        self.tiles[3][46] = TILE_SLOPE_UP
-        self.tiles[4][47] = TILE_SLOPE_UP
-
-        # Flat top
-        for x in range(48, 52):
-            self.tiles[5][x] = TILE_GROUND
-
-        # Slope down
-        self.tiles[4][52] = TILE_SLOPE_DOWN
-        self.tiles[3][53] = TILE_SLOPE_DOWN
-        self.tiles[2][54] = TILE_SLOPE_DOWN
-
     def get_tile(self, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.
 
@@ -104,26 +89,23 @@ class Level:
         Returns:
             Tile type at that position
         """
-        tile_x = int(world_x // TILE_SIZE)
-        tile_y = int(world_y // TILE_SIZE)
+        tile_x = int(world_x // BLOCK_SIZE)
+        tile_y = int(world_y // BLOCK_SIZE)
         return self.get_tile(tile_x, tile_y)
 
     def is_solid(self, tile_type: int) -> bool:
-        """Check if a tile type is solid (blocks movement).
+        """Check if a tile type has any solid quadrants.
 
         Args:
             tile_type: The tile type to check
 
         Returns:
-            True if tile blocks movement
+            True if tile has any solid collision
         """
-        return tile_type in [
-            TILE_GROUND,
-            TILE_BRICK,
-            TILE_PIPE,
-            TILE_SLOPE_UP,
-            TILE_SLOPE_DOWN,
-        ]
+        tile_def = self.get_tile_definition(tile_type)
+        if not tile_def:
+            return False
+        return tile_def["collision_mask"] != 0
 
     def get_visible_tiles(self, camera_x: float) -> List[Tuple[int, int, int]]:
         """Get all tiles visible in the current camera view.
@@ -135,10 +117,10 @@ class Level:
             List of (tile_x, tile_y, tile_type) for visible tiles
         """
         # Calculate tile range visible on screen
-        start_tile_x = max(0, int(camera_x // TILE_SIZE))
+        start_tile_x = max(0, int(camera_x // BLOCK_SIZE))
         end_tile_x = min(
             self.width_tiles,
-            int((camera_x + TILES_HORIZONTAL * TILE_SIZE) // TILE_SIZE) + 1,
+            int((camera_x + BLOCKS_HORIZONTAL * BLOCK_SIZE) // BLOCK_SIZE) + 1,
         )
 
         visible_tiles = []
@@ -177,10 +159,10 @@ class Level:
         """
         # Check corners and edges for collisions
         # Convert to tile coordinates
-        left_tile = int(x // TILE_SIZE)
-        right_tile = int((x + width - 1) // TILE_SIZE)
-        bottom_tile = int(y // TILE_SIZE)
-        top_tile = int((y + height - 1) // TILE_SIZE)
+        left_tile = int(x // BLOCK_SIZE)
+        right_tile = int((x + width - 1) // BLOCK_SIZE)
+        bottom_tile = int(y // BLOCK_SIZE)
+        top_tile = int((y + height - 1) // BLOCK_SIZE)
 
         # Check ground collision (bottom edge)
         for tile_x in range(left_tile, right_tile + 1):

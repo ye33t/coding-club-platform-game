@@ -1,8 +1,7 @@
 """Handle right wall collision detection and resolution."""
 
-from ..collision_shapes import TileCollision
-from ..constants import TILE_SIZE
-from ..level import TILE_SLOPE_DOWN, TILE_SLOPE_UP
+from ..constants import BLOCK_SIZE
+from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
 
@@ -10,13 +9,13 @@ class RightWallCollisionProcessor(PhysicsProcessor):
     """Handles right wall collision detection and resolution.
 
     This processor:
-    - Detects collision with walls on the right side
+    - Detects collision with walls on the right side using quadrant masks
     - Stops rightward movement into walls
     - Pushes Mario out to the left
     """
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
-        """Check and resolve right wall collisions."""
+        """Check and resolve right wall collisions using quadrant masks."""
         mario_state = context.mario_state
         level = context.level
 
@@ -40,26 +39,28 @@ class RightWallCollisionProcessor(PhysicsProcessor):
         ]
 
         for sample_y in sample_heights:
-            tile_x = int(right_x // TILE_SIZE)
-            tile_y = int(sample_y // TILE_SIZE)
+            tile_x = int(right_x // BLOCK_SIZE)
+            tile_y = int(sample_y // BLOCK_SIZE)
 
             tile_type = level.get_tile(tile_x, tile_y)
+            tile_def = level.get_tile_definition(tile_type)
 
-            # Skip slopes - they're handled by ground collision
-            if tile_type in [TILE_SLOPE_UP, TILE_SLOPE_DOWN]:
+            if not tile_def or tile_def["collision_mask"] == 0:
                 continue
 
-            if tile_type != 0 and level.is_solid(tile_type):
-                # Check if this is actually a wall at this height
-                x_offset = right_x - (tile_x * TILE_SIZE)
-                y_offset = sample_y - (tile_y * TILE_SIZE)
+            # Determine which quadrant we're checking
+            x_in_tile = right_x - (tile_x * BLOCK_SIZE)
+            y_in_tile = sample_y - (tile_y * BLOCK_SIZE)
 
-                # For regular tiles, always solid
-                if TileCollision.is_solid_at(tile_type, x_offset, y_offset):
-                    # Hit a wall on the right
-                    # Push Mario to the left edge of the tile
-                    mario_state.x = (tile_x * TILE_SIZE) - mario_state.width
-                    mario_state.vx = 0  # Stop horizontal movement
-                    break
+            quadrant_x = 0 if x_in_tile < (BLOCK_SIZE / 2) else 1
+            quadrant_y = 0 if y_in_tile < (BLOCK_SIZE / 2) else 1
+
+            # Check if this quadrant is solid
+            if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
+                # Hit a wall on the right
+                # Push Mario to the left edge of the tile
+                mario_state.x = (tile_x * BLOCK_SIZE) - mario_state.width
+                mario_state.vx = 0  # Stop horizontal movement
+                break
 
         return context
