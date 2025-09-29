@@ -4,13 +4,16 @@ from ..constants import BLOCK_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
+# Small downward velocity applied when hitting ceiling
+CEILING_BOUNCE_VELOCITY = -20.0  # pixels per second
+
 
 class CeilingCollisionProcessor(PhysicsProcessor):
     """Handles ceiling collision detection and resolution.
 
     This processor:
     - Detects when Mario's head hits a ceiling using quadrant masks
-    - Stops upward movement
+    - Applies small downward bounce velocity
     - Pushes Mario down flush with ceiling (no penetration)
     """
 
@@ -58,7 +61,8 @@ class CeilingCollisionProcessor(PhysicsProcessor):
             if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
                 # Mario's head hit a ceiling - push him down flush with block
                 mario_state.y = (tile_y * BLOCK_SIZE) - mario_state.height
-                mario_state.vy = 0  # Stop upward movement
+                # Apply small downward bounce velocity
+                mario_state.vy = CEILING_BOUNCE_VELOCITY
                 break
 
         return context
