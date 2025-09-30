@@ -6,7 +6,35 @@ from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
 from .tile_definitions import TileDefinition, get_tile_definition
 
 # Tile types (imported from tile_definitions for consistency)
-from .tile_definitions import TILE_BRICK, TILE_EMPTY, TILE_GROUND, TILE_PIPE
+from .tile_definitions import (
+    TILE_ARCH_CENTER,
+    TILE_ARCH_LEFT,
+    TILE_ARCH_RIGHT,
+    TILE_BATTLEMENT,
+    TILE_BEANSTALK,
+    TILE_BLOCK,
+    TILE_BLOCK_FLAT,
+    TILE_BRICK,
+    TILE_BRIDGE,
+    TILE_CANNON_BOTTOM,
+    TILE_CANNON_CENTER,
+    TILE_CANNON_TOP,
+    TILE_EARTH,
+    TILE_EMPTY,
+    TILE_GROUND,
+    TILE_LADDER,
+    TILE_PIPE_HORIZONTAL_BOTTOM,
+    TILE_PIPE_HORIZONTAL_TOP,
+    TILE_PIPE_JUNCTION_BOTTOM,
+    TILE_PIPE_JUNCTION_TOP,
+    TILE_PIPE_LEFT,
+    TILE_PIPE_RIGHT,
+    TILE_PIPE_TOP_LEFT,
+    TILE_PIPE_TOP_RIGHT,
+    TILE_ROCKS,
+    TILE_SAND,
+    TILE_VOID,
+)
 
 
 class Level:
@@ -71,6 +99,17 @@ class Level:
         if self.width_tiles > 25:
             for x in range(25, min(32, self.width_tiles)):
                 self.tiles[0][8][x] = TILE_BRICK
+
+        # Add a pipe (2x3 tiles)
+        if self.width_tiles > 35:
+            # Top of pipe
+            self.tiles[0][4][35] = TILE_PIPE_TOP_LEFT
+            self.tiles[0][4][36] = TILE_PIPE_TOP_RIGHT
+            # Body of pipe
+            self.tiles[0][3][35] = TILE_PIPE_LEFT
+            self.tiles[0][3][36] = TILE_PIPE_RIGHT
+            self.tiles[0][2][35] = TILE_PIPE_LEFT
+            self.tiles[0][2][36] = TILE_PIPE_RIGHT
 
         # Screen 1 (above main screen) - Sky area
         # Floating platforms
