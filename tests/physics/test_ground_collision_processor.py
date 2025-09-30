@@ -2,7 +2,7 @@
 
 import pytest
 
-from game.constants import TILE_SIZE
+from game.constants import BLOCK_SIZE
 from game.physics.ground_collision import GroundCollisionProcessor
 
 
@@ -15,7 +15,7 @@ class TestGroundCollisionProcessor:
         from game.physics import PhysicsContext
 
         processor = GroundCollisionProcessor()
-        state = MarioState(x=100, y=TILE_SIZE * 2 - 1, vy=-50)  # Just above ground
+        state = MarioState(x=100, y=BLOCK_SIZE * 2 - 1, vy=-50)  # Just above ground
         context = PhysicsContext(
             mario_state=state,
             mario_intent=MarioIntent(),
@@ -29,7 +29,7 @@ class TestGroundCollisionProcessor:
         assert result.mario_state.on_ground
         assert result.mario_state.vy == 0
         # Should be snapped to top of ground
-        assert result.mario_state.y == TILE_SIZE * 2
+        assert result.mario_state.y == BLOCK_SIZE * 2
 
     def test_no_ground_when_in_air(self, empty_level, camera):
         """Should not detect ground when Mario is in the air."""
@@ -59,7 +59,7 @@ class TestGroundCollisionProcessor:
 
         processor = GroundCollisionProcessor()
         # Mario above the platform at tile position 5
-        state = MarioState(x=12 * TILE_SIZE, y=6 * TILE_SIZE - 1, vy=-50)
+        state = MarioState(x=12 * BLOCK_SIZE, y=6 * BLOCK_SIZE - 1, vy=-50)
         context = PhysicsContext(
             mario_state=state,
             mario_intent=MarioIntent(),
@@ -72,7 +72,7 @@ class TestGroundCollisionProcessor:
 
         assert result.mario_state.on_ground
         assert result.mario_state.vy == 0
-        assert result.mario_state.y == 6 * TILE_SIZE
+        assert result.mario_state.y == 6 * BLOCK_SIZE
 
     def test_only_applies_when_falling(self, level_with_ground, camera):
         """Ground collision should only apply when falling (vy <= 0)."""
@@ -81,7 +81,7 @@ class TestGroundCollisionProcessor:
 
         processor = GroundCollisionProcessor()
         # Mario moving upward through ground level
-        state = MarioState(x=100, y=TILE_SIZE * 2 - 1, vy=100)  # Jumping up
+        state = MarioState(x=100, y=BLOCK_SIZE * 2 - 1, vy=100)  # Jumping up
         context = PhysicsContext(
             mario_state=state,
             mario_intent=MarioIntent(),
@@ -104,8 +104,8 @@ class TestGroundCollisionProcessor:
         processor = GroundCollisionProcessor()
         # Position Mario so only his right edge is over the platform
         state = MarioState(
-            x=(10 * TILE_SIZE) - 8,  # Mostly off the platform
-            y=6 * TILE_SIZE - 1,
+            x=(10 * BLOCK_SIZE) - 8,  # Mostly off the platform
+            y=6 * BLOCK_SIZE - 1,
             vy=-50,
         )
         context = PhysicsContext(
@@ -120,4 +120,4 @@ class TestGroundCollisionProcessor:
 
         # Should still detect ground from right edge sample
         assert result.mario_state.on_ground
-        assert result.mario_state.y == 6 * TILE_SIZE
+        assert result.mario_state.y == 6 * BLOCK_SIZE

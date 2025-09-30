@@ -328,11 +328,11 @@ class TestResetIntegration:
 
         # Create mock key state
         keys = {
-            pygame.K_LEFT: False,
-            pygame.K_RIGHT: False,
-            pygame.K_LSHIFT: False,
-            pygame.K_SPACE: False,
-            pygame.K_DOWN: False,
+            pygame.K_a: False,  # move left
+            pygame.K_d: False,  # move right
+            pygame.K_j: False,  # run
+            pygame.K_k: False,  # jump
+            pygame.K_s: False,  # duck
         }
 
         # Process update which should trigger reset in the pipeline

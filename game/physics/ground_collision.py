@@ -43,7 +43,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
                 if check_y < 0 or check_y >= level.height_tiles:
                     continue
 
-                tile_type = level.get_tile(tile_x, check_y)
+                tile_type = level.get_tile(mario_state.screen, tile_x, check_y)
                 tile_def = level.get_tile_definition(tile_type)
 
                 if not tile_def or tile_def["collision_mask"] == 0:

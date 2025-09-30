@@ -27,71 +27,99 @@ class Level:
         self.width_pixels = self.width_tiles * BLOCK_SIZE
         self.height_pixels = self.height_tiles * BLOCK_SIZE
 
-        # Initialize tile data (2D array)
-        # tiles[y][x] where y=0 is bottom of screen
+        # Initialize tile data (3D structure: screen -> y -> x)
+        # tiles[screen][y][x] where y=0 is bottom of each screen
         # Each entry represents a 16x16 pixel block
-        self.tiles: List[List[int]] = []
-        for y in range(self.height_tiles):
-            row = [TILE_EMPTY] * self.width_tiles
-            self.tiles.append(row)
+        self.tiles: dict[int, List[List[int]]] = {}
 
         # Create a simple test level
         self._create_test_level()
 
     def _create_test_level(self):
-        """Create a simple test level with ground and some platforms."""
+        """Create a simple test level with ground and some platforms across multiple screens."""
+        # Initialize screens -1, 0, 1
+        for screen_idx in [-1, 0, 1]:
+            self.tiles[screen_idx] = []
+            for y in range(self.height_tiles):
+                row = [TILE_EMPTY] * self.width_tiles
+                self.tiles[screen_idx].append(row)
+
+        # Screen 0 (main screen)
         # Ground (bottom 2 rows)
         for x in range(self.width_tiles):
-            self.tiles[0][x] = TILE_GROUND
-            self.tiles[1][x] = TILE_GROUND
+            self.tiles[0][0][x] = TILE_GROUND
+            self.tiles[0][1][x] = TILE_GROUND
 
-        # Add some gaps in the ground
-        for x in range(20, 23):
-            self.tiles[0][x] = TILE_EMPTY
-            self.tiles[1][x] = TILE_EMPTY
+        # Add some gaps in the ground (only if wide enough)
+        if self.width_tiles > 23:
+            for x in range(20, 23):
+                self.tiles[0][0][x] = TILE_EMPTY
+                self.tiles[0][1][x] = TILE_EMPTY
 
-        for x in range(40, 44):
-            self.tiles[0][x] = TILE_EMPTY
-            self.tiles[1][x] = TILE_EMPTY
+        if self.width_tiles > 44:
+            for x in range(40, 44):
+                self.tiles[0][0][x] = TILE_EMPTY
+                self.tiles[0][1][x] = TILE_EMPTY
 
-        # Add some platforms
+        # Add some platforms (only if wide enough)
         # Platform 1
-        for x in range(10, 15):
-            self.tiles[6][x] = TILE_BRICK
+        if self.width_tiles > 15:
+            for x in range(10, min(15, self.width_tiles)):
+                self.tiles[0][6][x] = TILE_BRICK
 
         # Platform 2
-        for x in range(25, 32):
-            self.tiles[8][x] = TILE_BRICK
+        if self.width_tiles > 25:
+            for x in range(25, min(32, self.width_tiles)):
+                self.tiles[0][8][x] = TILE_BRICK
 
-    def get_tile(self, tile_x: int, tile_y: int) -> int:
+        # Screen 1 (above main screen) - Sky area
+        # Floating platforms
+        for x in range(5, min(10, self.width_tiles)):
+            self.tiles[1][4][x] = TILE_BRICK
+
+        for x in range(15, min(20, self.width_tiles)):
+            self.tiles[1][7][x] = TILE_BRICK
+
+        # Screen -1 (below main screen) - Underground area
+        # Full ground
+        for x in range(self.width_tiles):
+            self.tiles[-1][0][x] = TILE_GROUND
+            self.tiles[-1][1][x] = TILE_GROUND
+            self.tiles[-1][2][x] = TILE_GROUND
+
+    def get_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.
 
         Args:
+            screen: Screen index
             tile_x: X position in tiles
-            tile_y: Y position in tiles (0 = bottom)
+            tile_y: Y position in tiles (0 = bottom of screen)
 
         Returns:
             Tile type, or TILE_EMPTY if out of bounds
         """
+        if screen not in self.tiles:
+            return TILE_EMPTY
         if tile_x < 0 or tile_x >= self.width_tiles:
             return TILE_EMPTY
         if tile_y < 0 or tile_y >= self.height_tiles:
             return TILE_EMPTY
-        return self.tiles[tile_y][tile_x]
+        return self.tiles[screen][tile_y][tile_x]
 
-    def get_tile_at_position(self, world_x: float, world_y: float) -> int:
+    def get_tile_at_position(self, screen: int, world_x: float, world_y: float) -> int:
         """Get tile type at given world position.
 
         Args:
+            screen: Screen index
             world_x: X position in world pixels
-            world_y: Y position in world pixels (from bottom)
+            world_y: Y position in screen-relative pixels (0-224, from bottom)
 
         Returns:
             Tile type at that position
         """
         tile_x = int(world_x // BLOCK_SIZE)
         tile_y = int(world_y // BLOCK_SIZE)
-        return self.get_tile(tile_x, tile_y)
+        return self.get_tile(screen, tile_x, tile_y)
 
     def is_solid(self, tile_type: int) -> bool:
         """Check if a tile type has any solid quadrants.
@@ -107,15 +135,19 @@ class Level:
             return False
         return tile_def["collision_mask"] != 0
 
-    def get_visible_tiles(self, camera_x: float) -> List[Tuple[int, int, int]]:
+    def get_visible_tiles(self, screen: int, camera_x: float) -> List[Tuple[int, int, int]]:
         """Get all tiles visible in the current camera view.
 
         Args:
+            screen: Screen index
             camera_x: Camera position in world pixels
 
         Returns:
-            List of (tile_x, tile_y, tile_type) for visible tiles
+            List of (tile_x, tile_y, tile_type) for visible tiles on the specified screen
         """
+        if screen not in self.tiles:
+            return []
+
         # Calculate tile range visible on screen
         start_tile_x = max(0, int(camera_x // BLOCK_SIZE))
         end_tile_x = min(
@@ -126,7 +158,7 @@ class Level:
         visible_tiles = []
         for tile_y in range(self.height_tiles):
             for tile_x in range(start_tile_x, end_tile_x):
-                tile_type = self.tiles[tile_y][tile_x]
+                tile_type = self.tiles[screen][tile_y][tile_x]
                 if tile_type != TILE_EMPTY:
                     visible_tiles.append((tile_x, tile_y, tile_type))
 
@@ -144,13 +176,14 @@ class Level:
         return get_tile_definition(tile_type)
 
     def check_collision(
-        self, x: float, y: float, width: float, height: float
+        self, screen: int, x: float, y: float, width: float, height: float
     ) -> Optional[str]:
         """Check if a rectangle collides with solid tiles.
 
         Args:
+            screen: Screen index
             x: Left edge in world pixels
-            y: Bottom edge in world pixels
+            y: Bottom edge in screen-relative pixels (0-224)
             width: Width in pixels
             height: Height in pixels
 
@@ -166,22 +199,22 @@ class Level:
 
         # Check ground collision (bottom edge)
         for tile_x in range(left_tile, right_tile + 1):
-            if self.is_solid(self.get_tile(tile_x, bottom_tile)):
+            if self.is_solid(self.get_tile(screen, tile_x, bottom_tile)):
                 return "ground"
 
         # Check ceiling collision (top edge)
         for tile_x in range(left_tile, right_tile + 1):
-            if self.is_solid(self.get_tile(tile_x, top_tile)):
+            if self.is_solid(self.get_tile(screen, tile_x, top_tile)):
                 return "ceiling"
 
         # Check left wall
         for tile_y in range(bottom_tile, top_tile + 1):
-            if self.is_solid(self.get_tile(left_tile, tile_y)):
+            if self.is_solid(self.get_tile(screen, left_tile, tile_y)):
                 return "wall_left"
 
         # Check right wall
         for tile_y in range(bottom_tile, top_tile + 1):
-            if self.is_solid(self.get_tile(right_tile, tile_y)):
+            if self.is_solid(self.get_tile(screen, right_tile, tile_y)):
                 return "wall_right"
 
         return None

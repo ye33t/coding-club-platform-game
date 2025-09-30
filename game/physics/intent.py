@@ -78,7 +78,7 @@ class IntentProcessor(PhysicsProcessor):
                 mario_state.input_duration = 1  # First frame of new input
 
         # Only apply acceleration if:
-        # - Input held for 3+ frames (not just a tap), OR
+        # - Input held for 9+ frames (not just a tap), OR
         # - Already moving significantly (keep momentum)
         nearly_stopped = abs(mario_state.vx) < 5.0
         if target_vx != 0 and (mario_state.input_duration >= 9 or not nearly_stopped):

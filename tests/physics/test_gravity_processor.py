@@ -2,7 +2,7 @@
 
 import pytest
 
-from game.physics.gravity import GRAVITY, JUMP_VELOCITY, GravityProcessor
+from game.physics.gravity import GRAVITY, WALK_JUMP_VELOCITY, GravityProcessor
 
 
 class TestGravityProcessor:
@@ -41,7 +41,7 @@ class TestGravityProcessor:
         result = processor.process(basic_context)
 
         # Should have jump velocity (gravity also applied in same frame)
-        expected_vy = JUMP_VELOCITY - (GRAVITY * basic_context.dt)
+        expected_vy = WALK_JUMP_VELOCITY - (GRAVITY * basic_context.dt)
         assert result.mario_state.vy == pytest.approx(expected_vy)
         assert not result.mario_state.on_ground
 
