@@ -44,5 +44,8 @@ class World:
         # Step 6: Update Mario's animation
         mario.update_animation()
 
-        # Step 7: Update camera based on Mario's new position
+        # Step 7: Update terrain behaviors
+        self.level.terrain_manager.update(dt)
+
+        # Step 8: Update camera based on Mario's new position
         self.camera.update(mario.state.x, self.level.width_pixels)

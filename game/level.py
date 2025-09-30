@@ -3,6 +3,7 @@
 from typing import List, Optional, Tuple
 
 from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
+from .terrain import BounceBehavior, TerrainManager, VisualState
 from .tile_definitions import TILE_BRICK_TOP, TileDefinition, get_tile_definition
 
 # Tile types (imported from tile_definitions for consistency)
@@ -60,6 +61,9 @@ class Level:
         # Each entry represents a 16x16 pixel block
         self.tiles: dict[int, List[List[int]]] = {}
 
+        # Initialize terrain manager for tile behaviors
+        self.terrain_manager = TerrainManager()
+
         # Create a simple test level
         self._create_test_level()
 
@@ -94,11 +98,15 @@ class Level:
         if self.width_tiles > 15:
             for x in range(10, min(15, self.width_tiles)):
                 self.tiles[0][6][x] = TILE_BRICK_TOP
+                # Make this platform bounceable
+                self.terrain_manager.set_tile_behavior(0, x, 6, BounceBehavior())
 
         # Platform 2
         if self.width_tiles > 25:
             for x in range(25, min(32, self.width_tiles)):
                 self.tiles[0][8][x] = TILE_BRICK_TOP
+                # Make this platform bounceable
+                self.terrain_manager.set_tile_behavior(0, x, 8, BounceBehavior())
 
         # Add a pipe (2x3 tiles)
         if self.width_tiles > 35:
@@ -213,6 +221,24 @@ class Level:
             TileDefinition for this tile, or None if not found
         """
         return get_tile_definition(tile_type)
+
+    def get_tile_visual_state(
+        self, screen: int, tile_x: int, tile_y: int
+    ) -> Optional[VisualState]:
+        """Get visual state for rendering a tile.
+
+        Args:
+            screen: The screen index
+            tile_x: Tile X coordinate
+            tile_y: Tile Y coordinate
+
+        Returns:
+            VisualState if tile has behaviors, None otherwise
+        """
+        instance = self.terrain_manager.get_instance(screen, tile_x, tile_y)
+        if instance and instance.state:
+            return instance.state.visual
+        return None
 
     def check_collision(
         self, screen: int, x: float, y: float, width: float, height: float

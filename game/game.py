@@ -106,6 +106,14 @@ class Game:
             world_x = tile_x * BLOCK_SIZE
             world_y = tile_y * BLOCK_SIZE
 
+            # Apply visual state from behaviors
+            visual = self.world.level.get_tile_visual_state(
+                self.mario.state.screen, tile_x, tile_y
+            )
+            if visual:
+                world_y += visual.offset_y
+                # Future: could add offset_x, rotation, scale, etc.
+
             # Transform to screen coordinates
             screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
 

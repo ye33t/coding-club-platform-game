@@ -1,6 +1,7 @@
 """Handle ceiling collision detection and resolution."""
 
 from ..constants import BLOCK_SIZE
+from ..terrain import TileEvent
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
@@ -63,6 +64,11 @@ class CeilingCollisionProcessor(PhysicsProcessor):
                 mario_state.y = (tile_y * BLOCK_SIZE) - mario_state.height
                 # Apply small downward bounce velocity
                 mario_state.vy = CEILING_BOUNCE_VELOCITY
+
+                # Trigger bounce behavior on the tile
+                context.level.terrain_manager.trigger_event(
+                    mario_state.screen, tile_x, tile_y, TileEvent.HIT_FROM_BELOW
+                )
                 break
 
         return context
