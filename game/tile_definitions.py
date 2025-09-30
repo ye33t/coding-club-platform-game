@@ -183,13 +183,15 @@ TILE_DEFS: dict[int, TileDefinition] = {
     TILE_BRIDGE: {
         "sprite_sheet": "background",
         "sprite_name": "bridge",
-        "collision_mask": MASK_FULL,
+        "collision_mask": MASK_TOP_HALF,
     },
     TILE_ROCKS: {
         "sprite_sheet": "background",
         "sprite_name": "rocks",
         "collision_mask": MASK_FULL,
     },
+    
+    # Sand
     TILE_SAND: {
         "sprite_sheet": "background",
         "sprite_name": "sand",
@@ -296,7 +298,7 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "collision_mask": MASK_FULL,
     },
     
-    # Pipe junctions
+    # Pipe junction
     TILE_PIPE_JUNCTION_TOP: {
         "sprite_sheet": "background",
         "sprite_name": "pipe_junction_top",
@@ -308,7 +310,7 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "collision_mask": MASK_FULL,
     },
     
-    # Cannons
+    # Cannon
     TILE_CANNON_TOP: {
         "sprite_sheet": "background",
         "sprite_name": "cannon_top",
@@ -325,28 +327,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "collision_mask": MASK_FULL,
     },
     
-    # Conveyors
-    TILE_CONVEYOR_CORNER_LEFT: {
-        "sprite_sheet": "background",
-        "sprite_name": "conveyor_corner_left",
-        "collision_mask": MASK_FULL,
-    },
-    TILE_CONVEYOR_HORIZONTAL: {
-        "sprite_sheet": "background",
-        "sprite_name": "conveyor_horizontal",
-        "collision_mask": MASK_FULL,
-    },
-    TILE_CONVEYOR_RIGHT: {
-        "sprite_sheet": "background",
-        "sprite_name": "conveyor_right",
-        "collision_mask": MASK_FULL,
-    },
-    TILE_CONVEYOR_VERTICAL: {
-        "sprite_sheet": "background",
-        "sprite_name": "conveyor_vertical",
-        "collision_mask": MASK_FULL,
-    },
-    
     # Climbing
     TILE_LADDER: {
         "sprite_sheet": "background",
@@ -359,6 +339,22 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "collision_mask": MASK_FULL,
     },
     
+    # Mushroom
+    TILE_MUSHROOM_LEFT: {
+        "sprite_sheet": "background",
+        "sprite_name": "mushroom_left",
+        "collision_mask": MASK_FULL,
+    },
+    TILE_MUSHROOM_CENTER: {
+        "sprite_sheet": "background",
+        "sprite_name": "mushroom_center",
+        "collision_mask": MASK_FULL,
+    },
+    TILE_MUSHROOM_RIGHT: {
+        "sprite_sheet": "background",
+        "sprite_name": "mushroom_right",
+        "collision_mask": MASK_FULL,
+    },
     
     # Decoration
     TILE_MOUND_TOP: {
@@ -392,6 +388,7 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "collision_mask": MASK_EMPTY,
     },
     
+    # Tree
     TILE_TREETOP_LEFT: {
         "sprite_sheet": "background",
         "sprite_name": "treetop_left",
@@ -407,21 +404,8 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "treetop_right",
         "collision_mask": MASK_EMPTY,
     },
-    TILE_MUSHROOM_LEFT: {
-        "sprite_sheet": "background",
-        "sprite_name": "mushroom_left",
-        "collision_mask": MASK_EMPTY,
-    },
-    TILE_MUSHROOM_CENTER: {
-        "sprite_sheet": "background",
-        "sprite_name": "mushroom_center",
-        "collision_mask": MASK_EMPTY,
-    },
-    TILE_MUSHROOM_RIGHT: {
-        "sprite_sheet": "background",
-        "sprite_name": "mushroom_right",
-        "collision_mask": MASK_EMPTY,
-    },
+    
+    # Bush
     TILE_BUSH_LEFT: {
         "sprite_sheet": "background",
         "sprite_name": "bush_left",
@@ -440,6 +424,28 @@ TILE_DEFS: dict[int, TileDefinition] = {
     TILE_LEAVES: {
         "sprite_sheet": "background",
         "sprite_name": "leaves",
+        "collision_mask": MASK_EMPTY,
+    },
+    
+        # Conveyors
+    TILE_CONVEYOR_CORNER_LEFT: {
+        "sprite_sheet": "background",
+        "sprite_name": "conveyor_corner_left",
+        "collision_mask": MASK_EMPTY,
+    },
+    TILE_CONVEYOR_HORIZONTAL: {
+        "sprite_sheet": "background",
+        "sprite_name": "conveyor_horizontal",
+        "collision_mask": MASK_EMPTY,
+    },
+    TILE_CONVEYOR_RIGHT: {
+        "sprite_sheet": "background",
+        "sprite_name": "conveyor_right",
+        "collision_mask": MASK_EMPTY,
+    },
+    TILE_CONVEYOR_VERTICAL: {
+        "sprite_sheet": "background",
+        "sprite_name": "conveyor_vertical",
         "collision_mask": MASK_EMPTY,
     },
     

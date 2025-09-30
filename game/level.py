@@ -3,7 +3,7 @@
 from typing import List, Optional, Tuple
 
 from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
-from .tile_definitions import TileDefinition, get_tile_definition
+from .tile_definitions import TILE_BRICK_TOP, TileDefinition, get_tile_definition
 
 # Tile types (imported from tile_definitions for consistency)
 from .tile_definitions import (
@@ -93,12 +93,12 @@ class Level:
         # Platform 1
         if self.width_tiles > 15:
             for x in range(10, min(15, self.width_tiles)):
-                self.tiles[0][6][x] = TILE_BRICK
+                self.tiles[0][6][x] = TILE_BRICK_TOP
 
         # Platform 2
         if self.width_tiles > 25:
             for x in range(25, min(32, self.width_tiles)):
-                self.tiles[0][8][x] = TILE_BRICK
+                self.tiles[0][8][x] = TILE_BRICK_TOP
 
         # Add a pipe (2x3 tiles)
         if self.width_tiles > 35:
@@ -114,10 +114,10 @@ class Level:
         # Screen 1 (above main screen) - Sky area
         # Floating platforms
         for x in range(5, min(10, self.width_tiles)):
-            self.tiles[1][4][x] = TILE_BRICK
+            self.tiles[1][4][x] = TILE_BRICK_TOP
 
         for x in range(15, min(20, self.width_tiles)):
-            self.tiles[1][7][x] = TILE_BRICK
+            self.tiles[1][7][x] = TILE_BRICK_TOP
 
         # Screen -1 (below main screen) - Underground area
         # Full ground
