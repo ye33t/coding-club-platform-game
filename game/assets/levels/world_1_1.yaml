@@ -1,5 +1,10 @@
 name: World 1-1
 
+spawn:
+  tile_x: 3
+  tile_y: 7
+  screen: 0
+
 screens:
   0:
     layout: |

@@ -129,7 +129,7 @@ class TestPhysicsPipeline:
 
     def test_wall_blocks_movement(self, empty_level, camera):
         """Walls should block horizontal movement."""
-        from game.level import TILE_GROUND
+        from game.tile_definitions import TILE_GROUND
 
         pipeline = PhysicsPipeline()
         # Create a wall at ground level

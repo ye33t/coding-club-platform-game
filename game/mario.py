@@ -73,9 +73,15 @@ class MarioState:
 class Mario:
     """Manages Mario's input processing and rendering."""
 
-    def __init__(self, initial_state: MarioState):
-        """Initialize Mario with a given state."""
-        self.state = initial_state
+    def __init__(self, x: float, y: float, screen: int):
+        """Initialize Mario at specific coordinates.
+
+        Args:
+            x: X position in world pixels
+            y: Y position in screen-relative pixels (0-224, from bottom)
+            screen: Which vertical screen Mario is on
+        """
+        self.state = MarioState(x=x, y=y, screen=screen)
         self.size = "small"  # small, big, fire
 
         # Animation configurations (each element = 1 frame at 60 FPS)

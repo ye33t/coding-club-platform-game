@@ -4,7 +4,8 @@ import pytest
 
 from game.camera import Camera, CameraState
 from game.constants import BLOCK_SIZE
-from game.level import TILE_EMPTY, TILE_GROUND, Level
+from game.level import Level
+from game.tile_definitions import TILE_EMPTY, TILE_GROUND
 from game.mario import MarioIntent, MarioState
 from game.physics import PhysicsContext
 
@@ -12,7 +13,16 @@ from game.physics import PhysicsContext
 @pytest.fixture
 def empty_level():
     """Create a real empty level for testing."""
-    level = Level(width_in_screens=2)
+    level = Level()
+    # Set spawn point
+    level.spawn_tile_x = 3
+    level.spawn_tile_y = 7
+    level.spawn_screen = 0
+    # Set dimensions (2 screens wide, standard height)
+    level.width_tiles = 32  # 2 screens * 16 tiles per screen
+    level.height_tiles = 14
+    level.width_pixels = level.width_tiles * BLOCK_SIZE
+    level.height_pixels = level.height_tiles * BLOCK_SIZE
     # Clear the entire level for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):
@@ -24,7 +34,16 @@ def empty_level():
 @pytest.fixture
 def level_with_ground():
     """Create a level with just ground at bottom."""
-    level = Level(width_in_screens=2)
+    level = Level()
+    # Set spawn point
+    level.spawn_tile_x = 3
+    level.spawn_tile_y = 7
+    level.spawn_screen = 0
+    # Set dimensions (2 screens wide, standard height)
+    level.width_tiles = 32  # 2 screens * 16 tiles per screen
+    level.height_tiles = 14
+    level.width_pixels = level.width_tiles * BLOCK_SIZE
+    level.height_pixels = level.height_tiles * BLOCK_SIZE
     # Clear the level first for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):
@@ -40,7 +59,16 @@ def level_with_ground():
 @pytest.fixture
 def level_with_platform():
     """Create a level with ground and a platform."""
-    level = Level(width_in_screens=2)
+    level = Level()
+    # Set spawn point
+    level.spawn_tile_x = 3
+    level.spawn_tile_y = 7
+    level.spawn_screen = 0
+    # Set dimensions (2 screens wide, standard height)
+    level.width_tiles = 32  # 2 screens * 16 tiles per screen
+    level.height_tiles = 14
+    level.width_pixels = level.width_tiles * BLOCK_SIZE
+    level.height_pixels = level.height_tiles * BLOCK_SIZE
     # Clear the level first for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):

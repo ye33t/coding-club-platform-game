@@ -210,8 +210,6 @@ class TestResetProcessor:
 
     def test_triggers_reset_when_fallen_far_enough(self, empty_level, camera):
         """Should reset Mario when dying Mario falls below threshold."""
-        from game.physics.reset import MARIO_START_X, MARIO_START_Y
-
         processor = ResetProcessor()
         state = MarioState(x=100, y=RESET_THRESHOLD_Y - 1, is_dying=True)
         context = PhysicsContext(
@@ -224,9 +222,9 @@ class TestResetProcessor:
 
         result = processor.process(context)
 
-        # Should have reset Mario to starting position
-        assert result.mario_state.x == MARIO_START_X
-        assert result.mario_state.y == MARIO_START_Y
+        # Should have reset Mario to level's spawn position
+        assert result.mario_state.x == empty_level.spawn_x
+        assert result.mario_state.y == empty_level.spawn_y
         assert not result.mario_state.is_dying
         # Should have reset camera
         assert result.camera_state.x == 0
@@ -276,8 +274,6 @@ class TestResetIntegration:
 
     def test_full_death_and_reset_cycle(self, empty_level, camera):
         """Test the complete death animation and reset trigger."""
-        from game.physics.reset import MARIO_START_X, MARIO_START_Y
-
         pipeline = PhysicsPipeline()
         # Start Mario falling
         state = MarioState(x=100, y=10, vy=-100, on_ground=False)
@@ -302,46 +298,47 @@ class TestResetIntegration:
             prev_y = context.mario_state.y
             context = pipeline.process(context)
             # Check if reset happened (Mario back at start)
-            if context.mario_state.x == MARIO_START_X and context.mario_state.y == MARIO_START_Y:
+            if context.mario_state.x == empty_level.spawn_x and context.mario_state.y == empty_level.spawn_y:
                 break
 
         # Should have reset
-        assert context.mario_state.x == MARIO_START_X
-        assert context.mario_state.y == MARIO_START_Y
+        assert context.mario_state.x == empty_level.spawn_x
+        assert context.mario_state.y == empty_level.spawn_y
         assert not context.mario_state.is_dying
 
-    def test_camera_resets_properly(self, empty_level):
+    def test_camera_resets_properly(self, level_with_ground):
         """Test that camera resets to origin when Mario respawns."""
-        from game.world import World
-        from game.mario import Mario, MarioState
-        from game.physics.reset import MARIO_START_X, MARIO_START_Y
-        import pygame
+        from game.physics import PhysicsPipeline
+        from game.camera import Camera
 
-        world = World()
-        # Position Mario below death threshold while dying
-        mario = Mario(MarioState(x=200, y=RESET_THRESHOLD_Y - 1, is_dying=True))
+        pipeline = PhysicsPipeline()
 
-        # Move camera forward
-        world.camera.update(200, world.level.width_pixels)
-        assert world.camera.x > 0
-        assert world.camera.max_x > 0
+        # Position Mario below death threshold while dying, with camera moved forward
+        state = MarioState(x=400, y=RESET_THRESHOLD_Y - 1, is_dying=True)
+        camera = Camera()
+        # Manually move camera forward (simulating prior movement)
+        camera.state.x = 100
+        camera.state.max_x = 100
 
-        # Create mock key state
-        keys = {
-            pygame.K_a: False,  # move left
-            pygame.K_d: False,  # move right
-            pygame.K_j: False,  # run
-            pygame.K_k: False,  # jump
-            pygame.K_s: False,  # duck
-        }
+        context = PhysicsContext(
+            mario_state=state,
+            mario_intent=MarioIntent(),
+            dt=1/60,
+            level=level_with_ground,  # This has width_tiles = 32 (512 pixels)
+            camera_state=camera.state,
+        )
 
-        # Process update which should trigger reset in the pipeline
-        world.update(mario, keys, 1/60)
+        # Verify camera has been moved
+        assert context.camera_state.x > 0
+        assert context.camera_state.max_x > 0
+
+        # Process through pipeline which should trigger reset
+        result = pipeline.process(context)
 
         # Camera should be back at origin
-        assert world.camera.x == 0
-        assert world.camera.max_x == 0
-        # Mario should be at starting position
-        assert mario.state.x == MARIO_START_X
-        assert mario.state.y == MARIO_START_Y
-        assert not mario.state.is_dying
+        assert result.camera_state.x == 0
+        assert result.camera_state.max_x == 0
+        # Mario should be at starting position (spawn point)
+        assert result.mario_state.x == level_with_ground.spawn_x
+        assert result.mario_state.y == level_with_ground.spawn_y
+        assert not result.mario_state.is_dying

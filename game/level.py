@@ -2,7 +2,7 @@
 
 from typing import List, Optional, Tuple
 
-from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
+from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL
 from .terrain import TerrainManager, VisualState
 from .tile_definitions import TILE_EMPTY, TileDefinition, get_tile_definition
 
@@ -19,11 +19,15 @@ class Level:
 
         The level will be populated by a loader after construction.
         """
-        # Initialize dimensions (16x14 blocks per screen)
-        self.width_tiles = BLOCKS_HORIZONTAL  # 16 blocks wide
-        self.height_tiles = BLOCKS_VERTICAL   # 14 blocks tall
-        self.width_pixels = self.width_tiles * BLOCK_SIZE
-        self.height_pixels = self.height_tiles * BLOCK_SIZE
+        self.width_tiles = 0
+        self.height_tiles = 0
+        self.width_pixels = 0
+        self.height_pixels = 0
+
+        # Spawn point (in tile coordinates)
+        self.spawn_tile_x: int = 0
+        self.spawn_tile_y: int = 0
+        self.spawn_screen: int = 0
 
         # Initialize tile data (3D structure: screen -> y -> x)
         # tiles[screen][y][x] where y=0 is bottom of each screen
@@ -32,6 +36,16 @@ class Level:
 
         # Initialize terrain manager for tile behaviors
         self.terrain_manager = TerrainManager()
+
+    @property
+    def spawn_x(self) -> float:
+        """Get spawn X position in pixels."""
+        return self.spawn_tile_x * BLOCK_SIZE
+
+    @property
+    def spawn_y(self) -> float:
+        """Get spawn Y position in pixels."""
+        return self.spawn_tile_y * BLOCK_SIZE
 
     def get_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.

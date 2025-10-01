@@ -8,14 +8,13 @@ import pygame
 from .constants import (
     BACKGROUND_COLOR,
     FPS,
-    NATIVE_HEIGHT,
     TILE_SIZE,
     TILES_HORIZONTAL,
     TILES_VERTICAL,
     WHITE,
 )
 from .display import Display
-from .mario import Mario, MarioState
+from .mario import Mario
 from .sprites import sprites
 from .world import World
 
@@ -38,11 +37,15 @@ class Game:
         assets_path = os.path.join(os.path.dirname(__file__), "assets", "images")
         sprites.load_sheets(assets_path)
 
-        # Create Mario and World
-        # Spawn Mario in the air - gravity will naturally drop him to the ground
-        spawn_y = NATIVE_HEIGHT / 2  # Halfway up the screen
-        self.mario = Mario(MarioState(x=50.0, y=spawn_y))
+        # Create World first to get level spawn point
         self.world = World()
+
+        # Create Mario at the level's spawn point
+        self.mario = Mario(
+            self.world.level.spawn_x,
+            self.world.level.spawn_y,
+            self.world.level.spawn_screen
+        )
 
     def handle_events(self):
         """Process pygame events."""
