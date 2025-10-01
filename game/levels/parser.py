@@ -1,48 +1,16 @@
 """Two-pass level parser for converting ASCII layouts to tile grids."""
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Set, Tuple
 
+from .converters import CONVERTERS, TilePlacement
+from .types import Compound, ParserContext
+from ..constants import BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
 from ..tile_definitions import (
     TILE_BLOCK,
     TILE_BRICK_TOP,
     TILE_EMPTY,
     TILE_GROUND,
-    TILE_PIPE_LEFT,
-    TILE_PIPE_RIGHT,
-    TILE_PIPE_TOP_LEFT,
-    TILE_PIPE_TOP_RIGHT,
 )
-
-
-@dataclass
-class ParserContext:
-    """Context carried through parsing operations."""
-
-    layout: List[str]  # The full screen layout (bottom-up)
-    width: int
-    height: int
-    screen_index: int
-    errors: List[str] = field(default_factory=list)
-
-    def get_char(self, x: int, y: int) -> Optional[str]:
-        """Safe character access with bounds checking."""
-        if 0 <= x < self.width and 0 <= y < self.height:
-            return self.layout[y][x]
-        return None
-
-    def add_error(self, message: str) -> None:
-        """Add an error message to the context."""
-        self.errors.append(f"Screen {self.screen_index}: {message}")
-
-
-@dataclass
-class Compound:
-    """Represents a connected group of characters forming a pattern."""
-
-    pattern_type: str  # Type of pattern ('pipe', etc.)
-    positions: Set[Tuple[int, int]]  # All positions in this compound
-    bounds: Tuple[int, int, int, int]  # min_x, min_y, max_x, max_y
 
 
 class ParseError(Exception):
@@ -67,12 +35,14 @@ class LevelParser:
     def parse_screen(self, layout: str, screen_index: int = 0) -> List[List[int]]:
         """Parse a screen layout into a tile grid.
 
+        The layout must be at least 16 columns wide and exactly 14 rows tall.
+
         Args:
             layout: ASCII art layout string
             screen_index: Index of the screen being parsed
 
         Returns:
-            2D list of tile IDs (14 rows x 16 columns)
+            2D list of tile IDs (14 rows x N columns, where N >= 16)
 
         Raises:
             ParseError: If parsing fails
@@ -82,25 +52,38 @@ class LevelParser:
         lines.reverse()
 
         # Validate dimensions
-        if len(lines) != 14:
-            raise ParseError(f"Screen must have 14 rows, got {len(lines)}")
+        if len(lines) != BLOCKS_VERTICAL:
+            raise ParseError(f"Layout must have {BLOCKS_VERTICAL} rows, got {len(lines)}")
+
+        # Check that all rows have the same length
+        if not lines:
+            raise ParseError("Layout is empty")
+
+        width = len(lines[0])
+        if width < BLOCKS_HORIZONTAL:
+            raise ParseError(
+                f"Layout width must be at least {BLOCKS_HORIZONTAL}, got {width}"
+            )
+
         for i, line in enumerate(lines):
-            if len(line) != 16:
-                raise ParseError(f"Row {i} must have 16 characters, got {len(line)}")
+            if len(line) != width:
+                raise ParseError(
+                    f"Row {i} has {len(line)} characters, expected {width} (all rows must be the same length)"
+                )
 
         # Create context
         context = ParserContext(
             layout=lines,
-            width=16,
-            height=14,
+            width=width,
+            height=BLOCKS_VERTICAL,
             screen_index=screen_index,
         )
 
-        # Pass 1: Find compounds
-        compounds = self._find_compounds(context)
+        # Pass 1: Lexer - find compounds (contiguous regions)
+        compounds = self._lexer_pass(context)
 
-        # Pass 2: Convert to tiles
-        tiles = self._convert_to_tiles(compounds, context)
+        # Pass 2: Parser - convert compounds to tiles
+        tiles = self._parser_pass(compounds, context)
 
         # Check for errors
         if context.errors:
@@ -108,14 +91,14 @@ class LevelParser:
 
         return tiles
 
-    def _find_compounds(self, context: ParserContext) -> List[Compound]:
-        """Pass 1: Find all connected components that form patterns.
+    def _lexer_pass(self, context: ParserContext) -> List[Compound]:
+        """Lexer pass: Find all connected regions of the same character.
 
         Args:
             context: Parser context
 
         Returns:
-            List of compounds found
+            List of compounds (contiguous regions of the same character)
         """
         compounds = []
         visited = set()
@@ -127,42 +110,59 @@ class LevelParser:
 
                 char = context.get_char(x, y)
 
-                # Simple tiles or empty - skip
+                # Skip if out of bounds
+                if char is None:
+                    continue
+
+                # Simple tiles - mark as visited but don't create compounds
                 if char in self.simple_tiles:
                     visited.add((x, y))
                     continue
 
-                # Pipe pattern
-                if char == "|":
-                    # Find all connected pipe characters
-                    component = self._flood_fill_pipes(x, y, context, visited)
-                    if component:
-                        # Validate it forms a valid pipe
-                        if self._validate_pipe(component, context):
-                            bounds = self._get_bounds(component)
-                            compounds.append(
-                                Compound(
-                                    pattern_type="pipe",
-                                    positions=component,
-                                    bounds=bounds,
-                                )
-                            )
+                # For any compound character, flood fill to find connected region
+                component = self._flood_fill(x, y, char, context, visited)
+                if component:
+                    # Convert positions set to mask
+                    xs = {x for x, y in component}
+                    ys = {y for x, y in component}
+                    min_x, max_x = min(xs), max(xs)
+                    min_y, max_y = min(ys), max(ys)
+
+                    # Create 2D mask
+                    width = max_x - min_x + 1
+                    height = max_y - min_y + 1
+                    mask = [[False for _ in range(width)] for _ in range(height)]
+
+                    # Fill mask based on positions
+                    for px, py in component:
+                        mask[py - min_y][px - min_x] = True
+
+                    compounds.append(
+                        Compound(
+                            character=char,
+                            mask=mask,
+                            origin_x=min_x,
+                            origin_y=min_y,
+                        )
+                    )
 
         return compounds
 
-    def _flood_fill_pipes(
-        self, start_x: int, start_y: int, context: ParserContext, visited: Set[Tuple[int, int]]
+    def _flood_fill(
+        self, start_x: int, start_y: int, target_char: str,
+        context: ParserContext, visited: Set[Tuple[int, int]]
     ) -> Set[Tuple[int, int]]:
-        """Flood fill to find connected pipe characters.
+        """Flood fill to find connected region of the same character.
 
         Args:
             start_x: Starting X position
             start_y: Starting Y position
+            target_char: The character to match
             context: Parser context
             visited: Set of already visited positions
 
         Returns:
-            Set of positions forming the pipe component
+            Set of positions forming the connected component
         """
         component = set()
         stack = [(start_x, start_y)]
@@ -174,7 +174,7 @@ class LevelParser:
                 continue
 
             char = context.get_char(x, y)
-            if char != "|":
+            if char != target_char:
                 continue
 
             visited.add((x, y))
@@ -189,62 +189,10 @@ class LevelParser:
 
         return component
 
-    def _validate_pipe(self, component: Set[Tuple[int, int]], context: ParserContext) -> bool:
-        """Validate that a component forms a valid pipe.
-
-        Pipes must be exactly 2 characters wide and vertically connected.
-
-        Args:
-            component: Set of positions in the component
-            context: Parser context
-
-        Returns:
-            True if valid pipe, False otherwise
-        """
-        if not component:
-            return False
-
-        # Get bounds
-        xs = {x for x, y in component}
-        ys = {y for x, y in component}
-
-        min_x, max_x = min(xs), max(xs)
-        min_y, max_y = min(ys), max(ys)
-
-        # Check if it's 2 wide
-        if max_x - min_x != 1:
-            context.add_error(f"Pipe at ({min_x}, {min_y}) must be exactly 2 characters wide")
-            return False
-
-        # Check that it forms a proper rectangle (all positions filled)
-        expected_positions = set()
-        for y in range(min_y, max_y + 1):
-            for x in range(min_x, max_x + 1):
-                expected_positions.add((x, y))
-
-        if component != expected_positions:
-            context.add_error(f"Pipe at ({min_x}, {min_y}) has gaps - must be solid rectangle")
-            return False
-
-        return True
-
-    def _get_bounds(self, component: Set[Tuple[int, int]]) -> Tuple[int, int, int, int]:
-        """Get the bounding box of a component.
-
-        Args:
-            component: Set of positions
-
-        Returns:
-            Tuple of (min_x, min_y, max_x, max_y)
-        """
-        xs = {x for x, y in component}
-        ys = {y for x, y in component}
-        return (min(xs), min(ys), max(xs), max(ys))
-
-    def _convert_to_tiles(
+    def _parser_pass(
         self, compounds: List[Compound], context: ParserContext
     ) -> List[List[int]]:
-        """Pass 2: Convert compounds and simple tiles to final tile grid.
+        """Parser pass: Convert compounds and simple tiles to final tile grid.
 
         Args:
             compounds: List of compounds to convert
@@ -254,18 +202,26 @@ class LevelParser:
             2D list of tile IDs
         """
         # Initialize with empty tiles
-        tiles = [[TILE_EMPTY for _ in range(16)] for _ in range(14)]
+        tiles = [[TILE_EMPTY for _ in range(context.width)] for _ in range(context.height)]
 
         # Track which positions have been processed
         processed = set()
 
-        # Convert compounds first
+        # Convert compounds using registered converters
         for compound in compounds:
-            if compound.pattern_type == "pipe":
-                pipe_tiles = self._convert_pipe(compound, context)
-                for (x, y), tile_id in pipe_tiles.items():
-                    tiles[y][x] = tile_id
-                    processed.add((x, y))
+            converter = CONVERTERS.get(compound.character)
+            if converter:
+                tile_placement = converter(compound, context)
+                if tile_placement:
+                    for (x, y), tile_id in tile_placement.items():
+                        tiles[y][x] = tile_id
+                        processed.add((x, y))
+            else:
+                # Unknown compound character - add to context errors
+                context.add_error(
+                    f"No converter found for compound '{compound.character}' "
+                    f"at ({compound.origin_x}, {compound.origin_y})"
+                )
 
         # Convert simple tiles
         for y in range(context.height):
@@ -279,32 +235,3 @@ class LevelParser:
 
         return tiles
 
-    def _convert_pipe(
-        self, compound: Compound, context: ParserContext
-    ) -> Dict[Tuple[int, int], int]:
-        """Convert a pipe compound to tile placements.
-
-        Args:
-            compound: Pipe compound to convert
-            context: Parser context
-
-        Returns:
-            Dictionary mapping positions to tile IDs
-        """
-        tiles = {}
-        min_x, min_y, max_x, max_y = compound.bounds
-
-        for y in range(min_y, max_y + 1):
-            # Check if this is the top of the pipe
-            is_top = y == min_y
-
-            if is_top:
-                # Top tiles
-                tiles[(min_x, y)] = TILE_PIPE_TOP_LEFT
-                tiles[(min_x + 1, y)] = TILE_PIPE_TOP_RIGHT
-            else:
-                # Body tiles
-                tiles[(min_x, y)] = TILE_PIPE_LEFT
-                tiles[(min_x + 1, y)] = TILE_PIPE_RIGHT
-
-        return tiles

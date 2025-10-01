@@ -70,8 +70,8 @@ TILE_BRIDGE_RAILS = 19
 # Pipes (vertical)
 TILE_PIPE_LEFT = 20
 TILE_PIPE_RIGHT = 21
-TILE_PIPE_TOP_LEFT = 22  # mouth
-TILE_PIPE_TOP_RIGHT = 23  # mouth
+TILE_PIPE_MOUTH_LEFT = 22
+TILE_PIPE_MOUTH_RIGHT = 23
 
 # Pipes (horizontal)
 TILE_PIPE_HORIZONTAL_TOP = 24
@@ -265,12 +265,12 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "pipe_right",
         "collision_mask": MASK_FULL,
     },
-    TILE_PIPE_TOP_LEFT: {
+    TILE_PIPE_MOUTH_LEFT: {
         "sprite_sheet": "background",
         "sprite_name": "pipe_mouth_left",
         "collision_mask": MASK_FULL,
     },
-    TILE_PIPE_TOP_RIGHT: {
+    TILE_PIPE_MOUTH_RIGHT: {
         "sprite_sheet": "background",
         "sprite_name": "pipe_mouth_right",
         "collision_mask": MASK_FULL,
