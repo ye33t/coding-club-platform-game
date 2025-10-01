@@ -2,7 +2,7 @@
 
 import pytest
 
-from game.physics.movement import FRICTION, MovementProcessor
+from game.physics.movement import MIN_FRICTION, MAX_FRICTION, MovementProcessor
 
 
 class TestMovementProcessor:
@@ -11,14 +11,14 @@ class TestMovementProcessor:
     def test_friction_applies_when_no_input(self, basic_context):
         """Friction should slow Mario when no movement intent."""
         processor = MovementProcessor()
-        basic_context.mario_state.vx = 100.0  # Moving right
+        basic_context.mario_state.vx = 100.0  # Moving right (high speed)
         basic_context.mario_intent.move_left = False
         basic_context.mario_intent.move_right = False
 
         result = processor.process(basic_context)
 
-        # Should be slowed by friction
-        expected_vx = 100.0 * FRICTION
+        # At high speed (100), friction should be MIN_FRICTION
+        expected_vx = 100.0 * MIN_FRICTION
         assert result.mario_state.vx == pytest.approx(expected_vx)
 
     def test_no_friction_when_moving(self, basic_context):
@@ -63,7 +63,7 @@ class TestMovementProcessor:
     def test_friction_applied_multiple_times(self, basic_context):
         """Friction should compound over multiple frames."""
         processor = MovementProcessor()
-        basic_context.mario_state.vx = 100.0
+        basic_context.mario_state.vx = 100.0  # High speed
         basic_context.mario_intent.move_left = False
         basic_context.mario_intent.move_right = False
 
@@ -72,6 +72,24 @@ class TestMovementProcessor:
         for _ in range(3):
             context = processor.process(context)
 
-        # Should be significantly slower
-        expected_vx = 100.0 * (FRICTION**3)
-        assert context.mario_state.vx == pytest.approx(expected_vx)
+        # Should be significantly slower but exact value depends on velocity-based friction
+        # Starting at 100, should end up around 65-70 after 3 frames
+        assert 65.0 < context.mario_state.vx < 70.0
+
+    def test_velocity_based_friction(self, basic_context):
+        """Friction should vary based on velocity."""
+        processor = MovementProcessor()
+        basic_context.mario_intent.move_left = False
+        basic_context.mario_intent.move_right = False
+
+        # Test low speed - should have high friction (quick stop)
+        basic_context.mario_state.vx = 15.0
+        result = processor.process(basic_context)
+        # At low speeds, friction should be closer to MAX_FRICTION
+        assert result.mario_state.vx < 15.0 * 0.70  # Should drop significantly
+
+        # Test high speed - should have low friction (more sliding)
+        basic_context.mario_state.vx = 100.0
+        result = processor.process(basic_context)
+        # At high speeds, friction should be MIN_FRICTION
+        assert result.mario_state.vx == pytest.approx(100.0 * MIN_FRICTION)

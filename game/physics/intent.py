@@ -3,14 +3,14 @@
 from .base import PhysicsContext, PhysicsProcessor
 
 # Movement constants
-WALK_SPEED = 64.0  # pixels per second
-RUN_SPEED = 128.0  # pixels per second
+WALK_SPEED = 85.0  # pixels per second
+RUN_SPEED = 140.0  # pixels per second
 SKID_THRESHOLD = 80.0  # speed difference that triggers skidding
 
 # Acceleration constants (pixels per second²)
-GROUND_ACCELERATION = 400.0  # Normal ground acceleration
+GROUND_ACCELERATION = 180.0  # Normal ground acceleration (more gradual)
 SKID_DECELERATION = 600.0  # Deceleration when skidding (stronger)
-AIR_ACCELERATION = 200.0  # Air control (weaker)
+AIR_ACCELERATION = 120.0  # Air control (moderate)
 
 
 class IntentProcessor(PhysicsProcessor):
@@ -77,11 +77,8 @@ class IntentProcessor(PhysicsProcessor):
             else:
                 mario_state.input_duration = 1  # First frame of new input
 
-        # Only apply acceleration if:
-        # - Input held for 9+ frames (not just a tap), OR
-        # - Already moving significantly (keep momentum)
-        nearly_stopped = abs(mario_state.vx) < 5.0
-        if target_vx != 0 and (mario_state.input_duration >= 9 or not nearly_stopped):
+        # Apply acceleration whenever there's input
+        if target_vx != 0:
             # Choose acceleration based on state
             if mario_state.action == "skidding":
                 # Stronger deceleration when skidding

@@ -31,9 +31,9 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
         left_x = mario_state.x
 
         # Check at multiple heights (bottom, middle, top)
-        # Skip the very bottom to allow walking up single-pixel steps
+        # Skip the very bottom to avoid collision with ground tiles
         sample_heights = [
-            mario_state.y + 2,  # Near bottom (with 2 pixel tolerance)
+            mario_state.y + 8,  # Above feet (8 pixel tolerance for ground)
             mario_state.y + mario_state.height / 2,  # Middle
             mario_state.y + mario_state.height - 2,  # Near top
         ]

@@ -61,9 +61,9 @@ class Level:
         if screen not in self.tiles:
             raise ValueError(f"Screen {screen} not found in level data")
         if tile_x < 0 or tile_x >= self.width_tiles:
-            raise ValueError(f"Tile X {tile_x} out of bounds")
+            return TILE_EMPTY
         if tile_y < 0 or tile_y >= self.height_tiles:
-            raise ValueError(f"Tile Y {tile_y} out of bounds")
+            return TILE_EMPTY
         return self.tiles[screen][tile_y][tile_x]
 
     def get_tile_at_position(self, screen: int, world_x: float, world_y: float) -> int:
