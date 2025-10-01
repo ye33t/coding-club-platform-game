@@ -1,6 +1,6 @@
 """Handle ceiling collision detection and resolution."""
 
-from ..constants import BLOCK_SIZE
+from ..constants import TILE_SIZE
 from ..terrain import TileEvent
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
@@ -42,8 +42,8 @@ class CeilingCollisionProcessor(PhysicsProcessor):
         ]
 
         for sample_x in ceiling_sample_points:
-            tile_x = int(sample_x // BLOCK_SIZE)
-            tile_y = int(head_y // BLOCK_SIZE)
+            tile_x = int(sample_x // TILE_SIZE)
+            tile_y = int(head_y // TILE_SIZE)
 
             tile_type = level.get_tile(mario_state.screen, tile_x, tile_y)
             tile_def = level.get_tile_definition(tile_type)
@@ -52,16 +52,16 @@ class CeilingCollisionProcessor(PhysicsProcessor):
                 continue
 
             # Determine which quadrant we're checking
-            x_in_tile = sample_x - (tile_x * BLOCK_SIZE)
-            y_in_tile = head_y - (tile_y * BLOCK_SIZE)
+            x_in_tile = sample_x - (tile_x * TILE_SIZE)
+            y_in_tile = head_y - (tile_y * TILE_SIZE)
 
-            quadrant_x = 0 if x_in_tile < (BLOCK_SIZE / 2) else 1
-            quadrant_y = 0 if y_in_tile < (BLOCK_SIZE / 2) else 1
+            quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
+            quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
 
             # Check if this quadrant is solid
             if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
                 # Mario's head hit a ceiling - push him down flush with block
-                mario_state.y = (tile_y * BLOCK_SIZE) - mario_state.height
+                mario_state.y = (tile_y * TILE_SIZE) - mario_state.height
                 # Apply small downward bounce velocity
                 mario_state.vy = CEILING_BOUNCE_VELOCITY
 

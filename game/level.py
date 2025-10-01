@@ -2,7 +2,7 @@
 
 from typing import List, Optional, Tuple
 
-from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL
+from .constants import TILE_SIZE, TILES_HORIZONTAL
 from .terrain import TerrainManager, VisualState
 from .tile_definitions import TILE_EMPTY, TileDefinition, get_tile_definition
 
@@ -10,8 +10,8 @@ from .tile_definitions import TILE_EMPTY, TileDefinition, get_tile_definition
 class Level:
     """Manages level geometry and tile data.
 
-    Note: The level grid represents game blocks (16x16 pixels each),
-    not individual NES tiles (8x8 pixels). Each block is a 2x2 tile sprite.
+    Note: The level grid represents game tiles (16x16 pixels each),
+    not individual NES sub-tiles (8x8 pixels). Each tile is a 2x2 sub-tile sprite.
     """
 
     def __init__(self):
@@ -31,7 +31,7 @@ class Level:
 
         # Initialize tile data (3D structure: screen -> y -> x)
         # tiles[screen][y][x] where y=0 is bottom of each screen
-        # Each entry represents a 16x16 pixel block
+        # Each entry represents a 16x16 pixel tile
         self.tiles: dict[int, List[List[int]]] = {}
 
         # Initialize terrain manager for tile behaviors
@@ -40,12 +40,12 @@ class Level:
     @property
     def spawn_x(self) -> float:
         """Get spawn X position in pixels."""
-        return self.spawn_tile_x * BLOCK_SIZE
+        return self.spawn_tile_x * TILE_SIZE
 
     @property
     def spawn_y(self) -> float:
         """Get spawn Y position in pixels."""
-        return self.spawn_tile_y * BLOCK_SIZE
+        return self.spawn_tile_y * TILE_SIZE
 
     def get_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.
@@ -77,8 +77,8 @@ class Level:
         Returns:
             Tile type at that position
         """
-        tile_x = int(world_x // BLOCK_SIZE)
-        tile_y = int(world_y // BLOCK_SIZE)
+        tile_x = int(world_x // TILE_SIZE)
+        tile_y = int(world_y // TILE_SIZE)
         return self.get_tile(screen, tile_x, tile_y)
 
     def is_solid(self, tile_type: int) -> bool:
@@ -109,10 +109,10 @@ class Level:
             raise ValueError(f"Screen {screen} not found in level data")
 
         # Calculate tile range visible on screen
-        start_tile_x = max(0, int(camera_x // BLOCK_SIZE))
+        start_tile_x = max(0, int(camera_x // TILE_SIZE))
         end_tile_x = min(
             self.width_tiles,
-            int((camera_x + BLOCKS_HORIZONTAL * BLOCK_SIZE) // BLOCK_SIZE) + 1,
+            int((camera_x + TILES_HORIZONTAL * TILE_SIZE) // TILE_SIZE) + 1,
         )
 
         visible_tiles = []
@@ -170,10 +170,10 @@ class Level:
         """
         # Check corners and edges for collisions
         # Convert to tile coordinates
-        left_tile = int(x // BLOCK_SIZE)
-        right_tile = int((x + width - 1) // BLOCK_SIZE)
-        bottom_tile = int(y // BLOCK_SIZE)
-        top_tile = int((y + height - 1) // BLOCK_SIZE)
+        left_tile = int(x // TILE_SIZE)
+        right_tile = int((x + width - 1) // TILE_SIZE)
+        bottom_tile = int(y // TILE_SIZE)
+        top_tile = int((y + height - 1) // TILE_SIZE)
 
         # Check ground collision (bottom edge)
         for tile_x in range(left_tile, right_tile + 1):

@@ -2,7 +2,7 @@
 
 import pygame
 
-from .constants import TILE_SIZE
+from .constants import SUB_TILE_SIZE
 
 
 class SpriteSheet:
@@ -40,8 +40,8 @@ class SpriteSheet:
             pygame.Surface containing the sprite
         """
         # Calculate pixel dimensions
-        width = tile_width * TILE_SIZE
-        height = tile_height * TILE_SIZE
+        width = tile_width * SUB_TILE_SIZE
+        height = tile_height * SUB_TILE_SIZE
 
         # Calculate top-left corner from bottom-left
         top_left_x = x

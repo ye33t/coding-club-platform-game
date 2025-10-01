@@ -1,6 +1,6 @@
 """Handle ground collision detection and resolution."""
 
-from ..constants import BLOCK_SIZE
+from ..constants import TILE_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
@@ -34,9 +34,9 @@ class GroundCollisionProcessor(PhysicsProcessor):
         ]
 
         for sample_x in sample_points:
-            # Get block coordinates (each block is 16x16 pixels)
-            tile_x = int(sample_x // BLOCK_SIZE)
-            base_tile_y = int(mario_state.y // BLOCK_SIZE)
+            # Get tile coordinates (each tile is 16x16 pixels)
+            tile_x = int(sample_x // TILE_SIZE)
+            base_tile_y = int(mario_state.y // TILE_SIZE)
 
             # Check the tile Mario is in and one below
             for check_y in [base_tile_y, base_tile_y - 1]:
@@ -49,10 +49,10 @@ class GroundCollisionProcessor(PhysicsProcessor):
                 if not tile_def or tile_def["collision_mask"] == 0:
                     continue
 
-                # Each block has 4 quadrants (8x8 pixels each)
+                # Each tile has 4 quadrants (8x8 pixels each)
                 # Check which quadrant of the tile we're sampling
-                x_in_tile = sample_x - (tile_x * BLOCK_SIZE)
-                quadrant_x = 0 if x_in_tile < (BLOCK_SIZE / 2) else 1
+                x_in_tile = sample_x - (tile_x * TILE_SIZE)
+                quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
 
                 # Check both top and bottom quadrants
                 for quadrant_y in [0, 1]:  # 0=bottom, 1=top
@@ -61,7 +61,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
                     # Calculate world Y of this quadrant's top edge
                     quadrant_top_y = (
-                        check_y * BLOCK_SIZE + (quadrant_y + 1) * (BLOCK_SIZE / 2)
+                        check_y * TILE_SIZE + (quadrant_y + 1) * (TILE_SIZE / 2)
                     )
 
                     # Check if Mario's feet are within collision range

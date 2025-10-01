@@ -1,7 +1,7 @@
 """Tile definitions mapping tile IDs to properties.
 
 Collision Masks:
-    Each 2x2 tile (16x16 pixels) is divided into 4 quadrants (8x8 pixels each).
+    Each tile (16x16 pixels) is divided into 4 quadrants (8x8 pixels each).
     A 4-bit mask represents which quadrants are solid:
 
     ┌────┬────┐
@@ -11,7 +11,7 @@ Collision Masks:
     └────┴────┘
 
     Examples:
-        0b1111 = all solid (full block)
+        0b1111 = all solid (full tile)
         0b1100 = top half solid (platform)
         0b0011 = bottom half solid
 """

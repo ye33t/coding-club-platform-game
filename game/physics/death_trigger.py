@@ -3,7 +3,7 @@
 from ..constants import TILE_SIZE
 from .base import PhysicsContext, PhysicsProcessor
 
-DEATH_LEAP_HEIGHT = TILE_SIZE * 3  # Jump 3 tiles up when dying
+DEATH_LEAP_HEIGHT = TILE_SIZE * 2  # Jump 2 tiles up when dying
 
 
 class DeathTriggerProcessor(PhysicsProcessor):

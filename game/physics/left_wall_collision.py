@@ -1,6 +1,6 @@
 """Handle left wall collision detection and resolution."""
 
-from ..constants import BLOCK_SIZE
+from ..constants import TILE_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
@@ -39,8 +39,8 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
         ]
 
         for sample_y in sample_heights:
-            tile_x = int(left_x // BLOCK_SIZE)
-            tile_y = int(sample_y // BLOCK_SIZE)
+            tile_x = int(left_x // TILE_SIZE)
+            tile_y = int(sample_y // TILE_SIZE)
 
             tile_type = level.get_tile(mario_state.screen, tile_x, tile_y)
             tile_def = level.get_tile_definition(tile_type)
@@ -49,17 +49,17 @@ class LeftWallCollisionProcessor(PhysicsProcessor):
                 continue
 
             # Determine which quadrant we're checking
-            x_in_tile = left_x - (tile_x * BLOCK_SIZE)
-            y_in_tile = sample_y - (tile_y * BLOCK_SIZE)
+            x_in_tile = left_x - (tile_x * TILE_SIZE)
+            y_in_tile = sample_y - (tile_y * TILE_SIZE)
 
-            quadrant_x = 0 if x_in_tile < (BLOCK_SIZE / 2) else 1
-            quadrant_y = 0 if y_in_tile < (BLOCK_SIZE / 2) else 1
+            quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
+            quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
 
             # Check if this quadrant is solid
             if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
                 # Hit a wall on the left
                 # Push Mario to the right edge of the tile
-                mario_state.x = (tile_x + 1) * BLOCK_SIZE
+                mario_state.x = (tile_x + 1) * TILE_SIZE
                 mario_state.vx = 0  # Stop horizontal movement
                 break
 

@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 import pygame
 
-from game.constants import BLOCK_SIZE
+from game.constants import TILE_SIZE
 
 from .sprites import sprites
 
@@ -39,8 +39,8 @@ class MarioState:
     screen: int = 0  # Which vertical screen Mario is on (-1, 0, 1, etc.)
 
     # Dimensions (in pixels)
-    width: float = BLOCK_SIZE
-    height: float = BLOCK_SIZE
+    width: float = TILE_SIZE
+    height: float = TILE_SIZE
 
     # Status
     facing_right: bool = True

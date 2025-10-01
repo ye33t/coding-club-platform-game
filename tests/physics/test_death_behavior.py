@@ -161,7 +161,7 @@ class TestDeathIntegration:
         pipeline = PhysicsPipeline()
         # Position Mario to collide with platform during death leap
         state = MarioState(
-            x=12 * TILE_SIZE, y=-1, vy=-50, is_dying=False  # Just below screen
+            x=6 * TILE_SIZE, y=-1, vy=-50, is_dying=False  # Just below screen
         )
         context = PhysicsContext(
             mario_state=state,
@@ -179,7 +179,7 @@ class TestDeathIntegration:
         for _ in range(30):
             context = pipeline.process(context)
             # Check if we're at platform height
-            if 5 * TILE_SIZE <= context.mario_state.y <= 6 * TILE_SIZE:
+            if 2 * TILE_SIZE <= context.mario_state.y <= 3 * TILE_SIZE:
                 # Should pass through without collision
                 assert context.mario_state.vx == 0
                 # Velocity should only be affected by gravity, not collision

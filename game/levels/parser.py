@@ -4,7 +4,7 @@ from typing import List, Set, Tuple
 
 from .converters import CONVERTERS, TilePlacement
 from .types import Compound, ParserContext
-from ..constants import BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
+from ..constants import TILES_HORIZONTAL, TILES_VERTICAL
 from ..tile_definitions import (
     TILE_BLOCK,
     TILE_BRICK_TOP,
@@ -52,17 +52,17 @@ class LevelParser:
         lines.reverse()
 
         # Validate dimensions
-        if len(lines) != BLOCKS_VERTICAL:
-            raise ParseError(f"Layout must have {BLOCKS_VERTICAL} rows, got {len(lines)}")
+        if len(lines) != TILES_VERTICAL:
+            raise ParseError(f"Layout must have {TILES_VERTICAL} rows, got {len(lines)}")
 
         # Check that all rows have the same length
         if not lines:
             raise ParseError("Layout is empty")
 
         width = len(lines[0])
-        if width < BLOCKS_HORIZONTAL:
+        if width < TILES_HORIZONTAL:
             raise ParseError(
-                f"Layout width must be at least {BLOCKS_HORIZONTAL}, got {width}"
+                f"Layout width must be at least {TILES_HORIZONTAL}, got {width}"
             )
 
         for i, line in enumerate(lines):
@@ -75,7 +75,7 @@ class LevelParser:
         context = ParserContext(
             layout=lines,
             width=width,
-            height=BLOCKS_VERTICAL,
+            height=TILES_VERTICAL,
             screen_index=screen_index,
         )
 

@@ -4,7 +4,7 @@ import os
 
 import pygame
 
-from .constants import TILE_SIZE, TRANSPARENT
+from .constants import TRANSPARENT
 from .sprite_definitions import SPRITE_SHEETS
 from .sprite_sheet import SpriteSheet
 
@@ -101,57 +101,6 @@ class SpriteManager:
         self.sprites[sheet_name][sprite_name] = sprite
 
         return sprite
-
-    def get_info(self, sheet_name, sprite_name):
-        """Get sprite info including tile dimensions.
-
-        Args:
-            sheet_name: Name of the sprite sheet
-            sprite_name: Name of the sprite
-
-        Returns:
-            Dict with sprite info or None if not found
-        """
-        if (
-            sheet_name not in SPRITE_SHEETS
-            or sprite_name not in SPRITE_SHEETS[sheet_name]
-        ):
-            return None
-
-        sprite_def = SPRITE_SHEETS[sheet_name][sprite_name]
-        if len(sprite_def) == 4:
-            x, y, tile_width, tile_height = sprite_def
-            return {
-                "tile_width": tile_width,
-                "tile_height": tile_height,
-                "pixel_width": tile_width * TILE_SIZE,
-                "pixel_height": tile_height * TILE_SIZE,
-            }
-        return None
-
-    def draw_at_tile(
-        self, surface, sheet_name, sprite_name, tile_x, tile_y, reflected=False
-    ):
-        """Draw a sprite at tile coordinates with bottom-left alignment.
-
-        Uses bottom-up coordinate system where y=0 is at the bottom of the screen.
-
-        Args:
-            surface: Surface to draw on
-            sheet_name: Name of the sprite sheet
-            sprite_name: Name of the sprite
-            tile_x: X position in tiles (left edge)
-            tile_y: Y position in tiles from bottom (bottom edge of sprite)
-            reflected: If True, flip the sprite horizontally
-        """
-        # Convert tile coordinates to pixel coordinates
-        pixel_x = tile_x * TILE_SIZE
-        pixel_y = tile_y * TILE_SIZE
-
-        # Use draw_at_position to do the actual drawing
-        self.draw_at_position(
-            surface, sheet_name, sprite_name, pixel_x, pixel_y, reflected
-        )
 
     def draw_at_position(self, surface, sheet_name, sprite_name, x, y, reflected=False):
         """Draw a sprite at pixel coordinates with bottom-left alignment.

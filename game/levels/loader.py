@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from .parser import LevelParser, ParseError
+from ..constants import TILE_SIZE
 from ..level import Level
 
 
@@ -91,7 +92,7 @@ def load(filepath: str) -> Level:
         first_screen = next(iter(level.tiles.values()))
         level.height_tiles = len(first_screen)
         level.width_tiles = len(first_screen[0]) if first_screen else 0
-        level.width_pixels = level.width_tiles * 16  # BLOCK_SIZE = 16
-        level.height_pixels = level.height_tiles * 16
+        level.width_pixels = level.width_tiles * TILE_SIZE
+        level.height_pixels = level.height_tiles * TILE_SIZE
 
     return level

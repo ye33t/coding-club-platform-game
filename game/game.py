@@ -8,9 +8,9 @@ import pygame
 from .constants import (
     BACKGROUND_COLOR,
     FPS,
-    TILE_SIZE,
-    TILES_HORIZONTAL,
-    TILES_VERTICAL,
+    SUB_TILE_SIZE,
+    SUB_TILES_HORIZONTAL,
+    SUB_TILES_VERTICAL,
     WHITE,
 )
 from .display import Display
@@ -94,7 +94,7 @@ class Game:
 
     def draw_level(self, surface):
         """Draw the visible level tiles."""
-        from .constants import BLOCK_SIZE
+        from .constants import TILE_SIZE
 
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_tiles(self.mario.state.screen, self.world.camera.x)
@@ -105,9 +105,9 @@ class Game:
             if not tile_def or not tile_def["sprite_name"]:
                 continue  # Skip empty tiles or tiles without sprites
 
-            # Convert block position to world pixels (each block is 16x16 pixels)
-            world_x = tile_x * BLOCK_SIZE
-            world_y = tile_y * BLOCK_SIZE
+            # Convert tile position to world pixels (each tile is 16x16 pixels)
+            world_x = tile_x * TILE_SIZE
+            world_y = tile_y * TILE_SIZE
 
             # Apply visual state from behaviors
             visual = self.world.level.get_tile_visual_state(
@@ -155,21 +155,21 @@ class Game:
     def draw_tile_grid(self, surface):
         """Draw the 8x8 tile grid for debugging."""
         # Draw vertical lines
-        for x in range(0, TILES_HORIZONTAL + 1):
+        for x in range(0, SUB_TILES_HORIZONTAL + 1):
             pygame.draw.line(
                 surface,
                 (100, 100, 100),
-                (x * TILE_SIZE, 0),
-                (x * TILE_SIZE, TILES_VERTICAL * TILE_SIZE),
+                (x * SUB_TILE_SIZE, 0),
+                (x * SUB_TILE_SIZE, SUB_TILES_VERTICAL * SUB_TILE_SIZE),
             )
 
         # Draw horizontal lines
-        for y in range(0, TILES_VERTICAL + 1):
+        for y in range(0, SUB_TILES_VERTICAL + 1):
             pygame.draw.line(
                 surface,
                 (100, 100, 100),
-                (0, y * TILE_SIZE),
-                (TILES_HORIZONTAL * TILE_SIZE, y * TILE_SIZE),
+                (0, y * SUB_TILE_SIZE),
+                (SUB_TILES_HORIZONTAL * SUB_TILE_SIZE, y * SUB_TILE_SIZE),
             )
 
     def draw_debug_info(self, surface):
@@ -178,7 +178,6 @@ class Game:
         debug_texts = [
             f"FPS: {fps:.1f}",
             f"Resolution: {surface.get_width()}x{surface.get_height()}",
-            f"Tiles: {TILES_HORIZONTAL}x{TILES_VERTICAL}",
             f"Scale: {self.display.scale}x",
             f"Camera X: {self.world.camera.x:.1f}",
             f"Mario World: ({self.mario.state.x:.1f}, {self.mario.state.y:.1f})",

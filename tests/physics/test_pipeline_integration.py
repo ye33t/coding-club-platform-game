@@ -3,7 +3,7 @@
 import math
 import pytest
 
-from game.constants import BLOCK_SIZE
+from game.constants import TILE_SIZE
 from game.mario import MarioIntent, MarioState
 from game.physics import PhysicsContext, PhysicsPipeline
 
@@ -37,7 +37,7 @@ class TestPhysicsPipeline:
     def test_mario_lands_on_ground(self, level_with_ground, camera):
         """Mario should stop falling when hitting ground."""
         pipeline = PhysicsPipeline()
-        state = MarioState(x=100, y=BLOCK_SIZE * 3, vy=-100)  # Falling fast
+        state = MarioState(x=100, y=TILE_SIZE * 3, vy=-100)  # Falling fast
         context = PhysicsContext(
             mario_state=state,
             mario_intent=MarioIntent(),
@@ -55,13 +55,13 @@ class TestPhysicsPipeline:
         # Should be on ground
         assert context.mario_state.on_ground
         assert context.mario_state.vy == 0
-        assert context.mario_state.y == BLOCK_SIZE * 2  # Top of ground
+        assert context.mario_state.y == TILE_SIZE * 2  # Top of ground
         assert context.mario_state.action == "idle"
 
     def test_complete_jump_cycle(self, level_with_ground, camera):
         """Test a complete jump from ground back to ground."""
         pipeline = PhysicsPipeline()
-        state = MarioState(x=100, y=BLOCK_SIZE * 2, on_ground=True)
+        state = MarioState(x=100, y=TILE_SIZE * 2, on_ground=True)
         intent = MarioIntent(jump=True)
         context = PhysicsContext(
             mario_state=state,
@@ -91,13 +91,13 @@ class TestPhysicsPipeline:
 
         # Should be back on ground
         assert context.mario_state.on_ground
-        assert context.mario_state.y == BLOCK_SIZE * 2
-        assert max_height > BLOCK_SIZE * 2  # Did go up
+        assert context.mario_state.y == TILE_SIZE * 2
+        assert max_height > TILE_SIZE * 2  # Did go up
 
     def test_horizontal_movement_with_friction(self, level_with_ground, camera):
         """Test moving right then stopping with friction."""
         pipeline = PhysicsPipeline()
-        state = MarioState(x=100, y=BLOCK_SIZE * 2, on_ground=True)
+        state = MarioState(x=100, y=TILE_SIZE * 2, on_ground=True)
         intent = MarioIntent(move_right=True)
         context = PhysicsContext(
             mario_state=state,
@@ -143,8 +143,8 @@ class TestPhysicsPipeline:
 
         # Position Mario to the left of the wall, on ground
         state = MarioState(
-            x=(10 * BLOCK_SIZE) - 20,  # Just left of wall
-            y=2 * BLOCK_SIZE,  # On ground
+            x=(10 * TILE_SIZE) - 20,  # Just left of wall
+            y=2 * TILE_SIZE,  # On ground
             on_ground=True,
             vx=0,
         )
@@ -164,16 +164,16 @@ class TestPhysicsPipeline:
         # Should be stopped at wall edge
         # Mario's right edge should be at the wall (x=160)
         # So Mario's x should be 160 - 16 = 144
-        assert math.isclose(context.mario_state.x, (10 * BLOCK_SIZE) - context.mario_state.width, abs_tol=1.0)
-        assert math.isclose(context.mario_state.x, (10 * BLOCK_SIZE) - context.mario_state.width, abs_tol=1.0)
+        assert math.isclose(context.mario_state.x, (10 * TILE_SIZE) - context.mario_state.width, abs_tol=1.0)
+        assert math.isclose(context.mario_state.x, (10 * TILE_SIZE) - context.mario_state.width, abs_tol=1.0)
 
     def test_ceiling_collision(self, level_with_platform, camera):
         """Mario should hit ceiling when jumping into platform from below."""
         pipeline = PhysicsPipeline()
         # Position Mario below the platform
         state = MarioState(
-            x=12 * BLOCK_SIZE,  # Under platform
-            y=3 * BLOCK_SIZE,
+            x=12 * TILE_SIZE,  # Under platform
+            y=3 * TILE_SIZE,
             vy=200,  # Jumping up fast
             on_ground=False,
         )
@@ -195,4 +195,4 @@ class TestPhysicsPipeline:
 
         # Should have hit ceiling and stopped upward movement
         assert context.mario_state.vy <= 0  # No longer moving up
-        assert max_y < 5 * BLOCK_SIZE  # Didn't pass through platform
+        assert max_y < 5 * TILE_SIZE  # Didn't pass through platform

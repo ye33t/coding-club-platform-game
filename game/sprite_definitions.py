@@ -1,13 +1,13 @@
 """Sprite definitions with coordinates for each sprite sheet."""
 
 # Sprite definitions format:
-# "sprite_name": (x, y, tile_width, tile_height)
+# "sprite_name": (x, y, sub_tile_width, sub_tile_height)
 # x, y = pixel position on sprite sheet where the bottom-left coordinate is located,
 #        (0,0) is the top-left of the image
-# tile_width, tile_height = the size of the sprite in tile coordinates
+# sub_tile_width, sub_tile_height = the size of the sprite in sub-tile coordinates
 
 CHARACTERS = {
-    # Small Mario (2x2 tile space)
+    # Small Mario
     "small_mario_stand": (0, 24, 2, 2),
     "small_mario_walk1": (20, 24, 2, 2),
     "small_mario_walk2": (38, 24, 2, 2),
@@ -22,7 +22,6 @@ CHARACTERS = {
     "small_mario_swim3": (210, 24, 2, 2),
     "small_mario_swim4": (228, 24, 2, 2),
     "small_mario_swim5": (246, 24, 2, 2),
-    # "circle": (264, 16, 1, 1),
 }
 
 BLOCKS = {
@@ -30,7 +29,7 @@ BLOCKS = {
 }
 
 ENEMIES = {
-    # Goomba (2x2 tile space)
+    # Goomba
     "goomba_walk1": (0, 16, 2, 2),
 }
 
@@ -115,7 +114,7 @@ BACKGROUND = {
 }
 
 OTHER = {
-    # Power-ups (2x2 tile space)
+    # Power-ups 
     "mushroom": (0, 16, 2, 2),
 }
 

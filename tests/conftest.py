@@ -3,7 +3,7 @@
 import pytest
 
 from game.camera import Camera, CameraState
-from game.constants import BLOCK_SIZE
+from game.constants import TILE_SIZE
 from game.level import Level
 from game.tile_definitions import TILE_EMPTY, TILE_GROUND
 from game.mario import MarioIntent, MarioState
@@ -21,8 +21,8 @@ def empty_level():
     # Set dimensions (2 screens wide, standard height)
     level.width_tiles = 32  # 2 screens * 16 tiles per screen
     level.height_tiles = 14
-    level.width_pixels = level.width_tiles * BLOCK_SIZE
-    level.height_pixels = level.height_tiles * BLOCK_SIZE
+    level.width_pixels = level.width_tiles * TILE_SIZE
+    level.height_pixels = level.height_tiles * TILE_SIZE
     # Clear the entire level for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):
@@ -42,8 +42,8 @@ def level_with_ground():
     # Set dimensions (2 screens wide, standard height)
     level.width_tiles = 32  # 2 screens * 16 tiles per screen
     level.height_tiles = 14
-    level.width_pixels = level.width_tiles * BLOCK_SIZE
-    level.height_pixels = level.height_tiles * BLOCK_SIZE
+    level.width_pixels = level.width_tiles * TILE_SIZE
+    level.height_pixels = level.height_tiles * TILE_SIZE
     # Clear the level first for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):
@@ -67,8 +67,8 @@ def level_with_platform():
     # Set dimensions (2 screens wide, standard height)
     level.width_tiles = 32  # 2 screens * 16 tiles per screen
     level.height_tiles = 14
-    level.width_pixels = level.width_tiles * BLOCK_SIZE
-    level.height_pixels = level.height_tiles * BLOCK_SIZE
+    level.width_pixels = level.width_tiles * TILE_SIZE
+    level.height_pixels = level.height_tiles * TILE_SIZE
     # Clear the level first for screen 0
     level.tiles[0] = []
     for y in range(level.height_tiles):
