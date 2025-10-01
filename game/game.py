@@ -35,7 +35,7 @@ class Game:
         self.font = pygame.font.Font(None, 16)
 
         # Load sprite sheets
-        assets_path = os.path.join(os.path.dirname(__file__), "assets")
+        assets_path = os.path.join(os.path.dirname(__file__), "assets", "images")
         sprites.load_sheets(assets_path)
 
         # Create Mario and World

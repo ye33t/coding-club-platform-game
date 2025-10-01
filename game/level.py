@@ -3,39 +3,8 @@
 from typing import List, Optional, Tuple
 
 from .constants import BLOCK_SIZE, BLOCKS_HORIZONTAL, BLOCKS_VERTICAL
-from .terrain import BounceBehavior, TerrainManager, VisualState
-from .tile_definitions import TILE_BRICK_TOP, TileDefinition, get_tile_definition
-
-# Tile types (imported from tile_definitions for consistency)
-from .tile_definitions import (
-    TILE_ARCH_CENTER,
-    TILE_ARCH_LEFT,
-    TILE_ARCH_RIGHT,
-    TILE_BATTLEMENT,
-    TILE_BEANSTALK,
-    TILE_BLOCK,
-    TILE_BLOCK_FLAT,
-    TILE_BRICK,
-    TILE_BRIDGE,
-    TILE_CANNON_BOTTOM,
-    TILE_CANNON_CENTER,
-    TILE_CANNON_TOP,
-    TILE_EARTH,
-    TILE_EMPTY,
-    TILE_GROUND,
-    TILE_LADDER,
-    TILE_PIPE_HORIZONTAL_BOTTOM,
-    TILE_PIPE_HORIZONTAL_TOP,
-    TILE_PIPE_JUNCTION_BOTTOM,
-    TILE_PIPE_JUNCTION_TOP,
-    TILE_PIPE_LEFT,
-    TILE_PIPE_RIGHT,
-    TILE_PIPE_TOP_LEFT,
-    TILE_PIPE_TOP_RIGHT,
-    TILE_ROCKS,
-    TILE_SAND,
-    TILE_VOID,
-)
+from .terrain import TerrainManager, VisualState
+from .tile_definitions import TILE_EMPTY, TileDefinition, get_tile_definition
 
 
 class Level:
@@ -45,14 +14,14 @@ class Level:
     not individual NES tiles (8x8 pixels). Each block is a 2x2 tile sprite.
     """
 
-    def __init__(self, width_in_screens: int = 2):
-        """Initialize level with specified width.
+    def __init__(self):
+        """Initialize an empty level.
 
-        Args:
-            width_in_screens: Level width in screen units (each screen = 16 blocks)
+        The level will be populated by a loader after construction.
         """
-        self.width_tiles = width_in_screens * BLOCKS_HORIZONTAL
-        self.height_tiles = BLOCKS_VERTICAL
+        # Initialize dimensions (16x14 blocks per screen)
+        self.width_tiles = BLOCKS_HORIZONTAL  # 16 blocks wide
+        self.height_tiles = BLOCKS_VERTICAL   # 14 blocks tall
         self.width_pixels = self.width_tiles * BLOCK_SIZE
         self.height_pixels = self.height_tiles * BLOCK_SIZE
 
@@ -63,76 +32,6 @@ class Level:
 
         # Initialize terrain manager for tile behaviors
         self.terrain_manager = TerrainManager()
-
-        # Create a simple test level
-        self._create_test_level()
-
-    def _create_test_level(self):
-        """Create a simple test level with ground and some platforms across multiple screens."""
-        # Initialize screens -1, 0, 1
-        for screen_idx in [-1, 0, 1]:
-            self.tiles[screen_idx] = []
-            for y in range(self.height_tiles):
-                row = [TILE_EMPTY] * self.width_tiles
-                self.tiles[screen_idx].append(row)
-
-        # Screen 0 (main screen)
-        # Ground (bottom 2 rows)
-        for x in range(self.width_tiles):
-            self.tiles[0][0][x] = TILE_GROUND
-            self.tiles[0][1][x] = TILE_GROUND
-
-        # Add some gaps in the ground (only if wide enough)
-        if self.width_tiles > 23:
-            for x in range(20, 23):
-                self.tiles[0][0][x] = TILE_EMPTY
-                self.tiles[0][1][x] = TILE_EMPTY
-
-        if self.width_tiles > 44:
-            for x in range(40, 44):
-                self.tiles[0][0][x] = TILE_EMPTY
-                self.tiles[0][1][x] = TILE_EMPTY
-
-        # Add some platforms (only if wide enough)
-        # Platform 1
-        if self.width_tiles > 15:
-            for x in range(10, min(15, self.width_tiles)):
-                self.tiles[0][6][x] = TILE_BRICK_TOP
-                # Make this platform bounceable
-                self.terrain_manager.set_tile_behavior(0, x, 6, BounceBehavior())
-
-        # Platform 2
-        if self.width_tiles > 25:
-            for x in range(25, min(32, self.width_tiles)):
-                self.tiles[0][8][x] = TILE_BRICK_TOP
-                # Make this platform bounceable
-                self.terrain_manager.set_tile_behavior(0, x, 8, BounceBehavior())
-
-        # Add a pipe (2x3 tiles)
-        if self.width_tiles > 35:
-            # Top of pipe
-            self.tiles[0][4][35] = TILE_PIPE_TOP_LEFT
-            self.tiles[0][4][36] = TILE_PIPE_TOP_RIGHT
-            # Body of pipe
-            self.tiles[0][3][35] = TILE_PIPE_LEFT
-            self.tiles[0][3][36] = TILE_PIPE_RIGHT
-            self.tiles[0][2][35] = TILE_PIPE_LEFT
-            self.tiles[0][2][36] = TILE_PIPE_RIGHT
-
-        # Screen 1 (above main screen) - Sky area
-        # Floating platforms
-        for x in range(5, min(10, self.width_tiles)):
-            self.tiles[1][4][x] = TILE_BRICK_TOP
-
-        for x in range(15, min(20, self.width_tiles)):
-            self.tiles[1][7][x] = TILE_BRICK_TOP
-
-        # Screen -1 (below main screen) - Underground area
-        # Full ground
-        for x in range(self.width_tiles):
-            self.tiles[-1][0][x] = TILE_GROUND
-            self.tiles[-1][1][x] = TILE_GROUND
-            self.tiles[-1][2][x] = TILE_GROUND
 
     def get_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
         """Get tile type at given tile coordinates.
@@ -146,11 +45,11 @@ class Level:
             Tile type, or TILE_EMPTY if out of bounds
         """
         if screen not in self.tiles:
-            return TILE_EMPTY
+            raise ValueError(f"Screen {screen} not found in level data")
         if tile_x < 0 or tile_x >= self.width_tiles:
-            return TILE_EMPTY
+            raise ValueError(f"Tile X {tile_x} out of bounds")
         if tile_y < 0 or tile_y >= self.height_tiles:
-            return TILE_EMPTY
+            raise ValueError(f"Tile Y {tile_y} out of bounds")
         return self.tiles[screen][tile_y][tile_x]
 
     def get_tile_at_position(self, screen: int, world_x: float, world_y: float) -> int:
@@ -179,7 +78,7 @@ class Level:
         """
         tile_def = self.get_tile_definition(tile_type)
         if not tile_def:
-            return False
+            raise ValueError(f"Tile definition for type {tile_type} not found")
         return tile_def["collision_mask"] != 0
 
     def get_visible_tiles(self, screen: int, camera_x: float) -> List[Tuple[int, int, int]]:
@@ -193,7 +92,7 @@ class Level:
             List of (tile_x, tile_y, tile_type) for visible tiles on the specified screen
         """
         if screen not in self.tiles:
-            return []
+            raise ValueError(f"Screen {screen} not found in level data")
 
         # Calculate tile range visible on screen
         start_tile_x = max(0, int(camera_x // BLOCK_SIZE))

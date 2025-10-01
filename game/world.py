@@ -1,7 +1,7 @@
 """World physics and game logic."""
 
 from .camera import Camera
-from .level import Level
+from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 
@@ -11,11 +11,9 @@ class World:
 
     def __init__(self):
         """Initialize the world."""
-        # Create level and camera
-        self.level = Level(width_in_screens=3)  # 3 screens wide for testing
+        # Load the default level
+        self.level = loader.load("game/assets/levels/world_1_1.yaml")
         self.camera = Camera()
-
-        # Create physics pipeline
         self.physics_pipeline = PhysicsPipeline()
 
     def update(self, mario: Mario, keys, dt: float):
