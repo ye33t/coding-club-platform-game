@@ -223,24 +223,18 @@ class Level:
             raise ValueError(f"Screen {screen} not found in zones")
 
         zones = self.zones[screen]
-        height = len(zones)
-
-        # Find all positions in zones grid (top-down coordinates)
-        positions_top_down = [
+        positions = [
             (x, y)
-            for y in range(height)
+            for y in range(len(zones))
             for x in range(len(zones[0]))
             if zones[y][x] == zone_char
         ]
 
-        if not positions_top_down:
+        if not positions:
             raise ValueError(
                 f"Zone '{zone_char}' not found on screen {screen} "
                 f"(should have been validated at load time)"
             )
-
-        # Convert to bottom-up coordinates
-        positions = [(x, (height - 1) - y) for x, y in positions_top_down]
 
         # Calculate horizontal center (can be fractional)
         x_coords = [x for x, y in positions]

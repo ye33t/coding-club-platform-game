@@ -35,10 +35,9 @@ class WarpExitState(State):
         pixel_y = pipe_y * TILE_SIZE
 
         # Position mario at pipe, offset down by mario's height (hidden)
-        warp_distance = game.world.mario.state.height
         game.world.mario.state.screen = self.warp_behavior.to_screen
         game.world.mario.state.x = pixel_x
-        game.world.mario.state.y = pixel_y - warp_distance
+        game.world.mario.state.y = pixel_y
 
         # Reset camera to follow mario at new position
         from ..constants import NATIVE_WIDTH
@@ -48,7 +47,7 @@ class WarpExitState(State):
         game.world.camera.state.x = ideal_camera_x
         game.world.camera.state.max_x = ideal_camera_x
 
-        self.distance_moved = 0.0
+        self.distance_moved = -game.world.mario.state.height
 
         # Optional: Flash screen black here
 
@@ -60,13 +59,12 @@ class WarpExitState(State):
         """Move mario up out of pipe."""
         from ..physics.config import WARP_SPEED
 
-        warp_distance = game.world.mario.state.height
         move_amount = WARP_SPEED * dt
         game.world.mario.state.y += move_amount
         self.distance_moved += move_amount
 
         # When fully out of pipe, return to playing
-        if self.distance_moved >= warp_distance:
+        if self.distance_moved >= 0:
             from .playing import PlayingState
 
             game.transition_to(PlayingState())

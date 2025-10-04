@@ -65,4 +65,4 @@ DEATH_LEAP_VELOCITY = config["death"]["death_leap_velocity"]
 RESET_THRESHOLD_Y = config["death"]["reset_threshold_y"]
 
 # Warp (hardcoded - not user-tunable)
-WARP_SPEED = 128.0  # pixels/second
+WARP_SPEED = 16.0  # pixels/second (1 tile per second)

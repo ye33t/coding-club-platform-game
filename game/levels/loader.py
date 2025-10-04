@@ -230,13 +230,9 @@ def _process_zones_and_behaviors(
             params = {k: v for k, v in behavior_config.items() if k != "type"}
 
             # Create behavior instance and assign to tile
-            # Convert y from top-down (zones grid) to bottom-up (terrain coords)
-            bottom_up_y = (height - 1) - y
             try:
                 behavior = factory.create(behavior_type, params if params else None)
-                level.terrain_manager.set_tile_behavior(
-                    screen_idx, x, bottom_up_y, behavior
-                )
+                level.terrain_manager.set_tile_behavior(screen_idx, x, y, behavior)
             except Exception as e:
                 raise ParseError(
                     f"Screen {screen_idx}: Failed to create behavior "
