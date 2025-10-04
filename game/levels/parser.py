@@ -238,3 +238,40 @@ class LevelParser:
                     tiles[y][x] = self.simple_tiles[char]
 
         return tiles
+
+    def parse_zones(self, zones: str, width: int, height: int) -> List[List[str]]:
+        """Parse a zones grid into a 2D character array.
+
+        Args:
+            zones: ASCII zones string
+            width: Expected width in tiles
+            height: Expected height in tiles
+
+        Returns:
+            2D list of zone characters (height rows x width columns)
+
+        Raises:
+            ParseError: If parsing fails or dimensions don't match
+        """
+        # Split and reverse lines (bottom-up coordinates)
+        lines = zones.strip().split("\n")
+        lines.reverse()
+
+        # Validate dimensions
+        if len(lines) != height:
+            raise ParseError(
+                f"Zones grid must have {height} rows to match layout, got {len(lines)}"
+            )
+
+        if not lines:
+            raise ParseError("Zones grid is empty")
+
+        for i, line in enumerate(lines):
+            if len(line) != width:
+                raise ParseError(
+                    f"Zones row {i} has {len(line)} characters, expected {width} "
+                    "to match layout width"
+                )
+
+        # Convert to 2D array of characters
+        return [[char for char in line] for line in lines]

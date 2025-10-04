@@ -1,12 +1,16 @@
 """YAML level loader for loading level definitions from files."""
 
+import logging
 from pathlib import Path
+from typing import Set
 
 import yaml  # type: ignore[import-untyped]
 
 from ..constants import TILE_SIZE
 from ..level import Level
 from .parser import LevelParser, ParseError
+
+logger = logging.getLogger(__name__)
 
 
 def load(filepath: str) -> Level:
@@ -86,6 +90,25 @@ def load(filepath: str) -> Level:
         # Parse the layout and add to level
         level.tiles[screen_idx] = parser.parse_screen(layout, screen_idx)
 
+        # Process zones and behaviors if present
+        has_zones = "zones" in screen_data
+        has_behaviors = "behaviors" in screen_data
+
+        # Validate that zones and behaviors are both present or both absent
+        if has_zones and not has_behaviors:
+            raise ParseError(
+                f"Screen {screen_idx} has 'zones' but no 'behaviors' section"
+            )
+        if has_behaviors and not has_zones:
+            raise ParseError(
+                f"Screen {screen_idx} has 'behaviors' but no 'zones' section"
+            )
+
+        if has_zones and has_behaviors:
+            _process_zones_and_behaviors(
+                level, screen_idx, screen_data, parser, level.tiles[screen_idx]
+            )
+
     # Set level dimensions based on parsed screens
     if level.tiles:
         # Assume all screens have the same dimensions
@@ -96,3 +119,105 @@ def load(filepath: str) -> Level:
         level.height_pixels = level.height_tiles * TILE_SIZE
 
     return level
+
+
+def _process_zones_and_behaviors(
+    level: Level,
+    screen_idx: int,
+    screen_data: dict,
+    parser: LevelParser,
+    tiles: list,
+) -> None:
+    """Process zones and behaviors for a screen.
+
+    Args:
+        level: The level being constructed
+        screen_idx: Screen index
+        screen_data: Screen data from YAML
+        parser: The level parser
+        tiles: Parsed tiles for this screen
+
+    Raises:
+        ParseError: If validation fails
+    """
+    zones_str = screen_data["zones"]
+    behaviors_dict = screen_data["behaviors"]
+
+    if not isinstance(zones_str, str):
+        raise ParseError(f"Screen {screen_idx} zones must be a string")
+
+    if not isinstance(behaviors_dict, dict):
+        raise ParseError(f"Screen {screen_idx} behaviors must be a dictionary")
+
+    # Parse zones grid
+    height = len(tiles)
+    width = len(tiles[0]) if tiles else 0
+    zones = parser.parse_zones(zones_str, width, height)
+
+    # Collect all zone characters used in the grid (excluding '.')
+    used_zones: Set[str] = set()
+    for row in zones:
+        for char in row:
+            if char != ".":
+                used_zones.add(char)
+
+    # Validate that all used zones are defined in behaviors
+    undefined_zones = used_zones - behaviors_dict.keys()
+    if undefined_zones:
+        zones_list = ", ".join(f"'{z}'" for z in sorted(undefined_zones))
+        raise ParseError(
+            f"Screen {screen_idx}: Zone(s) {zones_list} used in grid "
+            f"but not defined in behaviors section"
+        )
+
+    # Warn about unused behaviors
+    unused_behaviors = behaviors_dict.keys() - used_zones
+    if unused_behaviors:
+        zones_list = ", ".join(f"'{z}'" for z in sorted(unused_behaviors))
+        logger.warning(
+            f"Screen {screen_idx}: Behavior(s) {zones_list} defined "
+            f"but not used in zones grid"
+        )
+
+    # Create behavior factory (import here to avoid circular imports)
+    from ..terrain import BehaviorFactory
+
+    factory = BehaviorFactory()
+
+    # Process each zone and assign behaviors
+    for y in range(height):
+        for x in range(width):
+            zone_char = zones[y][x]
+            if zone_char == ".":
+                continue
+
+            # Get behavior config
+            behavior_config = behaviors_dict[zone_char]
+            if not isinstance(behavior_config, dict):
+                raise ParseError(
+                    f"Screen {screen_idx}: Behavior for zone '{zone_char}' "
+                    f"must be a dictionary"
+                )
+
+            if "type" not in behavior_config:
+                raise ParseError(
+                    f"Screen {screen_idx}: Behavior for zone '{zone_char}' "
+                    f"must have a 'type' field"
+                )
+
+            behavior_type = behavior_config["type"]
+            if not isinstance(behavior_type, str):
+                raise ParseError(
+                    f"Screen {screen_idx}: Behavior type for zone '{zone_char}' "
+                    f"must be a string"
+                )
+
+            # Create behavior instance and assign to tile
+            try:
+                behavior = factory.create(behavior_type)
+                level.terrain_manager.set_tile_behavior(screen_idx, x, y, behavior)
+            except Exception as e:
+                raise ParseError(
+                    f"Screen {screen_idx}: Failed to create behavior "
+                    f"for zone '{zone_char}': {e}"
+                )
