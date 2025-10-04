@@ -5,6 +5,7 @@ from enum import Enum
 from ..constants import TILE_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
+from .config import WALL_DEAD_ZONE
 
 
 class Direction(Enum):
@@ -55,7 +56,7 @@ class WallCollisionProcessor(PhysicsProcessor):
         # Check at multiple heights (bottom, middle, top)
         # Skip the very bottom to avoid collision with ground tiles
         sample_heights = [
-            mario_state.y + 8,  # Above feet (8 pixel tolerance for ground)
+            mario_state.y + WALL_DEAD_ZONE,  # Above feet (tolerance for ground)
             mario_state.y + mario_state.height / 2,  # Middle
             mario_state.y + mario_state.height - 2,  # Near top
         ]

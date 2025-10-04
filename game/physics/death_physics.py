@@ -1,7 +1,7 @@
 """Handle physics during death animation."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .constants import GRAVITY
+from .config import GRAVITY
 
 
 class DeathPhysicsProcessor(PhysicsProcessor):

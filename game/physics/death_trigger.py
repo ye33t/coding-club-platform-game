@@ -2,6 +2,7 @@
 
 from ..constants import TILE_SIZE
 from .base import PhysicsContext, PhysicsProcessor
+from .config import DEATH_LEAP_VELOCITY
 
 DEATH_LEAP_HEIGHT = TILE_SIZE * 2  # Jump 2 tiles up when dying
 
@@ -27,15 +28,9 @@ class DeathTriggerProcessor(PhysicsProcessor):
         if mario_state.y < 0:
             # Trigger death sequence
             mario_state.is_dying = True
-            # Calculate velocity needed to jump 3 tiles
-            # Using kinematic equation: v² = u² + 2as
-            # We want to reach 3 tiles high, so v=0 at peak
-            # 0 = u² - 2g*h => u = sqrt(2gh)
-            # But we'll use a simple fixed velocity for predictable behavior
-            mario_state.death_leap_velocity = 150.0  # Will jump approximately 3 tiles
-            mario_state.vy = (
-                mario_state.death_leap_velocity
-            )  # Start the leap immediately
+            # Set death leap velocity from config
+            mario_state.death_leap_velocity = DEATH_LEAP_VELOCITY
+            mario_state.vy = mario_state.death_leap_velocity  # Start the leap immediately
             mario_state.on_ground = False
 
         return context

@@ -1,7 +1,7 @@
 """Handle gravity and jumping physics."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .constants import (
+from .config import (
     GRAVITY,
     JUMP_CUT_MULTIPLIER,
     RUN_JUMP_VELOCITY,

@@ -1,0 +1,89 @@
+# Physics Configuration for Platform Game
+
+[movement]
+# Normal walking speed in pixels/second
+walk_speed = 85.0
+
+# Running speed when holding run button in pixels/second
+run_speed = 140.0
+
+# Speed below which Mario instantly stops (px/s)
+# Prevents sliding at very low speeds
+stop_threshold = 10.0
+
+[jumping]
+# Jump velocity when walking - reaches ~4 blocks high (px/s)
+walk_jump_velocity = 226.0
+
+# Jump velocity when running - reaches ~6 blocks high (px/s)
+run_jump_velocity = 277.0
+
+# Horizontal speed needed to trigger run jump instead of walk jump (px/s)
+# Should be between walk_speed and run_speed
+run_speed_threshold = 100.0
+
+[gravity]
+# Downward acceleration in pixels/second²
+gravity = 400.0
+
+# Multiplies gravity when jump button released early
+# Allows variable jump height based on button hold time
+jump_cut_multiplier = 3.0
+
+[acceleration]
+# How quickly Mario accelerates on ground (px/s²)
+ground_acceleration = 180.0
+
+# Deceleration when skidding/reversing direction (px/s²)
+# Higher value = quicker stops when changing direction
+skid_deceleration = 240.0
+
+# Air control acceleration - weaker than ground (px/s²)
+# Lower value = less control while airborne
+air_acceleration = 120.0
+
+[friction]
+# Friction coefficient at high speeds (multiplier per frame)
+# Higher value = more sliding at high speeds
+# Note: Applied 60 times/second, so 0.99 = smooth slide, 0.95 = quicker stop
+min_friction = 0.94
+
+# Friction coefficient at low speeds (multiplier per frame)
+# Lower value = quicker stops
+# Used for walking speeds to reduce sliding
+max_friction = 0.90
+
+# Speed range over which friction transitions from max to min (px/s)
+# Friction interpolates from max_friction to min_friction over this speed range
+friction_speed_range = 100.0
+
+[action]
+# Speed difference that triggers skidding animation (px/s)
+# When velocity opposes movement direction by this amount
+skid_threshold = 100.0
+
+# Speed below which skidding animation clears (px/s)
+skid_clear_velocity = 10.0
+
+# Speed considered 'stopped' for animation purposes (px/s)
+stop_velocity = 1.0
+
+[collision]
+# Pixels from bottom of Mario ignored for wall collisions
+# Prevents Mario from catching on ground tiles when walking
+wall_dead_zone = 8
+
+# Pixel tolerance for ceiling collisions
+ceiling_dead_zone = 2
+
+[terrain]
+# Initial upward velocity for bounce blocks when hit (px/s)
+bounce_velocity = 60.0
+
+# Gravity applied to bounce block animation (px/s²)
+bounce_gravity = 400.0
+
+[death]
+# Initial upward velocity for death animation leap (px/s)
+# Mario leaps up before falling off screen
+death_leap_velocity = 200.0

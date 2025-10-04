@@ -1,6 +1,6 @@
 """Bounce behavior for tiles hit from below."""
 
-from ..physics.constants import BOUNCE_GRAVITY, BOUNCE_VELOCITY
+from ..physics.config import BOUNCE_GRAVITY, BOUNCE_VELOCITY
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 
 # Animation constants - physics-based for more realistic motion

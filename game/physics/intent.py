@@ -1,7 +1,7 @@
 """Process player intent into target velocities and states."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .constants import (
+from .config import (
     AIR_ACCELERATION,
     GROUND_ACCELERATION,
     RUN_SPEED,

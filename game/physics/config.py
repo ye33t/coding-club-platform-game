@@ -1,0 +1,61 @@
+"""Load physics configuration from TOML file."""
+
+import tomllib
+from pathlib import Path
+
+# Load config file - fail fast if missing or invalid
+CONFIG_PATH = Path(__file__).parent.parent / "assets" / "config" / "physics_config.toml"
+
+try:
+    with open(CONFIG_PATH, "rb") as f:
+        config = tomllib.load(f)
+except FileNotFoundError:
+    raise FileNotFoundError(
+        f"Physics config file not found: {CONFIG_PATH}\n"
+        "The game requires physics_config.toml to run."
+    )
+except tomllib.TOMLDecodeError as e:
+    raise ValueError(
+        f"Invalid TOML in physics config: {CONFIG_PATH}\n"
+        f"Error: {e}"
+    )
+
+# Movement
+WALK_SPEED = config["movement"]["walk_speed"]
+RUN_SPEED = config["movement"]["run_speed"]
+STOP_THRESHOLD = config["movement"]["stop_threshold"]
+
+# Jumping
+WALK_JUMP_VELOCITY = config["jumping"]["walk_jump_velocity"]
+RUN_JUMP_VELOCITY = config["jumping"]["run_jump_velocity"]
+RUN_SPEED_THRESHOLD = config["jumping"]["run_speed_threshold"]
+
+# Gravity
+GRAVITY = config["gravity"]["gravity"]
+JUMP_CUT_MULTIPLIER = config["gravity"]["jump_cut_multiplier"]
+
+# Acceleration
+GROUND_ACCELERATION = config["acceleration"]["ground_acceleration"]
+SKID_DECELERATION = config["acceleration"]["skid_deceleration"]
+AIR_ACCELERATION = config["acceleration"]["air_acceleration"]
+
+# Friction
+MIN_FRICTION = config["friction"]["min_friction"]
+MAX_FRICTION = config["friction"]["max_friction"]
+FRICTION_SPEED_RANGE = config["friction"]["friction_speed_range"]
+
+# Action
+SKID_THRESHOLD = config["action"]["skid_threshold"]
+SKID_CLEAR_VELOCITY = config["action"]["skid_clear_velocity"]
+STOP_VELOCITY = config["action"]["stop_velocity"]
+
+# Collision
+WALL_DEAD_ZONE = config["collision"]["wall_dead_zone"]
+CEILING_DEAD_ZONE = config["collision"]["ceiling_dead_zone"]
+
+# Terrain
+BOUNCE_VELOCITY = config["terrain"]["bounce_velocity"]
+BOUNCE_GRAVITY = config["terrain"]["bounce_gravity"]
+
+# Death
+DEATH_LEAP_VELOCITY = config["death"]["death_leap_velocity"]

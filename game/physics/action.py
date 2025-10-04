@@ -1,7 +1,7 @@
 """Determine Mario's action based on physics state."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .constants import RUN_SPEED_THRESHOLD
+from .config import RUN_SPEED_THRESHOLD, SKID_CLEAR_VELOCITY, STOP_VELOCITY
 
 
 class ActionProcessor(PhysicsProcessor):
@@ -20,11 +20,11 @@ class ActionProcessor(PhysicsProcessor):
         # 1. Velocity is low (stopped or nearly stopped)
         # 2. Mario has changed direction (velocity crosses zero)
         if mario_state.action == "skidding":
-            velocity_is_low = abs(mario_state.vx) < 10
+            velocity_is_low = abs(mario_state.vx) < SKID_CLEAR_VELOCITY
 
             # Check if Mario has crossed zero velocity
             # When this happens, update facing direction
-            if abs(mario_state.vx) < 1.0:
+            if abs(mario_state.vx) < STOP_VELOCITY:
                 # Mario has essentially stopped - update facing based on intent
                 if context.mario_intent.move_right:
                     mario_state.facing_right = True
@@ -53,7 +53,7 @@ class ActionProcessor(PhysicsProcessor):
             return "idle"
         elif abs(mario_state.vx) > RUN_SPEED_THRESHOLD:
             return "running"
-        elif abs(mario_state.vx) > 1.0:
+        elif abs(mario_state.vx) > STOP_VELOCITY:
             return "walking"
         else:
             return "idle"
