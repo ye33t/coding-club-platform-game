@@ -68,6 +68,15 @@ skid_clear_velocity = 10.0
 # Speed considered 'stopped' for animation purposes (px/s)
 stop_velocity = 1.0
 
+# Minimum speed to show walking animation (px/s)
+# Below this, Mario shows idle even if sliding slightly
+walk_threshold = 5.0
+
+# Animation speed scaling factor
+# Controls how fast animation plays relative to velocity
+# Higher = faster animation, lower = slower animation
+animation_speed_scale = 0.3
+
 [collision]
 # Pixels from bottom of Mario ignored for wall collisions
 # Prevents Mario from catching on ground tiles when walking

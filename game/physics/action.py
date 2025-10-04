@@ -1,7 +1,7 @@
 """Determine Mario's action based on physics state."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .config import RUN_SPEED_THRESHOLD, SKID_CLEAR_VELOCITY, STOP_VELOCITY
+from .config import RUN_SPEED_THRESHOLD, SKID_CLEAR_VELOCITY, STOP_VELOCITY, WALK_THRESHOLD
 
 
 class ActionProcessor(PhysicsProcessor):
@@ -43,17 +43,16 @@ class ActionProcessor(PhysicsProcessor):
         return context
 
     def _determine_action(self, mario_state, mario_intent) -> str:
-        """Determine Mario's action based on his physics state and input."""
+        """Determine Mario's action based on his physics state (velocity-based)."""
         if mario_state.is_dying:
             return "dying"
         elif not mario_state.on_ground:
             return "jumping"
-        elif not mario_intent.move_left and not mario_intent.move_right:
-            # No input = idle animation, even if still sliding from momentum
-            return "idle"
+        # Animation based on actual velocity, not input
+        # This ensures Mario animates even when sliding without input
         elif abs(mario_state.vx) > RUN_SPEED_THRESHOLD:
             return "running"
-        elif abs(mario_state.vx) > STOP_VELOCITY:
+        elif abs(mario_state.vx) > WALK_THRESHOLD:
             return "walking"
         else:
             return "idle"

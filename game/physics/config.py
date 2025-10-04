@@ -48,6 +48,8 @@ FRICTION_SPEED_RANGE = config["friction"]["friction_speed_range"]
 SKID_THRESHOLD = config["action"]["skid_threshold"]
 SKID_CLEAR_VELOCITY = config["action"]["skid_clear_velocity"]
 STOP_VELOCITY = config["action"]["stop_velocity"]
+WALK_THRESHOLD = config["action"]["walk_threshold"]
+ANIMATION_SPEED_SCALE = config["action"]["animation_speed_scale"]
 
 # Collision
 WALL_DEAD_ZONE = config["collision"]["wall_dead_zone"]

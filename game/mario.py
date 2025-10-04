@@ -88,30 +88,27 @@ class Mario:
                 "loop": True,
             },
             "walking": {
-                "sprites": repeat("small_mario_walk1", 6)
-                + repeat("small_mario_walk2", 6)
-                + repeat("small_mario_walk3", 6),  # 18 frames total
+                # Use single frames - speed controlled by velocity
+                "sprites": ["small_mario_walk1", "small_mario_walk2", "small_mario_walk3"],
                 "loop": True,
             },
             "running": {
-                # Same frames as walking, just faster
-                "sprites": repeat("small_mario_walk1", 3)
-                + repeat("small_mario_walk2", 3)
-                + repeat("small_mario_walk3", 3),  # 9 frames total
+                # Same animation as walking - speed controlled by velocity
+                "sprites": ["small_mario_walk1", "small_mario_walk2", "small_mario_walk3"],
                 "loop": True,
             },
             "jumping": {
                 # Single static jump frame
-                "sprites": repeat("small_mario_jump", 60),  # Hold entire jump
+                "sprites": repeat("small_mario_jump", 1),  # Hold entire jump
                 "loop": True,
             },
             "skidding": {
-                "sprites": repeat("small_mario_skid", 12),  # Hold for 0.2 seconds
+                "sprites": repeat("small_mario_skid", 1),  # Hold for 0.2 seconds
                 "loop": True,
             },
             "dying": {
-                "sprites": repeat("small_mario_die", 60),  # Hold for 1 second
-                "loop": False,
+                "sprites": repeat("small_mario_die", 1),  # Hold for 1 second
+                "loop": True,
             },
         }
 
@@ -137,6 +134,9 @@ class Mario:
             else:
                 new_state.animation_length = 1
             new_state.frame = 0
+            # Reset animation progress for velocity-based animations
+            if hasattr(self.state, 'animation_progress'):
+                delattr(self.state, 'animation_progress')
 
         # Also reset walking/running animations when changing direction while moving
         elif new_state.action in ["walking", "running"] and self.state.action in [
@@ -146,26 +146,44 @@ class Mario:
             # Reset if direction changed
             if (new_state.vx > 0) != (self.state.vx > 0) and abs(new_state.vx) > 1.0:
                 new_state.frame = 0
+                # Reset animation progress
+                if hasattr(self.state, 'animation_progress'):
+                    delattr(self.state, 'animation_progress')
 
         self.state = new_state
 
     def update_animation(self):
-        """Update animation frame (just increment, no timer needed)."""
+        """Update animation frame based on velocity for movement animations."""
         if self.state.action not in self.animations:
             return
 
         anim = self.animations[self.state.action]
         sprites = anim["sprites"]
 
-        # Simply increment the frame
-        self.state.frame += 1
+        # For movement animations, advance based on velocity
+        if self.state.action in ["walking", "running"]:
+            # Animation speed proportional to velocity
+            # Scale linearly with actual velocity
+            from .physics.config import ANIMATION_SPEED_SCALE
+            speed = abs(self.state.vx)
+            frame_advance = (speed / 85.0) * ANIMATION_SPEED_SCALE  # Normalized to walk speed
 
-        # Handle looping or stopping at end
-        if self.state.frame >= len(sprites):
-            if anim["loop"]:
-                self.state.frame = 0
-            else:
-                self.state.frame = len(sprites) - 1
+            # Use floating point for smooth animation
+            if not hasattr(self.state, 'animation_progress'):
+                self.state.animation_progress = 0.0
+
+            self.state.animation_progress += frame_advance
+            self.state.frame = int(self.state.animation_progress) % len(sprites)
+        else:
+            # Non-movement animations advance at fixed rate
+            self.state.frame += 1
+
+            # Handle looping or stopping at end
+            if self.state.frame >= len(sprites):
+                if anim["loop"]:
+                    self.state.frame = 0
+                else:
+                    self.state.frame = len(sprites) - 1
 
     def draw(self, surface):
         """Draw Mario at current state."""
