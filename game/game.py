@@ -14,8 +14,8 @@ from .constants import (
     WHITE,
 )
 from .display import Display
-from .mario import Mario
 from .sprites import sprites
+from .states import PlayingState, State
 from .world import World
 
 
@@ -37,18 +37,70 @@ class Game:
         assets_path = os.path.join(os.path.dirname(__file__), "assets", "images")
         sprites.load_sheets(assets_path)
 
-        # Create World first to get level spawn point
+        # Create World (owns level, mario, camera, physics)
         self.world = World()
 
-        # Create Mario at the level's spawn point
-        self.mario = Mario(
-            self.world.level.spawn_x,
-            self.world.level.spawn_y,
-            self.world.level.spawn_screen,
-        )
+        # Initialize state machine
+        self.state: State = PlayingState()
+        self.state.on_enter(self)
+        
+    def run(self):
+        """Main game loop."""
+        print("Starting NES Platform Game...")
+        print("Controls:")
+        print("  ESC   - Quit")
+        print("  +/-   - Change Window Scale")
+        print("  F3    - Toggle Debug Info")
+        print("  Arrow Keys - Move Mario")
+        print("  Shift - Run")
+        print("  Space - Jump")
 
-    def handle_events(self):
-        """Process pygame events."""
+        while self.running:
+            # Calculate delta time
+            dt = self.clock.tick(FPS) / 1000.0
+
+            # Global event handling
+            self._handle_events()
+
+            # State-specific event handling
+            self.state.handle_events(self)
+
+            # Update game state
+            self.state.update(self, dt)
+
+            # Clear screen and get surface
+            self.display.clear(BACKGROUND_COLOR)
+            surface = self.display.get_native_surface()
+
+            # State-specific drawing
+            self.state.draw(self, surface)
+
+            # Global debug overlay
+            if self.show_debug:
+                self._draw_tile_grid(surface)
+                self._draw_debug_info(surface)
+
+            # Present the frame
+            self.display.present()
+
+        # Cleanup
+        pygame.quit()
+        sys.exit()
+
+    def transition_to(self, new_state: State) -> None:
+        """Transition to a new game state.
+
+        Calls on_exit on current state, then on_enter on new state.
+
+        Args:
+            new_state: The state to transition to
+        """
+        self.state.on_exit(self)
+        self.state = new_state
+        self.state.on_enter(self)
+
+    def _handle_events(self):
+        """Handle global events (ESC, scaling, debug toggle)."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -62,43 +114,13 @@ class Game:
                 elif event.key == pygame.K_F3:
                     self.show_debug = not self.show_debug
 
-    def update(self, dt):
-        """Update game state."""
-        # Get current keyboard state
-        keys = pygame.key.get_pressed()
-
-        # Let the world process Mario's intent and update his state
-        self.world.update(self.mario, keys, dt)
-
-    def draw(self):
-        """Draw everything to the screen."""
-        # Clear the native surface
-        self.display.clear(BACKGROUND_COLOR)
-
-        # Get the surface to draw on
-        surface = self.display.get_native_surface()
-
-        # Draw level tiles
-        self.draw_level(surface)
-
-        # Draw Mario at screen position (transform from world to screen)
-        self.draw_mario(surface)
-
-        # Draw tile grid (for visualization)
-        if self.show_debug:
-            self.draw_tile_grid(surface)
-            self.draw_debug_info(surface)
-
-        # Present the scaled result
-        self.display.present()
-
-    def draw_level(self, surface):
+    def _draw_level(self, surface):
         """Draw the visible level tiles."""
         from .constants import TILE_SIZE
 
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_tiles(
-            self.mario.state.screen, self.world.camera.x
+            self.world.mario.state.screen, self.world.camera.x
         )
 
         for tile_x, tile_y, tile_type in visible_tiles:
@@ -113,7 +135,7 @@ class Game:
 
             # Apply visual state from behaviors
             visual = self.world.level.get_tile_visual_state(
-                self.mario.state.screen, tile_x, tile_y
+                self.world.mario.state.screen, tile_x, tile_y
             )
             if visual:
                 world_y += visual.offset_y
@@ -131,18 +153,18 @@ class Game:
                 int(screen_y),
             )
 
-    def draw_mario(self, surface):
+    def _draw_mario(self, surface):
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position
         screen_x, screen_y = self.world.camera.world_to_screen(
-            self.mario.state.x, self.mario.state.y
+            self.world.mario.state.x, self.world.mario.state.y
         )
 
         # Get sprite name
-        sprite_name = self.mario._get_sprite_name()
+        sprite_name = self.world.mario._get_sprite_name()
         if sprite_name:
             # Use reflection when facing left
-            reflected = not self.mario.state.facing_right
+            reflected = not self.world.mario.state.facing_right
 
             # Draw at screen position (not world position)
             sprites.draw_at_position(
@@ -154,7 +176,7 @@ class Game:
                 reflected,
             )
 
-    def draw_tile_grid(self, surface):
+    def _draw_tile_grid(self, surface):
         """Draw the 8x8 tile grid for debugging."""
         # Draw vertical lines
         for x in range(0, SUB_TILES_HORIZONTAL + 1):
@@ -174,18 +196,19 @@ class Game:
                 (SUB_TILES_HORIZONTAL * SUB_TILE_SIZE, y * SUB_TILE_SIZE),
             )
 
-    def draw_debug_info(self, surface):
+    def _draw_debug_info(self, surface):
         """Draw debug information."""
         fps = self.clock.get_fps()
+        mario = self.world.mario.state
         debug_texts = [
             f"FPS: {fps:.1f}",
             f"Resolution: {surface.get_width()}x{surface.get_height()}",
             f"Scale: {self.display.scale}x",
             f"Camera X: {self.world.camera.x:.1f}",
-            f"Mario World: ({self.mario.state.x:.1f}, {self.mario.state.y:.1f})",
-            f"Velocity: ({self.mario.state.vx:.1f}, {self.mario.state.vy:.1f})",
-            f"Action: {self.mario.state.action}",
-            f"On Ground: {self.mario.state.on_ground}",
+            f"Mario World: ({mario.x:.1f}, {mario.y:.1f})",
+            f"Velocity: ({mario.vx:.1f}, {mario.vy:.1f})",
+            f"Action: {mario.action}",
+            f"On Ground: {mario.on_ground}",
         ]
 
         y = 4
@@ -193,30 +216,6 @@ class Game:
             text_surface = self.font.render(text, True, WHITE)
             surface.blit(text_surface, (4, y))
             y += 12
-
-    def run(self):
-        """Main game loop."""
-        print("Starting NES Platform Game...")
-        print("Controls:")
-        print("  ESC   - Quit")
-        print("  +/-   - Change Window Scale")
-        print("  F3    - Toggle Debug Info")
-        print("  Arrow Keys - Move Mario")
-        print("  Shift - Run")
-        print("  Space - Jump")
-
-        while self.running:
-            # Calculate delta time
-            dt = self.clock.tick(FPS) / 1000.0
-
-            # Game loop steps
-            self.handle_events()
-            self.update(dt)
-            self.draw()
-
-        # Cleanup
-        pygame.quit()
-        sys.exit()
 
     def quit(self):
         """Quit the game."""

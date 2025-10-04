@@ -16,14 +16,21 @@ class World:
         self.camera = Camera()
         self.physics_pipeline = PhysicsPipeline()
 
-    def update(self, mario: Mario, keys, dt: float):
+        # Create Mario at the level's spawn point
+        self.mario = Mario(
+            self.level.spawn_x,
+            self.level.spawn_y,
+            self.level.spawn_screen,
+        )
+
+    def update(self, keys, dt: float):
         """Process Mario's intent and update his state."""
         # Step 1: Get Mario's intent from input
-        mario_intent = mario.get_intent(keys)
+        mario_intent = self.mario.get_intent(keys)
 
         # Step 2: Create physics context with cloned states
         context = PhysicsContext(
-            mario_state=mario.state.clone(),  # Work with a copy
+            mario_state=self.mario.state.clone(),  # Work with a copy
             mario_intent=mario_intent,
             level=self.level,
             camera_state=self.camera.state.clone(),  # Work with a copy
@@ -34,16 +41,16 @@ class World:
         processed_context = self.physics_pipeline.process(context)
 
         # Step 4: Push state back to Mario
-        mario.apply_state(processed_context.mario_state)
+        self.mario.apply_state(processed_context.mario_state)
 
         # Step 5: Apply camera state changes
         self.camera.apply_state(processed_context.camera_state)
 
         # Step 6: Update Mario's animation
-        mario.update_animation()
+        self.mario.update_animation()
 
         # Step 7: Update terrain behaviors
         self.level.terrain_manager.update(dt)
 
         # Step 8: Update camera based on Mario's new position
-        self.camera.update(mario.state.x, self.level.width_pixels)
+        self.camera.update(self.mario.state.x, self.level.width_pixels)
