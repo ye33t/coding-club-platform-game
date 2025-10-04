@@ -55,6 +55,7 @@ class MarioState:
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
     frame: int = 0
     animation_length: int = 1  # Total frames in current animation
+    animation_progress: float = 0.0  # Fractional progress for smooth cycling
 
     def clone(self):
         """Create a deep copy of this state."""
@@ -89,12 +90,20 @@ class Mario:
             },
             "walking": {
                 # Use single frames - speed controlled by velocity
-                "sprites": ["small_mario_walk1", "small_mario_walk2", "small_mario_walk3"],
+                "sprites": [
+                    "small_mario_walk1",
+                    "small_mario_walk2",
+                    "small_mario_walk3",
+                ],
                 "loop": True,
             },
             "running": {
                 # Same animation as walking - speed controlled by velocity
-                "sprites": ["small_mario_walk1", "small_mario_walk2", "small_mario_walk3"],
+                "sprites": [
+                    "small_mario_walk1",
+                    "small_mario_walk2",
+                    "small_mario_walk3",
+                ],
                 "loop": True,
             },
             "jumping": {
@@ -135,8 +144,7 @@ class Mario:
                 new_state.animation_length = 1
             new_state.frame = 0
             # Reset animation progress for velocity-based animations
-            if hasattr(self.state, 'animation_progress'):
-                delattr(self.state, 'animation_progress')
+            new_state.animation_progress = 0.0
 
         # Also reset walking/running animations when changing direction while moving
         elif new_state.action in ["walking", "running"] and self.state.action in [
@@ -147,8 +155,7 @@ class Mario:
             if (new_state.vx > 0) != (self.state.vx > 0) and abs(new_state.vx) > 1.0:
                 new_state.frame = 0
                 # Reset animation progress
-                if hasattr(self.state, 'animation_progress'):
-                    delattr(self.state, 'animation_progress')
+                new_state.animation_progress = 0.0
 
         self.state = new_state
 
@@ -164,14 +171,14 @@ class Mario:
         if self.state.action in ["walking", "running"]:
             # Animation speed proportional to velocity
             # Scale linearly with actual velocity
-            from .physics.config import ANIMATION_SPEED_SCALE
+            from .physics.config import ANIMATION_SPEED_SCALE, WALK_SPEED
+
             speed = abs(self.state.vx)
-            frame_advance = (speed / 85.0) * ANIMATION_SPEED_SCALE  # Normalized to walk speed
+            frame_advance = (
+                speed / WALK_SPEED
+            ) * ANIMATION_SPEED_SCALE  # Normalized to walk speed
 
             # Use floating point for smooth animation
-            if not hasattr(self.state, 'animation_progress'):
-                self.state.animation_progress = 0.0
-
             self.state.animation_progress += frame_advance
             self.state.frame = int(self.state.animation_progress) % len(sprites)
         else:

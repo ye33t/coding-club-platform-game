@@ -1,12 +1,17 @@
 """Sprite definitions with coordinates for each sprite sheet."""
 
+from typing import Dict, Tuple
+
 # Sprite definitions format:
 # "sprite_name": (x, y, sub_tile_width, sub_tile_height)
 # x, y = pixel position on sprite sheet where the bottom-left coordinate is located,
 #        (0,0) is the top-left of the image
 # sub_tile_width, sub_tile_height = the size of the sprite in sub-tile coordinates
 
-CHARACTERS = {
+SpriteDefinition = Tuple[int, int, int, int]
+SpriteSheet = Dict[str, SpriteDefinition]
+
+CHARACTERS: SpriteSheet = {
     # Small Mario
     "small_mario_stand": (0, 24, 2, 2),
     "small_mario_walk1": (20, 24, 2, 2),
@@ -24,16 +29,16 @@ CHARACTERS = {
     "small_mario_swim5": (246, 24, 2, 2),
 }
 
-BLOCKS = {
+BLOCKS: SpriteSheet = {
     # Ground blocks (2x2 tile space, actual size 16x16)
 }
 
-ENEMIES = {
+ENEMIES: SpriteSheet = {
     # Goomba
     "goomba_walk1": (0, 16, 2, 2),
 }
 
-BACKGROUND = {
+BACKGROUND: SpriteSheet = {
     # Terrain
     "ground": (0, 32, 2, 2),
     "brick_top": (17, 32, 2, 2),
@@ -64,7 +69,6 @@ BACKGROUND = {
     "conveyor_vertical": (34, 83, 2, 2),
     "sand": (51, 83, 2, 2),
     "sand_dune": (68, 83, 2, 2),
-    
     # Decorations
     "treetop_left": (0, 212, 2, 2),
     "treetop_center": (17, 212, 2, 2),
@@ -84,7 +88,7 @@ BACKGROUND = {
     "pipe_left": (119, 229, 2, 2),
     "pipe_right": (136, 229, 2, 2),
     "bridge_rails": (0, 246, 2, 2),
-    #"sprite_18": (17, 246, 2, 2),
+    # "sprite_18": (17, 246, 2, 2),
     "mound_top": (34, 246, 2, 2),
     "pipe_horizontal_mouth_top": (85, 246, 2, 2),
     "pipe_horizontal_top": (102, 246, 2, 2),
@@ -99,7 +103,6 @@ BACKGROUND = {
     "pipe_horizontal_bottom": (102, 263, 2, 2),
     "pipe_junction_bottom": (119, 263, 2, 2),
     "flagpole": (136, 263, 2, 2),
-    
     # Clouds
     "cloud_top_left": (298, 32, 2, 2),
     "cloud_top": (315, 32, 2, 2),
@@ -113,13 +116,13 @@ BACKGROUND = {
     "piano": (366, 49, 2, 2),
 }
 
-OTHER = {
-    # Power-ups 
+OTHER: SpriteSheet = {
+    # Power-ups
     "mushroom": (0, 16, 2, 2),
 }
 
 # Map sheet names to their definitions
-SPRITE_SHEETS = {
+SPRITE_SHEETS: Dict[str, SpriteSheet] = {
     "characters": CHARACTERS,
     "blocks": BLOCKS,
     "enemies": ENEMIES,

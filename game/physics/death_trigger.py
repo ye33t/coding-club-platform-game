@@ -30,7 +30,9 @@ class DeathTriggerProcessor(PhysicsProcessor):
             mario_state.is_dying = True
             # Set death leap velocity from config
             mario_state.death_leap_velocity = DEATH_LEAP_VELOCITY
-            mario_state.vy = mario_state.death_leap_velocity  # Start the leap immediately
+            mario_state.vy = (
+                mario_state.death_leap_velocity
+            )  # Start the leap immediately
             mario_state.on_ground = False
 
         return context

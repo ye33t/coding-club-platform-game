@@ -1,7 +1,12 @@
 """Determine Mario's action based on physics state."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .config import RUN_SPEED_THRESHOLD, SKID_CLEAR_VELOCITY, STOP_VELOCITY, WALK_THRESHOLD
+from .config import (
+    RUN_SPEED_THRESHOLD,
+    SKID_CLEAR_VELOCITY,
+    STOP_VELOCITY,
+    WALK_THRESHOLD,
+)
 
 
 class ActionProcessor(PhysicsProcessor):

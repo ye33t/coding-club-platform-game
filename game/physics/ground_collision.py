@@ -60,12 +60,15 @@ class GroundCollisionProcessor(PhysicsProcessor):
                         continue
 
                     # Calculate world Y of this quadrant's top edge
-                    quadrant_top_y = (
-                        check_y * TILE_SIZE + (quadrant_y + 1) * (TILE_SIZE / 2)
+                    quadrant_top_y = check_y * TILE_SIZE + (quadrant_y + 1) * (
+                        TILE_SIZE / 2
                     )
 
                     # Check if Mario's feet are within collision range
-                    if abs(mario_state.y - quadrant_top_y) <= 2.0 or mario_state.y < quadrant_top_y:
+                    if (
+                        abs(mario_state.y - quadrant_top_y) <= 2.0
+                        or mario_state.y < quadrant_top_y
+                    ):
                         if mario_state.y <= quadrant_top_y + 1:
                             found_ground = True
                             if highest_ground < 0 or quadrant_top_y > highest_ground:

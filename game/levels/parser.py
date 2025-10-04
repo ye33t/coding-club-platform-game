@@ -2,15 +2,10 @@
 
 from typing import List, Set, Tuple
 
-from .converters import CONVERTERS, TilePlacement
-from .types import Compound, ParserContext
 from ..constants import TILES_HORIZONTAL, TILES_VERTICAL
-from ..tile_definitions import (
-    TILE_BLOCK,
-    TILE_BRICK_TOP,
-    TILE_EMPTY,
-    TILE_GROUND,
-)
+from ..tile_definitions import TILE_BLOCK, TILE_BRICK_TOP, TILE_EMPTY, TILE_GROUND
+from .converters import CONVERTERS
+from .types import Compound, ParserContext
 
 
 class ParseError(Exception):
@@ -53,7 +48,9 @@ class LevelParser:
 
         # Validate dimensions
         if len(lines) != TILES_VERTICAL:
-            raise ParseError(f"Layout must have {TILES_VERTICAL} rows, got {len(lines)}")
+            raise ParseError(
+                f"Layout must have {TILES_VERTICAL} rows, got {len(lines)}"
+            )
 
         # Check that all rows have the same length
         if not lines:
@@ -68,7 +65,8 @@ class LevelParser:
         for i, line in enumerate(lines):
             if len(line) != width:
                 raise ParseError(
-                    f"Row {i} has {len(line)} characters, expected {width} (all rows must be the same length)"
+                    f"Row {i} has {len(line)} characters, expected {width} "
+                    "(all rows must be the same length)"
                 )
 
         # Create context
@@ -149,8 +147,12 @@ class LevelParser:
         return compounds
 
     def _flood_fill(
-        self, start_x: int, start_y: int, target_char: str,
-        context: ParserContext, visited: Set[Tuple[int, int]]
+        self,
+        start_x: int,
+        start_y: int,
+        target_char: str,
+        context: ParserContext,
+        visited: Set[Tuple[int, int]],
     ) -> Set[Tuple[int, int]]:
         """Flood fill to find connected region of the same character.
 
@@ -202,7 +204,9 @@ class LevelParser:
             2D list of tile IDs
         """
         # Initialize with empty tiles
-        tiles = [[TILE_EMPTY for _ in range(context.width)] for _ in range(context.height)]
+        tiles = [
+            [TILE_EMPTY for _ in range(context.width)] for _ in range(context.height)
+        ]
 
         # Track which positions have been processed
         processed = set()
@@ -234,4 +238,3 @@ class LevelParser:
                     tiles[y][x] = self.simple_tiles[char]
 
         return tiles
-

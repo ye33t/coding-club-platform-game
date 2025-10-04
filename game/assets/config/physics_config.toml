@@ -85,6 +85,18 @@ wall_dead_zone = 8
 # Pixel tolerance for ceiling collisions
 ceiling_dead_zone = 2
 
+# Inset for ceiling collision sample points (px)
+# Slightly insets from Mario's edges to avoid collision edge cases
+ceiling_sample_edge_offset = 1
+
+# Offset from Mario's top for wall collision samples (px)
+# Prevents top corners from catching on walls
+wall_sample_top_offset = 2
+
+# Downward velocity applied when hitting ceiling (px/s)
+# Negative value pushes Mario down
+ceiling_bounce_velocity = -20.0
+
 [terrain]
 # Initial upward velocity for bounce blocks when hit (px/s)
 bounce_velocity = 60.0
@@ -92,7 +104,14 @@ bounce_velocity = 60.0
 # Gravity applied to bounce block animation (px/s²)
 bounce_gravity = 400.0
 
+# Duration of bounce animation (seconds)
+bounce_duration = 0.25
+
 [death]
 # Initial upward velocity for death animation leap (px/s)
 # Mario leaps up before falling off screen
 death_leap_velocity = 200.0
+
+# How far below screen Mario must fall before reset (px)
+# Negative value means below y=0
+reset_threshold_y = -200.0

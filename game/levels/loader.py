@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
-from .parser import LevelParser, ParseError
 from ..constants import TILE_SIZE
 from ..level import Level
+from .parser import LevelParser, ParseError
 
 
 def load(filepath: str) -> Level:

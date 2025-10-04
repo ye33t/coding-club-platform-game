@@ -48,7 +48,7 @@ class GravityProcessor(PhysicsProcessor):
 
         # Apply gravity when not on ground
         if not mario_state.on_ground:
-            # Jump cut: If button released early while moving upward, apply stronger gravity
+            # Jump cut: release jump early while rising to apply stronger gravity
             if mario_state.is_jumping and not intent.jump and mario_state.vy > 0:
                 mario_state.vy -= GRAVITY * JUMP_CUT_MULTIPLIER * dt
             else:

@@ -1,6 +1,6 @@
 """Level data and tile management."""
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 
 from .constants import TILE_SIZE, TILES_HORIZONTAL
 from .terrain import TerrainManager, VisualState
@@ -95,7 +95,9 @@ class Level:
             raise ValueError(f"Tile definition for type {tile_type} not found")
         return tile_def["collision_mask"] != 0
 
-    def get_visible_tiles(self, screen: int, camera_x: float) -> List[Tuple[int, int, int]]:
+    def get_visible_tiles(
+        self, screen: int, camera_x: float
+    ) -> List[Tuple[int, int, int]]:
         """Get all tiles visible in the current camera view.
 
         Args:
@@ -103,7 +105,7 @@ class Level:
             camera_x: Camera position in world pixels
 
         Returns:
-            List of (tile_x, tile_y, tile_type) for visible tiles on the specified screen
+            List of (tile_x, tile_y, tile_type) for tiles within the current view
         """
         if screen not in self.tiles:
             raise ValueError(f"Screen {screen} not found in level data")
@@ -149,9 +151,9 @@ class Level:
             VisualState if tile has behaviors, None otherwise
         """
         instance = self.terrain_manager.get_instance(screen, tile_x, tile_y)
-        if instance and instance.state:
-            return instance.state.visual
-        return None
+        if instance is None:
+            return None
+        return cast(VisualState, instance.state.visual)
 
     def check_collision(
         self, screen: int, x: float, y: float, width: float, height: float

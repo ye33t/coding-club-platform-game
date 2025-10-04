@@ -1,19 +1,10 @@
 """Compound converter registry and type definitions."""
 
-from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional
 
-# Type aliases
-TilePlacement = Dict[Tuple[int, int], int]  # Maps (x, y) -> tile_id
+from .pipe import TilePlacement, convert_pipe
 
-if TYPE_CHECKING:
-    from ..types import Compound, ParserContext
-    ConverterFunc = Callable[[Compound, ParserContext], Optional[TilePlacement]]
-
-# Import converter functions (delayed to avoid circular imports)
-from .pipe import convert_pipe
-
-# Converter registry
-CONVERTERS: Dict[str, Callable] = {
+CONVERTERS: Dict[str, Callable[..., Optional[TilePlacement]]] = {
     "|": convert_pipe,
 }
 

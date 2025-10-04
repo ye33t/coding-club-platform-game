@@ -148,7 +148,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": None,
         "collision_mask": MASK_EMPTY,
     },
-    
     # Basic terrain
     TILE_GROUND: {
         "sprite_sheet": "background",
@@ -190,7 +189,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "rocks",
         "collision_mask": MASK_FULL,
     },
-    
     # Sand
     TILE_SAND: {
         "sprite_sheet": "background",
@@ -212,7 +210,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "sand_dune",
         "collision_mask": MASK_FULL,
     },
-    
     # Arches
     TILE_ARCH_LEFT: {
         "sprite_sheet": "background",
@@ -234,7 +231,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "void",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Battlements
     TILE_BATTLEMENT: {
         "sprite_sheet": "background",
@@ -246,14 +242,12 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "battlement_1",
         "collision_mask": MASK_FULL,
     },
-    
     # Bridge rails (decoration, no collision)
     TILE_BRIDGE_RAILS: {
         "sprite_sheet": "background",
         "sprite_name": "bridge_rails",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Pipes (vertical)
     TILE_PIPE_LEFT: {
         "sprite_sheet": "background",
@@ -275,7 +269,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "pipe_mouth_right",
         "collision_mask": MASK_FULL,
     },
-    
     # Pipes (horizontal)
     TILE_PIPE_HORIZONTAL_TOP: {
         "sprite_sheet": "background",
@@ -297,7 +290,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "pipe_horizontal_mouth_bottom",
         "collision_mask": MASK_FULL,
     },
-    
     # Pipe junction
     TILE_PIPE_JUNCTION_TOP: {
         "sprite_sheet": "background",
@@ -309,7 +301,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "pipe_junction_bottom",
         "collision_mask": MASK_FULL,
     },
-    
     # Cannon
     TILE_CANNON_TOP: {
         "sprite_sheet": "background",
@@ -326,7 +317,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "cannon_bottom",
         "collision_mask": MASK_FULL,
     },
-    
     # Climbing
     TILE_LADDER: {
         "sprite_sheet": "background",
@@ -338,7 +328,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "beanstalk",
         "collision_mask": MASK_FULL,
     },
-    
     # Mushroom
     TILE_MUSHROOM_LEFT: {
         "sprite_sheet": "background",
@@ -355,7 +344,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "mushroom_right",
         "collision_mask": MASK_FULL,
     },
-    
     # Decoration
     TILE_MOUND_TOP: {
         "sprite_sheet": "background",
@@ -387,7 +375,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "mound_right_45",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Tree
     TILE_TREETOP_LEFT: {
         "sprite_sheet": "background",
@@ -404,7 +391,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "treetop_right",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Bush
     TILE_BUSH_LEFT: {
         "sprite_sheet": "background",
@@ -426,8 +412,7 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "leaves",
         "collision_mask": MASK_EMPTY,
     },
-    
-        # Conveyors
+    # Conveyors
     TILE_CONVEYOR_CORNER_LEFT: {
         "sprite_sheet": "background",
         "sprite_name": "conveyor_corner_left",
@@ -448,7 +433,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "conveyor_vertical",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Lollipops
     TILE_LOLLIPOP_TOP: {
         "sprite_sheet": "background",
@@ -465,7 +449,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "lollipop_bottom",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Flagpole
     TILE_FLAGPOLE_TOP: {
         "sprite_sheet": "background",
@@ -477,7 +460,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "flagpole",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Clouds
     TILE_CLOUD_TOP_LEFT: {
         "sprite_sheet": "background",
@@ -514,7 +496,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "cloud_block",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Water
     TILE_WATER_TOP: {
         "sprite_sheet": "background",
@@ -526,7 +507,6 @@ TILE_DEFS: dict[int, TileDefinition] = {
         "sprite_name": "water",
         "collision_mask": MASK_EMPTY,
     },
-    
     # Other
     TILE_PIANO: {
         "sprite_sheet": "background",
@@ -548,7 +528,9 @@ def get_tile_definition(tile_type: int) -> Optional[TileDefinition]:
     return TILE_DEFS.get(tile_type)
 
 
-def is_quadrant_solid(tile_def: TileDefinition, quadrant_x: int, quadrant_y: int) -> bool:
+def is_quadrant_solid(
+    tile_def: TileDefinition, quadrant_x: int, quadrant_y: int
+) -> bool:
     """Check if a specific quadrant of a tile is solid using bitwise operations.
 
     Args:

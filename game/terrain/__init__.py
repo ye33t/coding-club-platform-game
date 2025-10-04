@@ -1,12 +1,6 @@
 """Terrain behavior system for tile animations and effects."""
 
-from .base import (
-    BehaviorContext,
-    TerrainBehavior,
-    TileEvent,
-    TileState,
-    VisualState,
-)
+from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState, VisualState
 from .bounce import BounceBehavior
 from .manager import TerrainManager
 

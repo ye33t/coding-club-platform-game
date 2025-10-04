@@ -4,9 +4,7 @@ from ..constants import TILE_SIZE
 from ..terrain import TileEvent
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
-
-# Small downward velocity applied when hitting ceiling
-CEILING_BOUNCE_VELOCITY = -20.0  # pixels per second
+from .config import CEILING_BOUNCE_VELOCITY, CEILING_SAMPLE_EDGE_OFFSET
 
 
 class CeilingCollisionProcessor(PhysicsProcessor):
@@ -36,9 +34,10 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
         # Sample points across Mario's width for ceiling
         ceiling_sample_points = [
-            mario_state.x + 1,  # Slightly inset to avoid edge issues
+            mario_state.x
+            + CEILING_SAMPLE_EDGE_OFFSET,  # Slightly inset to avoid edge issues
             mario_state.x + mario_state.width / 2,
-            mario_state.x + mario_state.width - 2,
+            mario_state.x + mario_state.width - CEILING_SAMPLE_EDGE_OFFSET - 1,
         ]
 
         for sample_x in ceiling_sample_points:

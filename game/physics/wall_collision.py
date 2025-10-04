@@ -5,7 +5,7 @@ from enum import Enum
 from ..constants import TILE_SIZE
 from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
-from .config import WALL_DEAD_ZONE
+from .config import WALL_DEAD_ZONE, WALL_SAMPLE_TOP_OFFSET
 
 
 class Direction(Enum):
@@ -58,7 +58,7 @@ class WallCollisionProcessor(PhysicsProcessor):
         sample_heights = [
             mario_state.y + WALL_DEAD_ZONE,  # Above feet (tolerance for ground)
             mario_state.y + mario_state.height / 2,  # Middle
-            mario_state.y + mario_state.height - 2,  # Near top
+            mario_state.y + mario_state.height - WALL_SAMPLE_TOP_OFFSET,  # Near top
         ]
 
         for sample_y in sample_heights:

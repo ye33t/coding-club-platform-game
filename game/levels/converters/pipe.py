@@ -1,15 +1,16 @@
 """Pipe compound converter."""
 
-from typing import Optional
+from typing import Dict, Optional, Tuple
 
-from . import TilePlacement
-from ..types import Compound, ParserContext
 from ...tile_definitions import (
     TILE_PIPE_LEFT,
-    TILE_PIPE_RIGHT,
     TILE_PIPE_MOUTH_LEFT,
     TILE_PIPE_MOUTH_RIGHT,
+    TILE_PIPE_RIGHT,
 )
+from ..types import Compound, ParserContext
+
+TilePlacement = Dict[Tuple[int, int], int]
 
 
 def convert_pipe(compound: Compound, context: ParserContext) -> Optional[TilePlacement]:
@@ -35,7 +36,8 @@ def convert_pipe(compound: Compound, context: ParserContext) -> Optional[TilePla
     # Validate: must be solid (no gaps)
     if not compound.is_solid:
         context.add_error(
-            f"Pipe at ({compound.origin_x}, {compound.origin_y}) has gaps - must be solid rectangle"
+            f"Pipe at ({compound.origin_x}, {compound.origin_y}) has gaps - "
+            "must be solid rectangle"
         )
         return None
 

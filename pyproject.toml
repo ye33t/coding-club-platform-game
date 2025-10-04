@@ -9,8 +9,6 @@ packages = [{include = "game"}]
 format = "format:main"
 game = "main:main"
 test = "pytest:main"
-test-v = "pytest:main"
-coverage = "pytest:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"

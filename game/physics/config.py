@@ -15,10 +15,7 @@ except FileNotFoundError:
         "The game requires physics_config.toml to run."
     )
 except tomllib.TOMLDecodeError as e:
-    raise ValueError(
-        f"Invalid TOML in physics config: {CONFIG_PATH}\n"
-        f"Error: {e}"
-    )
+    raise ValueError(f"Invalid TOML in physics config: {CONFIG_PATH}\n" f"Error: {e}")
 
 # Movement
 WALK_SPEED = config["movement"]["walk_speed"]
@@ -54,10 +51,15 @@ ANIMATION_SPEED_SCALE = config["action"]["animation_speed_scale"]
 # Collision
 WALL_DEAD_ZONE = config["collision"]["wall_dead_zone"]
 CEILING_DEAD_ZONE = config["collision"]["ceiling_dead_zone"]
+CEILING_SAMPLE_EDGE_OFFSET = config["collision"]["ceiling_sample_edge_offset"]
+WALL_SAMPLE_TOP_OFFSET = config["collision"]["wall_sample_top_offset"]
+CEILING_BOUNCE_VELOCITY = config["collision"]["ceiling_bounce_velocity"]
 
 # Terrain
 BOUNCE_VELOCITY = config["terrain"]["bounce_velocity"]
 BOUNCE_GRAVITY = config["terrain"]["bounce_gravity"]
+BOUNCE_DURATION = config["terrain"]["bounce_duration"]
 
 # Death
 DEATH_LEAP_VELOCITY = config["death"]["death_leap_velocity"]
+RESET_THRESHOLD_Y = config["death"]["reset_threshold_y"]

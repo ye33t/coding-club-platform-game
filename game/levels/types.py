@@ -18,7 +18,12 @@ class ParserContext:
         """Safe character access with bounds checking."""
         if 0 <= x < self.width and 0 <= y < self.height:
             return self.layout[y][x]
-        raise IndexError(f"Coordinates ({x}, {y}) out of bounds (width={self.width}, height={self.height})")
+        raise IndexError(
+            (
+                f"Coordinates ({x}, {y}) out of bounds "
+                f"(width={self.width}, height={self.height})"
+            )
+        )
 
     def add_error(self, message: str) -> None:
         """Add an error message to the context."""

@@ -1,7 +1,7 @@
 """Handle movement physics including friction and deceleration."""
 
 from .base import PhysicsContext, PhysicsProcessor
-from .config import MIN_FRICTION, MAX_FRICTION, FRICTION_SPEED_RANGE, STOP_THRESHOLD
+from .config import FRICTION_SPEED_RANGE, MAX_FRICTION, MIN_FRICTION, STOP_THRESHOLD
 
 
 class MovementProcessor(PhysicsProcessor):
@@ -34,7 +34,9 @@ class MovementProcessor(PhysicsProcessor):
                 # At low speeds (walking): MAX_FRICTION (more friction, less slide)
                 # At high speeds (running): MIN_FRICTION (less friction, more slide)
                 friction_factor = min(speed / FRICTION_SPEED_RANGE, 1.0)
-                friction = MAX_FRICTION + (MIN_FRICTION - MAX_FRICTION) * friction_factor
+                friction = (
+                    MAX_FRICTION + (MIN_FRICTION - MAX_FRICTION) * friction_factor
+                )
                 mario_state.vx *= friction
 
         return context

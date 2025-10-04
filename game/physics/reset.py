@@ -3,9 +3,7 @@
 from ..camera import CameraState
 from ..mario import MarioState
 from .base import PhysicsContext, PhysicsProcessor
-
-# How far below screen Mario must fall before reset
-RESET_THRESHOLD_Y = -200.0
+from .config import RESET_THRESHOLD_Y
 
 
 class ResetProcessor(PhysicsProcessor):
@@ -31,7 +29,7 @@ class ResetProcessor(PhysicsProcessor):
             context.mario_state = MarioState(
                 x=context.level.spawn_x,
                 y=context.level.spawn_y,
-                screen=context.level.spawn_screen
+                screen=context.level.spawn_screen,
             )
             # Reset camera to beginning (both position and ratchet)
             context.camera_state = CameraState(x=0, max_x=0)

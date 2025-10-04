@@ -1,10 +1,7 @@
 """Bounce behavior for tiles hit from below."""
 
-from ..physics.config import BOUNCE_GRAVITY, BOUNCE_VELOCITY
+from ..physics.config import BOUNCE_DURATION, BOUNCE_GRAVITY, BOUNCE_VELOCITY
 from .base import BehaviorContext, TerrainBehavior, TileEvent
-
-# Animation constants - physics-based for more realistic motion
-BOUNCE_DURATION = 0.25  # seconds (slightly faster)
 
 
 class BounceBehavior(TerrainBehavior):
@@ -21,7 +18,9 @@ class BounceBehavior(TerrainBehavior):
         if timer > 0:
             # Physics-based animation: y = v*t - 0.5*g*t^2
             elapsed = BOUNCE_DURATION - timer
-            offset = (BOUNCE_VELOCITY * elapsed) - (0.5 * BOUNCE_GRAVITY * elapsed * elapsed)
+            offset = (BOUNCE_VELOCITY * elapsed) - (
+                0.5 * BOUNCE_GRAVITY * elapsed * elapsed
+            )
 
             # Clamp to not go below starting position
             context.state.visual.offset_y = max(0, offset)

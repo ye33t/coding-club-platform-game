@@ -44,7 +44,7 @@ class Game:
         self.mario = Mario(
             self.world.level.spawn_x,
             self.world.level.spawn_y,
-            self.world.level.spawn_screen
+            self.world.level.spawn_screen,
         )
 
     def handle_events(self):
@@ -97,7 +97,9 @@ class Game:
         from .constants import TILE_SIZE
 
         # Get visible tiles from level
-        visible_tiles = self.world.level.get_visible_tiles(self.mario.state.screen, self.world.camera.x)
+        visible_tiles = self.world.level.get_visible_tiles(
+            self.mario.state.screen, self.world.camera.x
+        )
 
         for tile_x, tile_y, tile_type in visible_tiles:
             # Get tile definition
