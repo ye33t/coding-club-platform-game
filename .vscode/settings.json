@@ -6,6 +6,7 @@
         "blit",
         "bounceable",
         "colorkey",
+        "koopa",
         "NTSC"
     ],
     "python.testing.pytestArgs": [

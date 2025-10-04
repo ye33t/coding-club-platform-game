@@ -1,20 +1,18 @@
 """Handle movement physics including friction and deceleration."""
 
 from .base import PhysicsContext, PhysicsProcessor
-
-# Friction varies by speed for natural feel
-MIN_FRICTION = 0.88  # At high speeds (more sliding)
-MAX_FRICTION = 0.60  # At low speeds (quick stops)
-FRICTION_SPEED_RANGE = 80.0  # Speed range over which friction varies
+from .constants import MIN_FRICTION
 
 
 class MovementProcessor(PhysicsProcessor):
     """Handles horizontal movement physics.
 
     This processor manages:
-    - Velocity-based friction for natural deceleration
-    - Quick stops at low speeds, sliding at high speeds
+    - Simple step-function friction for natural deceleration
+    - Instant stop below threshold, constant friction above
     """
+
+    STOP_THRESHOLD = 30.0  # px/s - instant stop below this speed
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process movement physics."""
@@ -25,20 +23,16 @@ class MovementProcessor(PhysicsProcessor):
         if mario_state.is_dying:
             return context
 
-        # If no horizontal movement intent, apply velocity-based friction
+        # If no horizontal movement intent, apply friction
         if not intent.move_left and not intent.move_right:
             speed = abs(mario_state.vx)
 
-            # Calculate friction based on speed
-            # At 0 speed: MAX_FRICTION (0.60 = quick stop)
-            # At FRICTION_SPEED_RANGE+: MIN_FRICTION (0.88 = more sliding)
-            friction_factor = min(speed / FRICTION_SPEED_RANGE, 1.0)
-            friction = MAX_FRICTION + (MIN_FRICTION - MAX_FRICTION) * friction_factor
-
-            mario_state.vx *= friction
-
-            # Stop completely if velocity is negligible (for numerical stability)
-            if abs(mario_state.vx) < 1.0:
+            # Simple step function:
+            # Below threshold: instant stop
+            # Above threshold: constant friction
+            if speed < self.STOP_THRESHOLD:
                 mario_state.vx = 0.0
+            else:
+                mario_state.vx *= MIN_FRICTION
 
         return context

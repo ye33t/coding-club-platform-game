@@ -1,16 +1,14 @@
 """Process player intent into target velocities and states."""
 
 from .base import PhysicsContext, PhysicsProcessor
-
-# Movement constants
-WALK_SPEED = 85.0  # pixels per second
-RUN_SPEED = 140.0  # pixels per second
-SKID_THRESHOLD = 80.0  # speed difference that triggers skidding
-
-# Acceleration constants (pixels per second²)
-GROUND_ACCELERATION = 180.0  # Normal ground acceleration (more gradual)
-SKID_DECELERATION = 600.0  # Deceleration when skidding (stronger)
-AIR_ACCELERATION = 120.0  # Air control (moderate)
+from .constants import (
+    AIR_ACCELERATION,
+    GROUND_ACCELERATION,
+    RUN_SPEED,
+    SKID_DECELERATION,
+    SKID_THRESHOLD,
+    WALK_SPEED,
+)
 
 
 class IntentProcessor(PhysicsProcessor):
@@ -35,47 +33,23 @@ class IntentProcessor(PhysicsProcessor):
         # Calculate target horizontal velocity based on intent
         target_vx = 0.0
 
-        # Track input duration for distinguishing taps from holds
-        # Check if continuing in same direction
-        continuing_same_direction = False
-
         if intent.move_right:
             target_vx = RUN_SPEED if intent.run else WALK_SPEED
-            # Check if this continues previous input
-            continuing_same_direction = (
-                mario_state.facing_right and mario_state.vx >= -5.0
-            )
 
             # Check for skidding (trying to reverse direction quickly)
             if mario_state.vx < -SKID_THRESHOLD and mario_state.on_ground:
                 mario_state.action = "skidding"
-                mario_state.input_duration = 0  # Reset on direction change
             elif mario_state.action != "skidding":
                 mario_state.facing_right = True
 
         elif intent.move_left:
             target_vx = -(RUN_SPEED if intent.run else WALK_SPEED)
-            # Check if this continues previous input
-            continuing_same_direction = (
-                not mario_state.facing_right and mario_state.vx <= 5.0
-            )
 
             # Check for skidding
             if mario_state.vx > SKID_THRESHOLD and mario_state.on_ground:
                 mario_state.action = "skidding"
-                mario_state.input_duration = 0  # Reset on direction change
             elif mario_state.action != "skidding":
                 mario_state.facing_right = False
-        else:
-            # No input - reset duration
-            mario_state.input_duration = 0
-
-        # Update input duration
-        if target_vx != 0:
-            if continuing_same_direction:
-                mario_state.input_duration += 1
-            else:
-                mario_state.input_duration = 1  # First frame of new input
 
         # Apply acceleration whenever there's input
         if target_vx != 0:

@@ -1,10 +1,7 @@
 """Determine Mario's action based on physics state."""
 
 from .base import PhysicsContext, PhysicsProcessor
-
-# Speed thresholds
-RUN_SPEED = 128.0  # pixels per second
-RUN_THRESHOLD = RUN_SPEED * 0.8  # 80% of run speed
+from .constants import RUN_SPEED_THRESHOLD
 
 
 class ActionProcessor(PhysicsProcessor):
@@ -54,7 +51,7 @@ class ActionProcessor(PhysicsProcessor):
         elif not mario_intent.move_left and not mario_intent.move_right:
             # No input = idle animation, even if still sliding from momentum
             return "idle"
-        elif abs(mario_state.vx) > RUN_THRESHOLD:
+        elif abs(mario_state.vx) > RUN_SPEED_THRESHOLD:
             return "running"
         elif abs(mario_state.vx) > 1.0:
             return "walking"

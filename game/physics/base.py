@@ -2,10 +2,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from ..camera import CameraState
-from ..level import Level
 from ..mario import MarioIntent, MarioState
+
+if TYPE_CHECKING:
+    from ..level import Level
 
 
 @dataclass
@@ -18,7 +21,7 @@ class PhysicsContext:
 
     mario_state: MarioState  # The current/evolving state of Mario
     mario_intent: MarioIntent  # What the player wants Mario to do
-    level: Level  # Level data for collision detection
+    level: "Level"  # Level data for collision detection
     camera_state: CameraState  # Camera state for boundary checks
     dt: float  # Delta time for this frame
 

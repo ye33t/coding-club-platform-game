@@ -1,11 +1,10 @@
 """Bounce behavior for tiles hit from below."""
 
+from ..physics.constants import BOUNCE_GRAVITY, BOUNCE_VELOCITY
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 
 # Animation constants - physics-based for more realistic motion
 BOUNCE_DURATION = 0.25  # seconds (slightly faster)
-BOUNCE_VELOCITY = 60.0  # pixels per second initial upward velocity
-BOUNCE_GRAVITY = 400.0  # pixels per second^2 acceleration
 
 
 class BounceBehavior(TerrainBehavior):

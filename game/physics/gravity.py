@@ -1,19 +1,13 @@
 """Handle gravity and jumping physics."""
 
 from .base import PhysicsContext, PhysicsProcessor
-
-# Gravity constants
-GRAVITY = 400.0  # pixels per second squared
-JUMP_CUT_MULTIPLIER = 3.0  # Multiply gravity when jump button released early
-
-# Jump velocities tuned for desired heights:
-# - Walk jump: 4 blocks (64px) high
-# - Run jump: 6 blocks (96px) high
-WALK_JUMP_VELOCITY = 226.0  # pixels per second
-RUN_JUMP_VELOCITY = 277.0  # pixels per second
-
-# Speed threshold to determine if running
-RUN_SPEED_THRESHOLD = 100.0  # pixels per second
+from .constants import (
+    GRAVITY,
+    JUMP_CUT_MULTIPLIER,
+    RUN_JUMP_VELOCITY,
+    RUN_SPEED_THRESHOLD,
+    WALK_JUMP_VELOCITY,
+)
 
 
 class GravityProcessor(PhysicsProcessor):

@@ -11,11 +11,10 @@ from .death_trigger import DeathTriggerProcessor
 from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
-from .left_wall_collision import LeftWallCollisionProcessor
 from .movement import MovementProcessor
 from .reset import ResetProcessor
-from .right_wall_collision import RightWallCollisionProcessor
 from .velocity import VelocityProcessor
+from .wall_collision import Direction, WallCollisionProcessor
 
 
 class PhysicsPipeline:
@@ -30,8 +29,8 @@ class PhysicsPipeline:
     6. DeathTrigger - Check if Mario fell below screen
     7. Reset - Check if death animation complete
     8. Boundaries - Enforce world boundaries
-    9. LeftWallCollision - Detect and resolve left wall hits
-    10. RightWallCollision - Detect and resolve right wall hits
+    9. WallCollision (LEFT) - Detect and resolve left wall hits
+    10. WallCollision (RIGHT) - Detect and resolve right wall hits
     11. CeilingCollision - Detect and resolve ceiling hits
     12. GroundCollision - Detect and resolve ground/slopes
     13. Action - Determine action from final state
@@ -55,8 +54,8 @@ class PhysicsPipeline:
             DeathTriggerProcessor(),
             ResetProcessor(),
             BoundaryProcessor(),
-            LeftWallCollisionProcessor(),
-            RightWallCollisionProcessor(),
+            WallCollisionProcessor(Direction.LEFT),
+            WallCollisionProcessor(Direction.RIGHT),
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
             ActionProcessor(),
