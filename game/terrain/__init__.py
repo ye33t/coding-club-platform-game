@@ -4,6 +4,8 @@ from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState, Visual
 from .bounce import BounceBehavior
 from .factory import BehaviorFactory, BehaviorFactoryError
 from .manager import TerrainManager
+from .none import NoneBehavior
+from .warp import WarpBehavior
 
 __all__ = [
     "BehaviorContext",
@@ -12,6 +14,8 @@ __all__ = [
     "TileState",
     "VisualState",
     "BounceBehavior",
+    "NoneBehavior",
+    "WarpBehavior",
     "BehaviorFactory",
     "BehaviorFactoryError",
     "TerrainManager",

@@ -118,6 +118,17 @@ def load(filepath: str) -> Level:
         level.width_pixels = level.width_tiles * TILE_SIZE
         level.height_pixels = level.height_tiles * TILE_SIZE
 
+    # Validate all behaviors with complete level context
+    for instance in level.terrain_manager.instances.values():
+        if instance.behavior:
+            try:
+                instance.behavior.validate(level)
+            except ValueError as e:
+                raise ParseError(
+                    f"Behavior validation failed at screen {instance.screen}, "
+                    f"tile ({instance.x}, {instance.y}): {e}"
+                )
+
     return level
 
 
@@ -153,6 +164,9 @@ def _process_zones_and_behaviors(
     height = len(tiles)
     width = len(tiles[0]) if tiles else 0
     zones = parser.parse_zones(zones_str, width, height)
+
+    # Store zones in level
+    level.zones[screen_idx] = zones
 
     # Collect all zone characters used in the grid (excluding '.')
     used_zones: Set[str] = set()
@@ -212,10 +226,17 @@ def _process_zones_and_behaviors(
                     f"must be a string"
                 )
 
+            # Extract parameters (everything except "type")
+            params = {k: v for k, v in behavior_config.items() if k != "type"}
+
             # Create behavior instance and assign to tile
+            # Convert y from top-down (zones grid) to bottom-up (terrain coords)
+            bottom_up_y = (height - 1) - y
             try:
-                behavior = factory.create(behavior_type)
-                level.terrain_manager.set_tile_behavior(screen_idx, x, y, behavior)
+                behavior = factory.create(behavior_type, params if params else None)
+                level.terrain_manager.set_tile_behavior(
+                    screen_idx, x, bottom_up_y, behavior
+                )
             except Exception as e:
                 raise ParseError(
                     f"Screen {screen_idx}: Failed to create behavior "

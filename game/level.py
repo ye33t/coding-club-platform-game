@@ -34,6 +34,10 @@ class Level:
         # Each entry represents a 16x16 pixel tile
         self.tiles: dict[int, List[List[int]]] = {}
 
+        # Initialize zones data (3D structure: screen -> y -> x)
+        # zones[screen][y][x] contains zone character (or '.' for no zone)
+        self.zones: dict[int, List[List[str]]] = {}
+
         # Initialize terrain manager for tile behaviors
         self.terrain_manager = TerrainManager()
 
@@ -198,3 +202,51 @@ class Level:
                 return "wall_right"
 
         return None
+
+    def find_zone_position(self, screen: int, zone_char: str) -> Tuple[float, float]:
+        """Find center position of a zone.
+
+        Returns the center of a zone in tile coordinates.
+        Assumes zone is already validated (1 tile high, contiguous).
+
+        Args:
+            screen: Screen index
+            zone_char: Zone character to find
+
+        Returns:
+            Tuple of (center_x, center_y) in tile coordinates
+
+        Raises:
+            ValueError: If zone not found (shouldn't happen after validation)
+        """
+        if screen not in self.zones:
+            raise ValueError(f"Screen {screen} not found in zones")
+
+        zones = self.zones[screen]
+        height = len(zones)
+
+        # Find all positions in zones grid (top-down coordinates)
+        positions_top_down = [
+            (x, y)
+            for y in range(height)
+            for x in range(len(zones[0]))
+            if zones[y][x] == zone_char
+        ]
+
+        if not positions_top_down:
+            raise ValueError(
+                f"Zone '{zone_char}' not found on screen {screen} "
+                f"(should have been validated at load time)"
+            )
+
+        # Convert to bottom-up coordinates
+        positions = [(x, (height - 1) - y) for x, y in positions_top_down]
+
+        # Calculate horizontal center (can be fractional)
+        x_coords = [x for x, y in positions]
+        center_x = (min(x_coords) + max(x_coords)) / 2.0
+
+        # Get y coordinate (all same due to validation)
+        center_y = float(positions[0][1])
+
+        return (center_x, center_y)

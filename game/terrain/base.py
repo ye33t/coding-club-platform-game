@@ -3,7 +3,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
+
+if TYPE_CHECKING:
+    from ..level import Level
 
 
 class TileEvent(Enum):
@@ -51,3 +54,16 @@ class TerrainBehavior(ABC):
             context: The context containing tile state and event info
         """
         pass
+
+    def validate(self, level: "Level") -> None:
+        """Validate behavior configuration against fully loaded level.
+
+        Called after level load completes. Override to implement validation.
+
+        Args:
+            level: The fully loaded level
+
+        Raises:
+            ValueError: If configuration is invalid
+        """
+        pass  # Default: no validation needed

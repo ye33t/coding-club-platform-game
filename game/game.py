@@ -43,7 +43,7 @@ class Game:
         # Initialize state machine
         self.state: State = PlayingState()
         self.state.on_enter(self)
-        
+
     def run(self):
         """Main game loop."""
         print("Starting NES Platform Game...")
@@ -51,9 +51,9 @@ class Game:
         print("  ESC   - Quit")
         print("  +/-   - Change Window Scale")
         print("  F3    - Toggle Debug Info")
-        print("  Arrow Keys - Move Mario")
-        print("  Shift - Run")
-        print("  Space - Jump")
+        print("  WASD  - Move Mario")
+        print("  J     - Run")
+        print("  K     - Jump")
 
         while self.running:
             # Calculate delta time
