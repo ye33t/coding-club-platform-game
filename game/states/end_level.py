@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from game.constants import TILE_SIZE
+
 from ..physics.config import FLAGPOLE_DESCENT_SPEED
 from .base import State
 
@@ -30,10 +32,11 @@ class EndLevelState(State):
 
     def on_enter(self, game: "Game") -> None:
         """Lock Mario to flagpole position."""
-        # Lock Mario's X position to flagpole center
-        game.world.mario.state.x = self.flagpole_x
+        # Lock Mario's X position to left of flagpole (offset by TILE_SIZE pixels)
+        game.world.mario.state.x = self.flagpole_x - TILE_SIZE
         # Stop horizontal movement
         game.world.mario.state.vx = 0
+        game.world.mario.state.facing_right = True
 
     def handle_events(self, game: "Game") -> None:
         """No input during flagpole descent."""
@@ -45,6 +48,12 @@ class EndLevelState(State):
 
         # Move Mario down at constant speed
         mario.state.y -= FLAGPOLE_DESCENT_SPEED * dt
+
+        # Clamp Mario's position at the base and flip him to the other side of the pole
+        if mario.state.y <= self.flagpole_base_y:
+            mario.state.y = self.flagpole_base_y
+            game.world.mario.state.x = self.flagpole_x
+            mario.state.facing_right = False
 
         # Update Mario's animation
         mario.update_animation()
