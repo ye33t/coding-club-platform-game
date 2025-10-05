@@ -1,9 +1,7 @@
-"""Death state - Mario death animation and reset."""
+"""Death state - Mario death animation."""
 
 from typing import TYPE_CHECKING
 
-from ..camera import CameraState
-from ..mario import MarioState
 from ..physics.config import DEATH_LEAP_VELOCITY, GRAVITY, RESET_THRESHOLD_Y
 from .base import State
 
@@ -12,13 +10,12 @@ if TYPE_CHECKING:
 
 
 class DeathState(State):
-    """State for animating Mario's death and resetting the game.
+    """State for animating Mario's death.
 
     This state:
     - Gives Mario an upward leap
     - Applies gravity to make him fall
-    - Resets Mario to spawn point when he falls far enough
-    - Transitions back to PlayingState
+    - Transitions to StartLevelState when animation is complete
     """
 
     def on_enter(self, game: "Game") -> None:
@@ -26,7 +23,7 @@ class DeathState(State):
         # Give Mario the death leap velocity
         game.world.mario.state.vy = DEATH_LEAP_VELOCITY
         game.world.mario.state.vx = 0
-        
+
         # Tells the renderer what animation to use for Mario
         game.world.mario.state.action = "dying"
 
@@ -47,22 +44,15 @@ class DeathState(State):
         # Update animation
         mario.update_animation()
 
-        # Check if Mario has fallen far enough to reset
+        # Check if Mario has fallen far enough to end animation
         if mario.state.y < RESET_THRESHOLD_Y:
-            # Reset Mario to spawn point
-            mario.state = MarioState(
-                x=game.world.level.spawn_x,
-                y=game.world.level.spawn_y,
-                screen=game.world.level.spawn_screen,
+            # Transition to start level with screen fade
+            from .screen_transition import ScreenTransitionState, TransitionMode
+            from .start_level import StartLevelState
+
+            game.transition_to(
+                ScreenTransitionState(self, StartLevelState())
             )
-
-            # Reset camera to beginning (both position and ratchet)
-            game.world.camera.state = CameraState(x=0, max_x=0)
-
-            # Transition back to playing
-            from .playing import PlayingState
-
-            game.transition_to(PlayingState())
 
     def draw(self, game: "Game", surface) -> None:
         """Draw Mario during death animation."""

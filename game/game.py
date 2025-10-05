@@ -15,7 +15,7 @@ from .constants import (
 )
 from .display import Display
 from .sprites import sprites
-from .states import PlayingState, State
+from .states import InitialState, State
 from .world import World
 
 
@@ -40,8 +40,8 @@ class Game:
         # Create World (owns level, mario, camera, physics)
         self.world = World()
 
-        # Initialize state machine
-        self.state: State = PlayingState()
+        # Initialize state machine with initial black screen
+        self.state: State = InitialState()
         self.state.on_enter(self)
 
     def run(self):

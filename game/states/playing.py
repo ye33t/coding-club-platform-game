@@ -41,8 +41,5 @@ class PlayingState(State):
 
     def draw(self, game, surface) -> None:
         """Draw everything to the screen during gameplay."""
-        # Draw level tiles
         game._draw_level(surface)
-
-        # Draw Mario at screen position (transform from world to screen)
         game._draw_mario(surface)
