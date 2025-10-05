@@ -117,8 +117,8 @@ BACKGROUND: SpriteSheet = {
 }
 
 OTHER: SpriteSheet = {
-    # Power-ups
-    "mushroom": (0, 16, 2, 2),
+    "flag": (92, 102, 2, 2),
+    "flag_castle": (110, 102, 2, 2),
 }
 
 # Map sheet names to their definitions
