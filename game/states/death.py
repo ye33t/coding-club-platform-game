@@ -47,12 +47,10 @@ class DeathState(State):
         # Check if Mario has fallen far enough to end animation
         if mario.state.y < RESET_THRESHOLD_Y:
             # Transition to start level with screen fade
-            from .screen_transition import ScreenTransitionState, TransitionMode
+            from .screen_transition import ScreenTransitionState
             from .start_level import StartLevelState
 
-            game.transition_to(
-                ScreenTransitionState(self, StartLevelState())
-            )
+            game.transition_to(ScreenTransitionState(self, StartLevelState()))
 
     def draw(self, game: "Game", surface) -> None:
         """Draw Mario during death animation."""

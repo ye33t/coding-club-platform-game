@@ -25,3 +25,11 @@ class WarpEvent(PhysicsEvent):
     """Mario entered a warp pipe."""
 
     warp_behavior: "WarpBehavior"
+
+
+@dataclass
+class EndLevelEvent(PhysicsEvent):
+    """Mario touched the flagpole."""
+
+    flagpole_x: float  # X pixel position (center of flagpole)
+    flagpole_base_y: float  # Y pixel position of base block top

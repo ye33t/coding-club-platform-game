@@ -464,7 +464,7 @@ TILE_DEFS: dict[int, TileDefinition] = {
     TILE_FLAG: {
         "sprite_sheet": "other",
         "sprite_name": "flag",
-        "collision_mask": MASK_EMPTY  
+        "collision_mask": MASK_EMPTY,
     },
     # Clouds
     TILE_CLOUD_TOP_LEFT: {

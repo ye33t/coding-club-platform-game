@@ -2,7 +2,7 @@
 
 import pygame
 
-from ..physics.events import DeathEvent, WarpEvent
+from ..physics.events import DeathEvent, EndLevelEvent, WarpEvent
 from .base import State
 
 
@@ -38,6 +38,12 @@ class PlayingState(State):
                 from .warp_enter import WarpEnterState
 
                 game.transition_to(WarpEnterState(event.warp_behavior))
+            elif isinstance(event, EndLevelEvent):
+                from .end_level import EndLevelState
+
+                game.transition_to(
+                    EndLevelState(event.flagpole_x, event.flagpole_base_y)
+                )
 
     def draw(self, game, surface) -> None:
         """Draw everything to the screen during gameplay."""

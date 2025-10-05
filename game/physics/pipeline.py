@@ -7,6 +7,7 @@ from .base import PhysicsContext, PhysicsProcessor
 from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
 from .death_event import DeathEventProcessor
+from .end_level_event import EndLevelEventProcessor
 from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
@@ -23,15 +24,16 @@ class PhysicsPipeline:
     1. Intent - Convert player input to target states
     2. DeathEvent - Check if Mario fell below screen (short-circuits)
     3. WarpEvent - Check if Mario is warping (short-circuits)
-    4. Movement - Apply friction/deceleration
-    5. Gravity - Apply gravity and handle jumping
-    6. Velocity - Update position from velocity
-    7. Boundaries - Enforce world boundaries
-    8. WallCollision (LEFT) - Detect and resolve left wall hits
-    9. WallCollision (RIGHT) - Detect and resolve right wall hits
-    10. CeilingCollision - Detect and resolve ceiling hits
-    11. GroundCollision - Detect and resolve ground/slopes
-    12. Action - Determine action from final state
+    4. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
+    5. Movement - Apply friction/deceleration
+    6. Gravity - Apply gravity and handle jumping
+    7. Velocity - Update position from velocity
+    8. Boundaries - Enforce world boundaries
+    9. WallCollision (LEFT) - Detect and resolve left wall hits
+    10. WallCollision (RIGHT) - Detect and resolve right wall hits
+    11. CeilingCollision - Detect and resolve ceiling hits
+    12. GroundCollision - Detect and resolve ground/slopes
+    13. Action - Determine action from final state
 
     This order ensures that:
     - Input is processed first
@@ -48,6 +50,7 @@ class PhysicsPipeline:
             IntentProcessor(),
             DeathEventProcessor(),
             WarpEventProcessor(),
+            EndLevelEventProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),

@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 
 from .base import TerrainBehavior
 from .bounce import BounceBehavior
+from .flagpole import FlagpoleBehavior
 from .none import NoneBehavior
 from .warp import WarpBehavior
 
@@ -48,8 +49,10 @@ class BehaviorFactory:
                     "Warp behavior missing required parameter: to_zone"
                 )
             return WarpBehavior(params["to_screen"], params["to_zone"])
+        elif behavior_type == "flagpole":
+            return FlagpoleBehavior()
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "
-                f"Available types: bounce, none, warp"
+                f"Available types: bounce, none, warp, flagpole"
             )

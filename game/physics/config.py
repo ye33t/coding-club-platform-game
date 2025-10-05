@@ -64,5 +64,9 @@ BOUNCE_DURATION = config["terrain"]["bounce_duration"]
 DEATH_LEAP_VELOCITY = config["death"]["death_leap_velocity"]
 RESET_THRESHOLD_Y = config["death"]["reset_threshold_y"]
 
+# Flagpole
+FLAGPOLE_TRIGGER_DISTANCE = config["flagpole"]["trigger_distance"]
+FLAGPOLE_DESCENT_SPEED = config["flagpole"]["descent_speed"]
+
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)

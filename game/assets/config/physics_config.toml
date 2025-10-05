@@ -115,3 +115,11 @@ death_leap_velocity = 200.0
 # How far below screen Mario must fall before reset (px)
 # Negative value means below y=0
 reset_threshold_y = -200.0
+
+[flagpole]
+# Horizontal distance from flagpole center that triggers end level (px)
+# Mario must be within this distance to grab the flagpole
+trigger_distance = 4.0
+
+# Speed at which Mario descends the flagpole (px/s)
+descent_speed = 60.0
