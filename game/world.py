@@ -1,9 +1,12 @@
 """World physics and game logic."""
 
+from typing import Optional
+
 from .camera import Camera
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
+from .physics.events import PhysicsEvent
 
 
 class World:
@@ -23,8 +26,12 @@ class World:
             self.level.spawn_screen,
         )
 
-    def update(self, keys, dt: float):
-        """Process Mario's intent and update his state."""
+    def update(self, keys, dt: float) -> Optional[PhysicsEvent]:
+        """Process Mario's intent and update his state.
+
+        Returns:
+            Physics event if one was raised (e.g., death, warp), None otherwise
+        """
         # Step 1: Get Mario's intent from input
         mario_intent = self.mario.get_intent(keys)
 
@@ -40,17 +47,24 @@ class World:
         # Step 3: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
 
-        # Step 4: Push state back to Mario
+        # Step 4: Check if an event was raised (short-circuits normal processing)
+        event: Optional[PhysicsEvent] = processed_context.event
+        if event is not None:
+            return event
+
+        # Step 5: Push state back to Mario
         self.mario.apply_state(processed_context.mario_state)
 
-        # Step 5: Apply camera state changes
+        # Step 6: Apply camera state changes
         self.camera.apply_state(processed_context.camera_state)
 
-        # Step 6: Update Mario's animation
+        # Step 7: Update Mario's animation
         self.mario.update_animation()
 
-        # Step 7: Update terrain behaviors
+        # Step 8: Update terrain behaviors
         self.level.terrain_manager.update(dt)
 
-        # Step 8: Update camera based on Mario's new position
+        # Step 9: Update camera based on Mario's new position
         self.camera.update(self.mario.state.x, self.level.width_pixels)
+
+        return None

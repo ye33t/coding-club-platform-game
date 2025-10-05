@@ -19,10 +19,6 @@ class GroundCollisionProcessor(PhysicsProcessor):
         mario_state = context.mario_state
         level = context.level
 
-        # Skip collision detection if dying
-        if mario_state.is_dying:
-            return context
-
         highest_ground = -1.0  # Start with invalid value
         found_ground = False
 

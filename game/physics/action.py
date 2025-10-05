@@ -49,9 +49,7 @@ class ActionProcessor(PhysicsProcessor):
 
     def _determine_action(self, mario_state, mario_intent) -> str:
         """Determine Mario's action based on his physics state (velocity-based)."""
-        if mario_state.is_dying:
-            return "dying"
-        elif not mario_state.on_ground:
+        if not mario_state.on_ground:
             return "jumping"
         # Animation based on actual velocity, not input
         # This ensures Mario animates even when sliding without input

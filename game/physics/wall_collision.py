@@ -37,10 +37,6 @@ class WallCollisionProcessor(PhysicsProcessor):
         mario_state = context.mario_state
         level = context.level
 
-        # Skip collision detection if dying
-        if mario_state.is_dying:
-            return context
-
         # Only check if moving in the appropriate direction
         if self.direction == Direction.LEFT and mario_state.vx >= 0:
             return context

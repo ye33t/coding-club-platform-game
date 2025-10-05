@@ -25,10 +25,6 @@ class GravityProcessor(PhysicsProcessor):
         intent = context.mario_intent
         dt = context.dt
 
-        # Skip normal gravity if dying (DeathPhysicsProcessor handles it)
-        if mario_state.is_dying:
-            return context
-
         # Handle jump initiation
         if intent.jump and mario_state.on_ground:
             # Determine jump velocity based on horizontal speed

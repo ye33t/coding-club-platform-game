@@ -60,7 +60,7 @@ class ScreenTransitionState(State):
 
         import pygame
 
-        from ..constants import BLACK, BACKGROUND_COLOR, NATIVE_HEIGHT, NATIVE_WIDTH
+        from ..constants import BACKGROUND_COLOR, BLACK, NATIVE_HEIGHT, NATIVE_WIDTH
 
         # Calculate progress (0.0 to 1.0 over full duration)
         progress = min(1.0, self.elapsed / self.duration)

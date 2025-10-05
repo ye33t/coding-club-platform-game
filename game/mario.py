@@ -47,10 +47,6 @@ class MarioState:
     on_ground: bool = True
     is_jumping: bool = False  # True when in a player-initiated jump
 
-    # Death state
-    is_dying: bool = False
-    death_leap_velocity: float = 0.0  # Initial upward velocity for death animation
-
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
     frame: int = 0

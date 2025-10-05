@@ -2,13 +2,14 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..camera import CameraState
 from ..mario import MarioIntent, MarioState
 
 if TYPE_CHECKING:
     from ..level import Level
+    from .events import PhysicsEvent
 
 
 @dataclass
@@ -24,6 +25,7 @@ class PhysicsContext:
     level: "Level"  # Level data for collision detection
     camera_state: CameraState  # Camera state for boundary checks
     dt: float  # Delta time for this frame
+    event: Optional["PhysicsEvent"] = None  # Event that triggers state transition
 
     # Future extensibility - these will be added as needed:
     # enemies: List[Enemy] = field(default_factory=list)
