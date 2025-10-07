@@ -1,6 +1,6 @@
 """Physics pipeline that orchestrates all physics processors."""
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from .action import ActionProcessor
 from .base import PhysicsContext, PhysicsProcessor
@@ -15,6 +15,9 @@ from .movement import MovementProcessor
 from .velocity import VelocityProcessor
 from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
+
+if TYPE_CHECKING:
+    from ..mario import MarioState
 
 
 class PhysicsPipeline:
@@ -44,7 +47,7 @@ class PhysicsPipeline:
     - Final action is determined
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
             IntentProcessor(),
@@ -119,7 +122,7 @@ class PhysicsPipeline:
             p for p in self.processors if not isinstance(p, processor_type)
         ]
 
-    def _debug_state(self, mario_state, label: str) -> None:
+    def _debug_state(self, mario_state: "MarioState", label: str) -> None:
         """Debug helper to print state."""
         print(
             f"  {label}: pos=({mario_state.x:.1f}, {mario_state.y:.1f}), "

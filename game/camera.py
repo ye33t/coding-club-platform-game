@@ -13,7 +13,7 @@ class CameraState:
     x: float = 0.0  # Current camera position (left edge of viewport)
     max_x: float = 0.0  # Maximum x position reached (ratchet mechanism)
 
-    def clone(self):
+    def clone(self) -> "CameraState":
         """Create a deep copy of this camera state."""
         return deepcopy(self)
 
@@ -21,7 +21,7 @@ class CameraState:
 class Camera:
     """Manages the viewport for horizontal scrolling."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize camera at world origin."""
         self.state: CameraState = CameraState()
 

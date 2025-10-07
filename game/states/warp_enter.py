@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from .base import State
 
 if TYPE_CHECKING:
-    from ..game import Game
     from ..terrain import WarpBehavior
 
 
@@ -21,15 +20,15 @@ class WarpEnterState(State):
         self.warp_behavior = warp_behavior
         self.distance_moved = 0.0
 
-    def on_enter(self, game: "Game") -> None:
+    def on_enter(self, game) -> None:
         """Start warp enter animation."""
         self.distance_moved = 0.0
 
-    def handle_events(self, game: "Game") -> None:
+    def handle_events(self, game) -> None:
         """No input during warp."""
         pass
 
-    def update(self, game: "Game", dt: float) -> None:
+    def update(self, game, dt: float) -> None:
         """Move mario down into pipe."""
         from ..physics.config import WARP_SPEED
 
@@ -48,9 +47,10 @@ class WarpEnterState(State):
                 ScreenTransitionState(self, next_state, TransitionMode.BOTH)
             )
 
-    def draw(self, game: "Game", surface) -> None:
+    def draw(self, game, surface) -> None:
         """Draw with mario behind tiles."""
+        game.draw_background(surface)
         # Draw mario first (behind)
         game.draw_mario(surface)
         # Draw tiles on top
-        game.draw_level(surface)
+        game.draw_terrain(surface)

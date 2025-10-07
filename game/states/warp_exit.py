@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from .base import State
 
 if TYPE_CHECKING:
-    from ..game import Game
     from ..terrain import WarpBehavior
 
 
@@ -21,7 +20,7 @@ class WarpExitState(State):
         self.warp_behavior = warp_behavior
         self.distance_moved = 0.0
 
-    def on_enter(self, game: "Game") -> None:
+    def on_enter(self, game) -> None:
         """Setup exit: change screen, position mario at destination."""
         # Find destination pipe position
         center_x, pipe_y = game.world.level.find_zone_position(
@@ -51,11 +50,11 @@ class WarpExitState(State):
 
         # Optional: Flash screen black here
 
-    def handle_events(self, game: "Game") -> None:
+    def handle_events(self, game) -> None:
         """No input during warp."""
         pass
 
-    def update(self, game: "Game", dt: float) -> None:
+    def update(self, game, dt: float) -> None:
         """Move mario up out of pipe."""
         from ..physics.config import WARP_SPEED
 
@@ -69,9 +68,10 @@ class WarpExitState(State):
 
             game.transition_to(PlayingState())
 
-    def draw(self, game: "Game", surface) -> None:
+    def draw(self, game, surface) -> None:
         """Draw with mario behind tiles."""
+        game.draw_background(surface)
         # Draw mario first (behind)
         game.draw_mario(surface)
         # Draw tiles on top
-        game.draw_level(surface)
+        game.draw_terrain(surface)

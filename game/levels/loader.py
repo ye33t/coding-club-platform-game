@@ -90,6 +90,26 @@ def load(filepath: str) -> Level:
         # Parse the layout and add to level
         level.tiles[screen_idx] = parser.parse_screen(layout, screen_idx)
 
+        # Process background layer if present
+        background_layout = screen_data.get("background")
+        if background_layout is not None:
+            if not isinstance(background_layout, str):
+                raise ParseError(f"Screen {screen_idx} background must be a string")
+
+            background_tiles = parser.parse_screen(background_layout, screen_idx)
+            terrain_tiles = level.tiles[screen_idx]
+            if len(background_tiles) != len(terrain_tiles):
+                raise ParseError(
+                    f"Screen {screen_idx} background must match layout height"
+                )
+            if terrain_tiles and background_tiles:
+                if len(background_tiles[0]) != len(terrain_tiles[0]):
+                    raise ParseError(
+                        f"Screen {screen_idx} background must match layout width"
+                    )
+
+            level.background_tiles[screen_idx] = background_tiles
+
         # Process zones and behaviors if present
         has_zones = "zones" in screen_data
         has_behaviors = "behaviors" in screen_data

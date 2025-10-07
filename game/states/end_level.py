@@ -1,14 +1,9 @@
 """End level state - Mario descending flagpole."""
 
-from typing import TYPE_CHECKING
-
 from game.constants import TILE_SIZE
 
 from ..physics.config import FLAGPOLE_DESCENT_SPEED
 from .base import State
-
-if TYPE_CHECKING:
-    from ..game import Game
 
 
 class EndLevelState(State):
@@ -30,7 +25,7 @@ class EndLevelState(State):
         self.flagpole_x = flagpole_x
         self.flagpole_base_y = flagpole_base_y
 
-    def on_enter(self, game: "Game") -> None:
+    def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
         # Lock Mario's X position to left of flagpole (offset by TILE_SIZE pixels)
         game.world.mario.state.x = self.flagpole_x - TILE_SIZE
@@ -38,11 +33,11 @@ class EndLevelState(State):
         game.world.mario.state.vx = 0
         game.world.mario.state.facing_right = True
 
-    def handle_events(self, game: "Game") -> None:
+    def handle_events(self, game) -> None:
         """No input during flagpole descent."""
         pass
 
-    def update(self, game: "Game", dt: float) -> None:
+    def update(self, game, dt: float) -> None:
         """Descend Mario down the flagpole."""
         mario = game.world.mario
 
@@ -68,7 +63,8 @@ class EndLevelState(State):
                 ScreenTransitionState(self, StartLevelState(), TransitionMode.BOTH)
             )
 
-    def draw(self, game: "Game", surface) -> None:
+    def draw(self, game, surface) -> None:
         """Draw Mario descending flagpole."""
-        game.draw_level(surface)
+        game.draw_background(surface)
+        game.draw_terrain(surface)
         game.draw_mario(surface)

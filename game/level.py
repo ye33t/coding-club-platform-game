@@ -14,7 +14,7 @@ class Level:
     not individual NES sub-tiles (8x8 pixels). Each tile is a 2x2 sub-tile sprite.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize an empty level.
 
         The level will be populated by a loader after construction.
@@ -33,6 +33,9 @@ class Level:
         # tiles[screen][y][x] where y=0 is bottom of each screen
         # Each entry represents a 16x16 pixel tile
         self.tiles: dict[int, List[List[int]]] = {}
+
+        # Initialize background tile data (screen -> y -> x)
+        self.background_tiles: dict[int, List[List[int]]] = {}
 
         # Initialize zones data (3D structure: screen -> y -> x)
         # zones[screen][y][x] contains zone character (or '.' for no zone)
@@ -69,6 +72,26 @@ class Level:
         if tile_y < 0 or tile_y >= self.height_tiles:
             return TILE_EMPTY
         return self.tiles[screen][tile_y][tile_x]
+
+    def get_background_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
+        """Get background tile type at given tile coordinates.
+
+        Args:
+            screen: Screen index
+            tile_x: X position in tiles
+            tile_y: Y position in tiles (0 = bottom of screen)
+
+        Returns:
+            Tile type, or TILE_EMPTY if out of bounds or no background
+        """
+        tiles = self.background_tiles.get(screen)
+        if tiles is None:
+            return TILE_EMPTY
+        if tile_x < 0 or tile_x >= self.width_tiles:
+            return TILE_EMPTY
+        if tile_y < 0 or tile_y >= self.height_tiles:
+            return TILE_EMPTY
+        return tiles[tile_y][tile_x]
 
     def get_tile_at_position(self, screen: int, world_x: float, world_y: float) -> int:
         """Get tile type at given world position.
@@ -125,6 +148,38 @@ class Level:
         for tile_y in range(self.height_tiles):
             for tile_x in range(start_tile_x, end_tile_x):
                 tile_type = self.tiles[screen][tile_y][tile_x]
+                if tile_type != TILE_EMPTY:
+                    visible_tiles.append((tile_x, tile_y, tile_type))
+
+        return visible_tiles
+
+    def get_visible_background_tiles(
+        self, screen: int, camera_x: float
+    ) -> List[Tuple[int, int, int]]:
+        """Get background tiles visible in the current camera view.
+
+        Args:
+            screen: Screen index
+            camera_x: Camera position in world pixels
+
+        Returns:
+            List of (tile_x, tile_y, tile_type) for background tiles within the view
+        """
+        tiles = self.background_tiles.get(screen)
+        if tiles is None:
+            return []
+
+        # Calculate tile range visible on screen
+        start_tile_x = max(0, int(camera_x // TILE_SIZE))
+        end_tile_x = min(
+            self.width_tiles,
+            int((camera_x + TILES_HORIZONTAL * TILE_SIZE) // TILE_SIZE) + 1,
+        )
+
+        visible_tiles = []
+        for tile_y in range(self.height_tiles):
+            for tile_x in range(start_tile_x, end_tile_x):
+                tile_type = tiles[tile_y][tile_x]
                 if tile_type != TILE_EMPTY:
                     visible_tiles.append((tile_x, tile_y, tile_type))
 
