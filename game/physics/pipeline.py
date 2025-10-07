@@ -9,6 +9,7 @@ from .ceiling_collision import CeilingCollisionProcessor
 from .death_event import DeathEventProcessor
 from .end_level_event import EndLevelEventProcessor
 from .gravity import GravityProcessor
+from .flagpole_clamp import FlagpoleClampProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
@@ -25,9 +26,9 @@ class PhysicsPipeline:
 
     The pipeline processes physics in this order:
     1. Intent - Convert player input to target states
-    2. DeathEvent - Check if Mario fell below screen (short-circuits)
+    2. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
     3. WarpEvent - Check if Mario is warping (short-circuits)
-    4. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
+    4. DeathEvent - Check if Mario fell below screen (short-circuits)
     5. Movement - Apply friction/deceleration
     6. Gravity - Apply gravity and handle jumping
     7. Velocity - Update position from velocity
@@ -36,7 +37,8 @@ class PhysicsPipeline:
     10. WallCollision (RIGHT) - Detect and resolve right wall hits
     11. CeilingCollision - Detect and resolve ceiling hits
     12. GroundCollision - Detect and resolve ground/slopes
-    13. Action - Determine action from final state
+    13. FlagpoleClamp - Prevent Mario from sliding past the flagpole
+    14. Action - Determine action from final state
 
     This order ensures that:
     - Input is processed first
@@ -51,9 +53,9 @@ class PhysicsPipeline:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
             IntentProcessor(),
-            DeathEventProcessor(),
-            WarpEventProcessor(),
             EndLevelEventProcessor(),
+            WarpEventProcessor(),
+            DeathEventProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
@@ -62,6 +64,7 @@ class PhysicsPipeline:
             WallCollisionProcessor(Direction.RIGHT),
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
+            FlagpoleClampProcessor(),
             ActionProcessor(),
         ]
 
