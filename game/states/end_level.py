@@ -70,5 +70,5 @@ class EndLevelState(State):
 
     def draw(self, game: "Game", surface) -> None:
         """Draw Mario descending flagpole."""
-        game._draw_level(surface)
-        game._draw_mario(surface)
+        game.draw_level(surface)
+        game.draw_mario(surface)
