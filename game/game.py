@@ -142,7 +142,7 @@ class Game:
     def draw_terrain(self, surface: pygame.Surface) -> None:
         """Draw the visible terrain tiles."""
         # Get visible tiles from level
-        visible_tiles = self.world.level.get_visible_tiles(
+        visible_tiles = self.world.level.get_visible_terrain_tiles(
             self.world.mario.state.screen, self.world.camera.x
         )
 
@@ -157,7 +157,7 @@ class Game:
             world_y = tile_y * TILE_SIZE
 
             # Apply visual state from behaviors
-            visual = self.world.level.get_tile_visual_state(
+            visual = self.world.level.get_terrain_tile_visual_state(
                 self.world.mario.state.screen, tile_x, tile_y
             )
             if visual:

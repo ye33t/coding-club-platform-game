@@ -29,10 +29,10 @@ class Level:
         self.spawn_tile_y: int = 0
         self.spawn_screen: int = 0
 
-        # Initialize tile data (3D structure: screen -> y -> x)
-        # tiles[screen][y][x] where y=0 is bottom of each screen
-        # Each entry represents a 16x16 pixel tile
-        self.tiles: dict[int, List[List[int]]] = {}
+        # Initialize terrain tile data (3D structure: screen -> y -> x)
+        # terrain_tiles[screen][y][x] where y=0 is bottom of each screen
+        # Each entry represents a 16x16 pixel terrain tile
+        self.terrain_tiles: dict[int, List[List[int]]] = {}
 
         # Initialize background tile data (screen -> y -> x)
         self.background_tiles: dict[int, List[List[int]]] = {}
@@ -54,25 +54,6 @@ class Level:
         """Get spawn Y position in pixels."""
         return self.spawn_tile_y * TILE_SIZE
 
-    def get_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
-        """Get tile type at given tile coordinates.
-
-        Args:
-            screen: Screen index
-            tile_x: X position in tiles
-            tile_y: Y position in tiles (0 = bottom of screen)
-
-        Returns:
-            Tile type, or TILE_EMPTY if out of bounds
-        """
-        if screen not in self.tiles:
-            raise ValueError(f"Screen {screen} not found in level data")
-        if tile_x < 0 or tile_x >= self.width_tiles:
-            return TILE_EMPTY
-        if tile_y < 0 or tile_y >= self.height_tiles:
-            return TILE_EMPTY
-        return self.tiles[screen][tile_y][tile_x]
-
     def get_background_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
         """Get background tile type at given tile coordinates.
 
@@ -92,66 +73,6 @@ class Level:
         if tile_y < 0 or tile_y >= self.height_tiles:
             return TILE_EMPTY
         return tiles[tile_y][tile_x]
-
-    def get_tile_at_position(self, screen: int, world_x: float, world_y: float) -> int:
-        """Get tile type at given world position.
-
-        Args:
-            screen: Screen index
-            world_x: X position in world pixels
-            world_y: Y position in screen-relative pixels (0-224, from bottom)
-
-        Returns:
-            Tile type at that position
-        """
-        tile_x = int(world_x // TILE_SIZE)
-        tile_y = int(world_y // TILE_SIZE)
-        return self.get_tile(screen, tile_x, tile_y)
-
-    def is_solid(self, tile_type: int) -> bool:
-        """Check if a tile type has any solid quadrants.
-
-        Args:
-            tile_type: The tile type to check
-
-        Returns:
-            True if tile has any solid collision
-        """
-        tile_def = self.get_tile_definition(tile_type)
-        if not tile_def:
-            raise ValueError(f"Tile definition for type {tile_type} not found")
-        return tile_def["collision_mask"] != 0
-
-    def get_visible_tiles(
-        self, screen: int, camera_x: float
-    ) -> List[Tuple[int, int, int]]:
-        """Get all tiles visible in the current camera view.
-
-        Args:
-            screen: Screen index
-            camera_x: Camera position in world pixels
-
-        Returns:
-            List of (tile_x, tile_y, tile_type) for tiles within the current view
-        """
-        if screen not in self.tiles:
-            raise ValueError(f"Screen {screen} not found in level data")
-
-        # Calculate tile range visible on screen
-        start_tile_x = max(0, int(camera_x // TILE_SIZE))
-        end_tile_x = min(
-            self.width_tiles,
-            int((camera_x + TILES_HORIZONTAL * TILE_SIZE) // TILE_SIZE) + 1,
-        )
-
-        visible_tiles = []
-        for tile_y in range(self.height_tiles):
-            for tile_x in range(start_tile_x, end_tile_x):
-                tile_type = self.tiles[screen][tile_y][tile_x]
-                if tile_type != TILE_EMPTY:
-                    visible_tiles.append((tile_x, tile_y, tile_type))
-
-        return visible_tiles
 
     def get_visible_background_tiles(
         self, screen: int, camera_x: float
@@ -185,6 +106,87 @@ class Level:
 
         return visible_tiles
 
+    def get_terrain_tile(self, screen: int, tile_x: int, tile_y: int) -> int:
+        """Get terrain tile type at given tile coordinates.
+
+        Args:
+            screen: Screen index
+            tile_x: X position in tiles
+            tile_y: Y position in tiles (0 = bottom of screen)
+
+        Returns:
+            Tile type, or TILE_EMPTY if out of bounds
+        """
+        if screen not in self.terrain_tiles:
+            raise ValueError(f"Screen {screen} not found in level data")
+        if tile_x < 0 or tile_x >= self.width_tiles:
+            return TILE_EMPTY
+        if tile_y < 0 or tile_y >= self.height_tiles:
+            return TILE_EMPTY
+        return self.terrain_tiles[screen][tile_y][tile_x]
+
+    def get_terrain_tile_at_position(
+        self, screen: int, world_x: float, world_y: float
+    ) -> int:
+        """Get terrain tile type at given world position.
+
+        Args:
+            screen: Screen index
+            world_x: X position in world pixels
+            world_y: Y position in screen-relative pixels (0-224, from bottom)
+
+        Returns:
+            Tile type at that position
+        """
+        tile_x = int(world_x // TILE_SIZE)
+        tile_y = int(world_y // TILE_SIZE)
+        return self.get_terrain_tile(screen, tile_x, tile_y)
+
+    def is_solid(self, tile_type: int) -> bool:
+        """Check if a tile type has any solid quadrants.
+
+        Args:
+            tile_type: The tile type to check
+
+        Returns:
+            True if tile has any solid collision
+        """
+        tile_def = self.get_tile_definition(tile_type)
+        if not tile_def:
+            raise ValueError(f"Tile definition for type {tile_type} not found")
+        return tile_def["collision_mask"] != 0
+
+    def get_visible_terrain_tiles(
+        self, screen: int, camera_x: float
+    ) -> List[Tuple[int, int, int]]:
+        """Get all terrain tiles visible in the current camera view.
+
+        Args:
+            screen: Screen index
+            camera_x: Camera position in world pixels
+
+        Returns:
+            List of (tile_x, tile_y, tile_type) for tiles within the current view
+        """
+        if screen not in self.terrain_tiles:
+            raise ValueError(f"Screen {screen} not found in level data")
+
+        # Calculate tile range visible on screen
+        start_tile_x = max(0, int(camera_x // TILE_SIZE))
+        end_tile_x = min(
+            self.width_tiles,
+            int((camera_x + TILES_HORIZONTAL * TILE_SIZE) // TILE_SIZE) + 1,
+        )
+
+        visible_tiles = []
+        for tile_y in range(self.height_tiles):
+            for tile_x in range(start_tile_x, end_tile_x):
+                tile_type = self.terrain_tiles[screen][tile_y][tile_x]
+                if tile_type != TILE_EMPTY:
+                    visible_tiles.append((tile_x, tile_y, tile_type))
+
+        return visible_tiles
+
     def get_tile_definition(self, tile_type: int) -> Optional[TileDefinition]:
         """Get the definition for a tile type.
 
@@ -196,10 +198,10 @@ class Level:
         """
         return get_tile_definition(tile_type)
 
-    def get_tile_visual_state(
+    def get_terrain_tile_visual_state(
         self, screen: int, tile_x: int, tile_y: int
     ) -> Optional[VisualState]:
-        """Get visual state for rendering a tile.
+        """Get visual state for rendering a terrain tile.
 
         Args:
             screen: The screen index
@@ -238,22 +240,22 @@ class Level:
 
         # Check ground collision (bottom edge)
         for tile_x in range(left_tile, right_tile + 1):
-            if self.is_solid(self.get_tile(screen, tile_x, bottom_tile)):
+            if self.is_solid(self.get_terrain_tile(screen, tile_x, bottom_tile)):
                 return "ground"
 
         # Check ceiling collision (top edge)
         for tile_x in range(left_tile, right_tile + 1):
-            if self.is_solid(self.get_tile(screen, tile_x, top_tile)):
+            if self.is_solid(self.get_terrain_tile(screen, tile_x, top_tile)):
                 return "ceiling"
 
         # Check left wall
         for tile_y in range(bottom_tile, top_tile + 1):
-            if self.is_solid(self.get_tile(screen, left_tile, tile_y)):
+            if self.is_solid(self.get_terrain_tile(screen, left_tile, tile_y)):
                 return "wall_left"
 
         # Check right wall
         for tile_y in range(bottom_tile, top_tile + 1):
-            if self.is_solid(self.get_tile(screen, right_tile, tile_y)):
+            if self.is_solid(self.get_terrain_tile(screen, right_tile, tile_y)):
                 return "wall_right"
 
         return None

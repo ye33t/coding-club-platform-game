@@ -61,7 +61,7 @@ class WallCollisionProcessor(PhysicsProcessor):
             tile_x = int(edge_x // TILE_SIZE)
             tile_y = int(sample_y // TILE_SIZE)
 
-            tile_type = level.get_tile(mario_state.screen, tile_x, tile_y)
+            tile_type = level.get_terrain_tile(mario_state.screen, tile_x, tile_y)
             tile_def = level.get_tile_definition(tile_type)
 
             if not tile_def or tile_def["collision_mask"] == 0:

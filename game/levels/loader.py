@@ -88,7 +88,7 @@ def load(filepath: str) -> Level:
             raise ParseError(f"Screen {screen_idx} layout must be a string")
 
         # Parse the layout and add to level
-        level.tiles[screen_idx] = parser.parse_screen(layout, screen_idx)
+        level.terrain_tiles[screen_idx] = parser.parse_screen(layout, screen_idx)
 
         # Process background layer if present
         background_layout = screen_data.get("background")
@@ -97,7 +97,7 @@ def load(filepath: str) -> Level:
                 raise ParseError(f"Screen {screen_idx} background must be a string")
 
             background_tiles = parser.parse_screen(background_layout, screen_idx)
-            terrain_tiles = level.tiles[screen_idx]
+            terrain_tiles = level.terrain_tiles[screen_idx]
             if len(background_tiles) != len(terrain_tiles):
                 raise ParseError(
                     f"Screen {screen_idx} background must match layout height"
@@ -126,13 +126,13 @@ def load(filepath: str) -> Level:
 
         if has_zones and has_behaviors:
             _process_zones_and_behaviors(
-                level, screen_idx, screen_data, parser, level.tiles[screen_idx]
+                level, screen_idx, screen_data, parser, level.terrain_tiles[screen_idx]
             )
 
     # Set level dimensions based on parsed screens
-    if level.tiles:
+    if level.terrain_tiles:
         # Assume all screens have the same dimensions
-        first_screen = next(iter(level.tiles.values()))
+        first_screen = next(iter(level.terrain_tiles.values()))
         level.height_tiles = len(first_screen)
         level.width_tiles = len(first_screen[0]) if first_screen else 0
         level.width_pixels = level.width_tiles * TILE_SIZE
