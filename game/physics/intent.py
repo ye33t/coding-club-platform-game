@@ -26,10 +26,6 @@ class IntentProcessor(PhysicsProcessor):
         mario_state = context.mario_state
         intent = context.mario_intent
 
-        # Ignore all input if dying
-        if mario_state.is_dying:
-            return context
-
         # Calculate target horizontal velocity based on intent
         target_vx = 0.0
 

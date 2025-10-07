@@ -124,6 +124,7 @@ TILE_LOLLIPOP_BOTTOM = 57
 # Flagpole
 TILE_FLAGPOLE_TOP = 58
 TILE_FLAGPOLE = 59
+TILE_FLAG = 1000
 
 # Clouds
 TILE_CLOUD_TOP_LEFT = 60
@@ -458,6 +459,11 @@ TILE_DEFS: dict[int, TileDefinition] = {
     TILE_FLAGPOLE: {
         "sprite_sheet": "background",
         "sprite_name": "flagpole",
+        "collision_mask": MASK_EMPTY,
+    },
+    TILE_FLAG: {
+        "sprite_sheet": "other",
+        "sprite_name": "flag",
         "collision_mask": MASK_EMPTY,
     },
     # Clouds

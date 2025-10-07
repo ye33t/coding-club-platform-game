@@ -6,15 +6,15 @@ from .action import ActionProcessor
 from .base import PhysicsContext, PhysicsProcessor
 from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
-from .death_physics import DeathPhysicsProcessor
-from .death_trigger import DeathTriggerProcessor
+from .death_event import DeathEventProcessor
+from .end_level_event import EndLevelEventProcessor
 from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
-from .reset import ResetProcessor
 from .velocity import VelocityProcessor
 from .wall_collision import Direction, WallCollisionProcessor
+from .warp_event import WarpEventProcessor
 
 
 class PhysicsPipeline:
@@ -22,12 +22,12 @@ class PhysicsPipeline:
 
     The pipeline processes physics in this order:
     1. Intent - Convert player input to target states
-    2. DeathPhysics - Handle death animation physics (early to override others)
-    3. Movement - Apply friction/deceleration
-    4. Gravity - Apply gravity and handle jumping
-    5. Velocity - Update position from velocity
-    6. DeathTrigger - Check if Mario fell below screen
-    7. Reset - Check if death animation complete
+    2. DeathEvent - Check if Mario fell below screen (short-circuits)
+    3. WarpEvent - Check if Mario is warping (short-circuits)
+    4. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
+    5. Movement - Apply friction/deceleration
+    6. Gravity - Apply gravity and handle jumping
+    7. Velocity - Update position from velocity
     8. Boundaries - Enforce world boundaries
     9. WallCollision (LEFT) - Detect and resolve left wall hits
     10. WallCollision (RIGHT) - Detect and resolve right wall hits
@@ -37,6 +37,7 @@ class PhysicsPipeline:
 
     This order ensures that:
     - Input is processed first
+    - Game events are detected early and short-circuit the pipeline
     - Forces are applied (gravity, friction)
     - Position is updated
     - Collisions are resolved separately
@@ -47,12 +48,12 @@ class PhysicsPipeline:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
             IntentProcessor(),
-            DeathPhysicsProcessor(),
+            DeathEventProcessor(),
+            WarpEventProcessor(),
+            EndLevelEventProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
-            DeathTriggerProcessor(),
-            ResetProcessor(),
             BoundaryProcessor(),
             WallCollisionProcessor(Direction.LEFT),
             WallCollisionProcessor(Direction.RIGHT),
@@ -71,7 +72,7 @@ class PhysicsPipeline:
             context: The initial physics context
 
         Returns:
-            The processed context
+            The processed context (may contain an event that short-circuits)
         """
         for processor in self.processors:
             if processor.is_enabled():
@@ -85,6 +86,12 @@ class PhysicsPipeline:
                 if self.debug:
                     name = processor.__class__.__name__
                     self._debug_state(context.mario_state, f"After {name}")
+
+                # Short-circuit if an event was raised
+                if context.event is not None:
+                    if self.debug:
+                        print(f"Event raised: {context.event.__class__.__name__}")
+                    return context
 
         return context
 

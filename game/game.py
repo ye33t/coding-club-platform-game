@@ -15,7 +15,7 @@ from .constants import (
 )
 from .display import Display
 from .sprites import sprites
-from .states import PlayingState, State
+from .states import InitialState, State
 from .world import World
 
 
@@ -40,8 +40,8 @@ class Game:
         # Create World (owns level, mario, camera, physics)
         self.world = World()
 
-        # Initialize state machine
-        self.state: State = PlayingState()
+        # Initialize state machine with initial black screen
+        self.state: State = InitialState()
         self.state.on_enter(self)
 
     def run(self):
@@ -114,7 +114,7 @@ class Game:
                 elif event.key == pygame.K_F3:
                     self.show_debug = not self.show_debug
 
-    def _draw_level(self, surface):
+    def draw_level(self, surface):
         """Draw the visible level tiles."""
         from .constants import TILE_SIZE
 
@@ -153,7 +153,7 @@ class Game:
                 int(screen_y),
             )
 
-    def _draw_mario(self, surface):
+    def draw_mario(self, surface):
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position
         screen_x, screen_y = self.world.camera.world_to_screen(

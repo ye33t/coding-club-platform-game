@@ -17,10 +17,6 @@ class BoundaryProcessor(PhysicsProcessor):
         camera_state = context.camera_state
         level = context.level
 
-        # Skip boundary enforcement if dying (allow falling off screen)
-        if mario_state.is_dying:
-            return context
-
         # Mario can't go left of the camera position (ratcheting)
         if mario_state.x < camera_state.x:
             mario_state.x = camera_state.x

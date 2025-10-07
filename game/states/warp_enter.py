@@ -40,15 +40,17 @@ class WarpEnterState(State):
 
         # When fully inside pipe, transition to exit
         if self.distance_moved >= warp_distance:
-            from .screen_transition import ScreenTransitionState
+            from .screen_transition import ScreenTransitionState, TransitionMode
             from .warp_exit import WarpExitState
 
             next_state = WarpExitState(self.warp_behavior)
-            game.transition_to(ScreenTransitionState(next_state))
+            game.transition_to(
+                ScreenTransitionState(self, next_state, TransitionMode.BOTH)
+            )
 
     def draw(self, game: "Game", surface) -> None:
         """Draw with mario behind tiles."""
         # Draw mario first (behind)
-        game._draw_mario(surface)
+        game.draw_mario(surface)
         # Draw tiles on top
-        game._draw_level(surface)
+        game.draw_level(surface)

@@ -21,10 +21,6 @@ class CeilingCollisionProcessor(PhysicsProcessor):
         mario_state = context.mario_state
         level = context.level
 
-        # Skip collision detection if dying
-        if mario_state.is_dying:
-            return context
-
         # Only check ceiling if moving upward
         if mario_state.vy <= 0:
             return context

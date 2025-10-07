@@ -18,10 +18,6 @@ class MovementProcessor(PhysicsProcessor):
         mario_state = context.mario_state
         intent = context.mario_intent
 
-        # Skip movement processing if dying
-        if mario_state.is_dying:
-            return context
-
         # If no horizontal movement intent, apply friction
         if not intent.move_left and not intent.move_right:
             speed = abs(mario_state.vx)

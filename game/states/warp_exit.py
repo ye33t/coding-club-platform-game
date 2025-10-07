@@ -72,6 +72,6 @@ class WarpExitState(State):
     def draw(self, game: "Game", surface) -> None:
         """Draw with mario behind tiles."""
         # Draw mario first (behind)
-        game._draw_mario(surface)
+        game.draw_mario(surface)
         # Draw tiles on top
-        game._draw_level(surface)
+        game.draw_level(surface)
