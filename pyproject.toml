@@ -9,6 +9,7 @@ packages = [{include = "game"}]
 format = "format:main"
 game = "main:main"
 test = "pytest:main"
+extractor = "sprite_extractor:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"

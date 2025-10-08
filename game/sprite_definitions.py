@@ -69,6 +69,7 @@ BACKGROUND: SpriteSheet = {
     "conveyor_vertical": (34, 83, 2, 2),
     "sand": (51, 83, 2, 2),
     "sand_dune": (68, 83, 2, 2),
+    
     # Decorations
     "treetop_left": (0, 212, 2, 2),
     "treetop_center": (17, 212, 2, 2),
@@ -88,7 +89,6 @@ BACKGROUND: SpriteSheet = {
     "pipe_left": (119, 229, 2, 2),
     "pipe_right": (136, 229, 2, 2),
     "bridge_rails": (0, 246, 2, 2),
-    # "sprite_18": (17, 246, 2, 2),
     "mound_top": (34, 246, 2, 2),
     "pipe_horizontal_mouth_top": (85, 246, 2, 2),
     "pipe_horizontal_top": (102, 246, 2, 2),
@@ -103,6 +103,7 @@ BACKGROUND: SpriteSheet = {
     "pipe_horizontal_bottom": (102, 263, 2, 2),
     "pipe_junction_bottom": (119, 263, 2, 2),
     "flagpole": (136, 263, 2, 2),
+    
     # Clouds
     "cloud_top_left": (298, 32, 2, 2),
     "cloud_top": (315, 32, 2, 2),
@@ -114,6 +115,11 @@ BACKGROUND: SpriteSheet = {
     "cloud_bottom_right": (332, 49, 2, 2),
     "water": (349, 49, 2, 2),
     "piano": (366, 49, 2, 2),
+    
+    # Misc
+    "item_box": (298, 94, 2, 2),
+    "coin": (298, 111, 2, 2),
+    "axe": (298, 141, 2, 2),
 }
 
 OTHER: SpriteSheet = {
