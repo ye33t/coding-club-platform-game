@@ -248,12 +248,6 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             if not isinstance(entry, dict):
                 raise ValueError(f"{path}: tile entries must be tables")
 
-            tile_id = entry.get("id")
-            if not isinstance(tile_id, int):
-                raise ValueError(f"{path}: tile id must be an integer")
-            if tile_id in tiles_by_id:
-                raise ValueError(f"{path}: tile id {tile_id} already defined")
-
             slug = entry.get("slug")
             if not isinstance(slug, str):
                 raise ValueError(f"{path}: tile slug must be a string")
@@ -304,7 +298,6 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                 )
 
             definition = TileDefinition(
-                id=tile_id,
                 slug=slug,
                 sprite_sheet=sprite_sheet,
                 sprite=sprite,
@@ -312,7 +305,6 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                 category=category,
             )
 
-            tiles_by_id[tile_id] = definition
             tiles_by_slug[slug] = definition
 
     return TileLibrary(collision_masks=collision_masks, tiles=tiles_by_slug)

@@ -9,496 +9,425 @@ top_half = 12
 full = 15
 
 [[tiles]]
-id = 0
 slug = "empty"
 sprite_sheet = "background"
 collision_mask = "empty"
 
 [[tiles]]
-id = 10
 slug = "ground"
 sprite_sheet = "background"
 sprite = "ground"
 collision_mask = "full"
 
 [[tiles]]
-id = 20
 slug = "brick"
 sprite_sheet = "background"
 sprite = "brick"
 collision_mask = "full"
 
 [[tiles]]
-id = 30
 slug = "brick_top"
 sprite_sheet = "background"
 sprite = "brick_top"
 collision_mask = "full"
 
 [[tiles]]
-id = 40
 slug = "block"
 sprite_sheet = "background"
 sprite = "block"
 collision_mask = "full"
 
 [[tiles]]
-id = 50
 slug = "block_flat"
 sprite_sheet = "background"
 sprite = "block_flat"
 collision_mask = "full"
 
 [[tiles]]
-id = 60
 slug = "earth"
 sprite_sheet = "background"
 sprite = "earth"
 collision_mask = "full"
 
 [[tiles]]
-id = 70
 slug = "bridge"
 sprite_sheet = "background"
 sprite = "bridge"
 collision_mask = "top_half"
 
 [[tiles]]
-id = 80
 slug = "rocks"
 sprite_sheet = "background"
 sprite = "rocks"
 collision_mask = "full"
 
 [[tiles]]
-id = 90
 slug = "sand"
 sprite_sheet = "background"
 sprite = "sand"
 collision_mask = "full"
 
 [[tiles]]
-id = 100
 slug = "sand_wave"
 sprite_sheet = "background"
 sprite = "sand_wave"
 collision_mask = "full"
 
 [[tiles]]
-id = 110
 slug = "sand_lines"
 sprite_sheet = "background"
 sprite = "sand_lines"
 collision_mask = "full"
 
 [[tiles]]
-id = 120
 slug = "sand_dune"
 sprite_sheet = "background"
 sprite = "sand_dune"
 collision_mask = "full"
 
 [[tiles]]
-id = 130
 slug = "void"
 sprite_sheet = "background"
 sprite = "void"
 collision_mask = "empty"
 
 [[tiles]]
-id = 140
 slug = "arch_left"
 sprite_sheet = "background"
 sprite = "arch_left"
 collision_mask = "left_half"
 
 [[tiles]]
-id = 150
 slug = "arch_center"
 sprite_sheet = "background"
 sprite = "arch_center"
 collision_mask = "empty"
 
 [[tiles]]
-id = 160
 slug = "arch_right"
 sprite_sheet = "background"
 sprite = "arch_right"
 collision_mask = "right_half"
 
 [[tiles]]
-id = 170
 slug = "battlement"
 sprite_sheet = "background"
 sprite = "battlement"
 collision_mask = "full"
 
 [[tiles]]
-id = 180
 slug = "battlement_1"
 sprite_sheet = "background"
 sprite = "battlement_1"
 collision_mask = "full"
 
 [[tiles]]
-id = 190
 slug = "bridge_rails"
 sprite_sheet = "background"
 sprite = "bridge_rails"
 collision_mask = "empty"
 
 [[tiles]]
-id = 200
 slug = "pipe_left"
 sprite_sheet = "background"
 sprite = "pipe_left"
 collision_mask = "full"
 
 [[tiles]]
-id = 210
 slug = "pipe_right"
 sprite_sheet = "background"
 sprite = "pipe_right"
 collision_mask = "full"
 
 [[tiles]]
-id = 220
 slug = "pipe_mouth_left"
 sprite_sheet = "background"
 sprite = "pipe_mouth_left"
 collision_mask = "full"
 
 [[tiles]]
-id = 230
 slug = "pipe_mouth_right"
 sprite_sheet = "background"
 sprite = "pipe_mouth_right"
 collision_mask = "full"
 
 [[tiles]]
-id = 240
 slug = "pipe_horizontal_top"
 sprite_sheet = "background"
 sprite = "pipe_horizontal_top"
 collision_mask = "full"
 
 [[tiles]]
-id = 250
 slug = "pipe_horizontal_bottom"
 sprite_sheet = "background"
 sprite = "pipe_horizontal_bottom"
 collision_mask = "full"
 
 [[tiles]]
-id = 260
 slug = "pipe_horizontal_mouth_top"
 sprite_sheet = "background"
 sprite = "pipe_horizontal_mouth_top"
 collision_mask = "full"
 
 [[tiles]]
-id = 270
 slug = "pipe_horizontal_mouth_bottom"
 sprite_sheet = "background"
 sprite = "pipe_horizontal_mouth_bottom"
 collision_mask = "full"
 
 [[tiles]]
-id = 280
 slug = "pipe_junction_top"
 sprite_sheet = "background"
 sprite = "pipe_junction_top"
 collision_mask = "full"
 
 [[tiles]]
-id = 290
 slug = "pipe_junction_bottom"
 sprite_sheet = "background"
 sprite = "pipe_junction_bottom"
 collision_mask = "full"
 
 [[tiles]]
-id = 300
 slug = "cannon_top"
 sprite_sheet = "background"
 sprite = "cannon_top"
 collision_mask = "full"
 
 [[tiles]]
-id = 310
 slug = "cannon_center"
 sprite_sheet = "background"
 sprite = "cannon_center"
 collision_mask = "full"
 
 [[tiles]]
-id = 320
 slug = "cannon_bottom"
 sprite_sheet = "background"
 sprite = "cannon_bottom"
 collision_mask = "full"
 
 [[tiles]]
-id = 330
 slug = "conveyor_corner_left"
 sprite_sheet = "background"
 sprite = "conveyor_corner_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 340
 slug = "conveyor_horizontal"
 sprite_sheet = "background"
 sprite = "conveyor_horizontal"
 collision_mask = "empty"
 
 [[tiles]]
-id = 350
 slug = "conveyor_right"
 sprite_sheet = "background"
 sprite = "conveyor_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 360
 slug = "conveyor_vertical"
 sprite_sheet = "background"
 sprite = "conveyor_vertical"
 collision_mask = "empty"
 
 [[tiles]]
-id = 370
 slug = "ladder"
 sprite_sheet = "background"
 sprite = "ladder"
 collision_mask = "full"
 
 [[tiles]]
-id = 380
 slug = "beanstalk"
 sprite_sheet = "background"
 sprite = "beanstalk"
 collision_mask = "full"
 
 [[tiles]]
-id = 390
 slug = "mound_top"
 sprite_sheet = "background"
 sprite = "mound_top"
 collision_mask = "empty"
 
 [[tiles]]
-id = 400
 slug = "mound_left_45"
 sprite_sheet = "background"
 sprite = "mound_left_45"
 collision_mask = "empty"
 
 [[tiles]]
-id = 410
 slug = "mound_left"
 sprite_sheet = "background"
 sprite = "mound_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 420
 slug = "mound_center"
 sprite_sheet = "background"
 sprite = "mound_center"
 collision_mask = "empty"
 
 [[tiles]]
-id = 430
 slug = "mound_right"
 sprite_sheet = "background"
 sprite = "mound_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 440
 slug = "mound_right_45"
 sprite_sheet = "background"
 sprite = "mound_right_45"
 collision_mask = "empty"
 
 [[tiles]]
-id = 450
 slug = "treetop_left"
 sprite_sheet = "background"
 sprite = "treetop_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 460
 slug = "treetop_center"
 sprite_sheet = "background"
 sprite = "treetop_center"
 collision_mask = "empty"
 
 [[tiles]]
-id = 470
 slug = "treetop_right"
 sprite_sheet = "background"
 sprite = "treetop_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 480
 slug = "mushroom_left"
 sprite_sheet = "background"
 sprite = "mushroom_left"
 collision_mask = "full"
 
 [[tiles]]
-id = 490
 slug = "mushroom_center"
 sprite_sheet = "background"
 sprite = "mushroom_center"
 collision_mask = "full"
 
 [[tiles]]
-id = 500
 slug = "mushroom_right"
 sprite_sheet = "background"
 sprite = "mushroom_right"
 collision_mask = "full"
 
 [[tiles]]
-id = 510
 slug = "bush_left"
 sprite_sheet = "background"
 sprite = "bush_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 520
 slug = "bush_center"
 sprite_sheet = "background"
 sprite = "bush_center"
 collision_mask = "empty"
 
 [[tiles]]
-id = 530
 slug = "bush_right"
 sprite_sheet = "background"
 sprite = "bush_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 540
 slug = "leaves"
 sprite_sheet = "background"
 sprite = "leaves"
 collision_mask = "empty"
 
 [[tiles]]
-id = 550
 slug = "lollipop_top"
 sprite_sheet = "background"
 sprite = "lollipop_top"
 collision_mask = "empty"
 
 [[tiles]]
-id = 560
 slug = "lollipop"
 sprite_sheet = "background"
 sprite = "lollipop"
 collision_mask = "empty"
 
 [[tiles]]
-id = 570
 slug = "lollipop_bottom"
 sprite_sheet = "background"
 sprite = "lollipop_bottom"
 collision_mask = "empty"
 
 [[tiles]]
-id = 580
 slug = "flagpole_top"
 sprite_sheet = "background"
 sprite = "flagpole_top"
 collision_mask = "empty"
 
 [[tiles]]
-id = 590
 slug = "flagpole"
 sprite_sheet = "background"
 sprite = "flagpole"
 collision_mask = "empty"
 
 [[tiles]]
-id = 600
 slug = "flag"
 sprite_sheet = "other"
 sprite = "flag"
 collision_mask = "empty"
 
 [[tiles]]
-id = 610
 slug = "cloud_top_left"
 sprite_sheet = "background"
 sprite = "cloud_top_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 620
 slug = "cloud_top"
 sprite_sheet = "background"
 sprite = "cloud_top"
 collision_mask = "empty"
 
 [[tiles]]
-id = 630
 slug = "cloud_top_right"
 sprite_sheet = "background"
 sprite = "cloud_top_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 640
 slug = "cloud_bottom_left"
 sprite_sheet = "background"
 sprite = "cloud_bottom_left"
 collision_mask = "empty"
 
 [[tiles]]
-id = 650
 slug = "cloud_bottom"
 sprite_sheet = "background"
 sprite = "cloud_bottom"
 collision_mask = "empty"
 
 [[tiles]]
-id = 660
 slug = "cloud_bottom_right"
 sprite_sheet = "background"
 sprite = "cloud_bottom_right"
 collision_mask = "empty"
 
 [[tiles]]
-id = 670
 slug = "cloud_block"
 sprite_sheet = "background"
 sprite = "cloud_block"
 collision_mask = "empty"
 
 [[tiles]]
-id = 680
 slug = "water_top"
 sprite_sheet = "background"
 sprite = "water_top"
 collision_mask = "empty"
 
 [[tiles]]
-id = 690
 slug = "water"
 sprite_sheet = "background"
 sprite = "water"
 collision_mask = "empty"
 
 [[tiles]]
-id = 700
 slug = "piano"
 sprite_sheet = "background"
 sprite = "piano"

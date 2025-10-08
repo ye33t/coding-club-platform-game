@@ -7,7 +7,6 @@ from dataclasses import dataclass
 class TileDefinition:
     """Metadata for a single tile ID."""
 
-    id: int
     slug: str
     sprite_sheet: str
     sprite: str | None
