@@ -42,9 +42,14 @@ TILE_DEFS: Dict[str, TileDefinition] = {
     tile.slug: _build_tile_definition(tile) for tile in _TILE_LIBRARY.tiles.values()
 }
 
+SIMPLE_TILES: Dict[str, str] = dict(_TILE_LIBRARY.simple_tiles)
+
 _EMPTY_TILE_SLUG = "empty"
 if _EMPTY_TILE_SLUG not in TILE_DEFS:
     raise RuntimeError("Tile slug 'empty' must be defined in tile assets.")
+
+if "." not in SIMPLE_TILES:
+    SIMPLE_TILES["."] = _EMPTY_TILE_SLUG
 
 
 def empty_tile_slug() -> str:
@@ -59,6 +64,12 @@ def require_tile(tile_slug: str) -> str:
     if tile_slug not in TILE_DEFS:
         raise KeyError(f"Tile '{tile_slug}' is not defined in tile assets.")
     return tile_slug
+
+
+def simple_tile_mapping() -> Dict[str, str]:
+    """Return mapping from simple layout characters to tile slugs."""
+
+    return dict(SIMPLE_TILES)
 
 
 def get_tile_definition(tile_slug: str) -> Optional[TileDefinition]:
@@ -84,4 +95,5 @@ __all__ = [
     "require_tile",
     "get_tile_definition",
     "is_quadrant_solid",
+    "simple_tile_mapping",
 ]

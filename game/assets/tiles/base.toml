@@ -2,22 +2,24 @@ version = 1
 
 [collision_masks]
 empty = 0
-bottom_half = 3
-right_half = 5
-left_half = 10
-top_half = 12
-full = 15
+bottom_half = 0b11
+right_half = 0b101
+left_half = 0b1010
+top_half = 0b1100
+full = 0b1111
 
 [[tiles]]
 slug = "empty"
 sprite_sheet = "background"
 collision_mask = "empty"
+simple_key = "."
 
 [[tiles]]
 slug = "ground"
 sprite_sheet = "background"
 sprite = "ground"
 collision_mask = "full"
+simple_key = "#"
 
 [[tiles]]
 slug = "brick"
@@ -30,12 +32,14 @@ slug = "brick_top"
 sprite_sheet = "background"
 sprite = "brick_top"
 collision_mask = "full"
+simple_key = "="
 
 [[tiles]]
 slug = "block"
 sprite_sheet = "background"
 sprite = "block"
 collision_mask = "full"
+simple_key = "@"
 
 [[tiles]]
 slug = "block_flat"

@@ -12,3 +12,4 @@ class TileDefinition:
     sprite: str | None
     collision_mask: int
     category: str | None = None
+    simple_key: str | None = None

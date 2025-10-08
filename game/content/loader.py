@@ -28,6 +28,7 @@ class TileLibrary:
 
     collision_masks: Mapping[str, int]
     tiles: Mapping[str, TileDefinition]
+    simple_tiles: Mapping[str, str]
 
 
 _SPRITE_CACHE: SpriteLibrary | None = None
@@ -211,8 +212,8 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
         )
 
     collision_masks: Dict[str, int] = {}
-    tiles_by_id: Dict[int, TileDefinition] = {}
     tiles_by_slug: Dict[str, TileDefinition] = {}
+    simple_tiles: Dict[str, str] = {}
 
     for path in files:
         with path.open("rb") as fh:
@@ -297,17 +298,40 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                     f"{path}: tile '{slug}' category must be a string if present"
                 )
 
+            simple_key = entry.get("simple_key")
+            if simple_key is not None:
+                if not isinstance(simple_key, str):
+                    raise ValueError(
+                        f"{path}: tile '{slug}' simple_key must be a string if provided"
+                    )
+                if len(simple_key) != 1:
+                    raise ValueError(
+                        f"{path}: tile '{slug}' simple_key must be a single character"
+                    )
+                if simple_key in simple_tiles:
+                    raise ValueError(
+                        f"{path}: simple_key '{simple_key}' already assigned to tile "
+                        f"'{simple_tiles[simple_key]}'"
+                    )
+
             definition = TileDefinition(
                 slug=slug,
                 sprite_sheet=sprite_sheet,
                 sprite=sprite,
                 collision_mask=mask,
                 category=category,
+                simple_key=simple_key,
             )
 
             tiles_by_slug[slug] = definition
+            if simple_key is not None:
+                simple_tiles[simple_key] = slug
 
-    return TileLibrary(collision_masks=collision_masks, tiles=tiles_by_slug)
+    return TileLibrary(
+        collision_masks=collision_masks,
+        tiles=tiles_by_slug,
+        simple_tiles=simple_tiles,
+    )
 
 
 def _coerce_int_pair(value: object, context: str) -> tuple[int, int]:

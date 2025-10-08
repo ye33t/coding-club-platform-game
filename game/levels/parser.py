@@ -3,7 +3,7 @@
 from typing import List, Set, Tuple
 
 from ..constants import TILES_HORIZONTAL, TILES_VERTICAL
-from ..tile_definitions import empty_tile_slug, require_tile
+from ..tile_definitions import empty_tile_slug, simple_tile_mapping
 from .converters import CONVERTERS
 from .types import Compound, ParserContext
 
@@ -19,13 +19,9 @@ class LevelParser:
 
     def __init__(self):
         """Initialize the parser with tile mappings."""
-        # Simple 1:1 character to tile mappings
-        self.simple_tiles = {
-            "#": require_tile("ground"),
-            "=": require_tile("brick_top"),
-            "@": require_tile("block"),
-            ".": empty_tile_slug(),
-        }
+        # Simple 1:1 character to tile mappings loaded from asset definitions
+        self.simple_tiles = simple_tile_mapping()
+        self._empty_tile = self.simple_tiles.get(".", empty_tile_slug())
 
     def parse_screen(self, layout: str, screen_index: int = 0) -> List[List[str]]:
         """Parse a screen layout into a tile slug grid.
@@ -204,8 +200,10 @@ class LevelParser:
             2D list of tile slugs
         """
         # Initialize with empty tiles
-        empty = empty_tile_slug()
-        tiles = [[empty for _ in range(context.width)] for _ in range(context.height)]
+        tiles = [
+            [self._empty_tile for _ in range(context.width)]
+            for _ in range(context.height)
+        ]
 
         # Track which positions have been processed
         processed = set()
