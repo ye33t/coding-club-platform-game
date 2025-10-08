@@ -1,0 +1,225 @@
+version: 1
+sprite_sheets:
+  background:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      ground:
+        offset: [0, 32]
+        size: [2, 2]
+      brick_top:
+        offset: [17, 32]
+        size: [2, 2]
+      brick:
+        offset: [34, 32]
+        size: [2, 2]
+      block_flat:
+        offset: [51, 32]
+        size: [2, 2]
+      battlement:
+        offset: [68, 32]
+        size: [2, 2]
+      battlement_1:
+        offset: [85, 32]
+        size: [2, 2]
+      arch_center:
+        offset: [102, 32]
+        size: [2, 2]
+      cannon_top:
+        offset: [119, 32]
+        size: [2, 2]
+      block:
+        offset: [0, 49]
+        size: [2, 2]
+      earth:
+        offset: [17, 49]
+        size: [2, 2]
+      bridge:
+        offset: [34, 49]
+        size: [2, 2]
+      arch_left:
+        offset: [51, 49]
+        size: [2, 2]
+      arch_right:
+        offset: [85, 49]
+        size: [2, 2]
+      void:
+        offset: [102, 49]
+        size: [2, 2]
+      cannon_center:
+        offset: [119, 49]
+        size: [2, 2]
+      rocks:
+        offset: [0, 66]
+        size: [2, 2]
+      conveyor_corner_left:
+        offset: [17, 66]
+        size: [2, 2]
+      conveyor_horizontal:
+        offset: [34, 66]
+        size: [2, 2]
+      conveyor_right:
+        offset: [51, 66]
+        size: [2, 2]
+      sand_wave:
+        offset: [68, 66]
+        size: [2, 2]
+      sand_lines:
+        offset: [85, 66]
+        size: [2, 2]
+      cannon_bottom:
+        offset: [119, 66]
+        size: [2, 2]
+      floating_blocks:
+        offset: [85, 84]
+        size: [5, 3]
+      beanstalk:
+        offset: [0, 83]
+        size: [2, 2]
+      ladder:
+        offset: [17, 83]
+        size: [2, 2]
+      conveyor_vertical:
+        offset: [34, 83]
+        size: [2, 2]
+      sand:
+        offset: [51, 83]
+        size: [2, 2]
+      sand_dune:
+        offset: [68, 83]
+        size: [2, 2]
+      treetop_left:
+        offset: [0, 212]
+        size: [2, 2]
+      treetop_center:
+        offset: [17, 212]
+        size: [2, 2]
+      treetop_right:
+        offset: [34, 212]
+        size: [2, 2]
+      mushroom_left:
+        offset: [51, 212]
+        size: [2, 2]
+      mushroom_center:
+        offset: [68, 212]
+        size: [2, 2]
+      mushroom_right:
+        offset: [85, 212]
+        size: [2, 2]
+      lollipop_top:
+        offset: [102, 212]
+        size: [2, 2]
+      pipe_mouth_left:
+        offset: [119, 212]
+        size: [2, 2]
+      pipe_mouth_right:
+        offset: [136, 212]
+        size: [2, 2]
+      bush_left:
+        offset: [0, 229]
+        size: [2, 2]
+      bush_center:
+        offset: [17, 229]
+        size: [2, 2]
+      bush_right:
+        offset: [34, 229]
+        size: [2, 2]
+      leaves:
+        offset: [51, 229]
+        size: [2, 2]
+      lollipop:
+        offset: [85, 229]
+        size: [2, 2]
+      lollipop_bottom:
+        offset: [102, 229]
+        size: [2, 2]
+      pipe_left:
+        offset: [119, 229]
+        size: [2, 2]
+      pipe_right:
+        offset: [136, 229]
+        size: [2, 2]
+      bridge_rails:
+        offset: [0, 246]
+        size: [2, 2]
+      mound_top:
+        offset: [34, 246]
+        size: [2, 2]
+      pipe_horizontal_mouth_top:
+        offset: [85, 246]
+        size: [2, 2]
+      pipe_horizontal_top:
+        offset: [102, 246]
+        size: [2, 2]
+      pipe_junction_top:
+        offset: [119, 246]
+        size: [2, 2]
+      flagpole_top:
+        offset: [136, 246]
+        size: [2, 2]
+      mound_left_45:
+        offset: [0, 263]
+        size: [2, 2]
+      mound_left:
+        offset: [17, 263]
+        size: [2, 2]
+      mound_center:
+        offset: [34, 263]
+        size: [2, 2]
+      mound_right:
+        offset: [51, 263]
+        size: [2, 2]
+      mound_right_45:
+        offset: [68, 263]
+        size: [2, 2]
+      pipe_horizontal_mouth_bottom:
+        offset: [85, 263]
+        size: [2, 2]
+      pipe_horizontal_bottom:
+        offset: [102, 263]
+        size: [2, 2]
+      pipe_junction_bottom:
+        offset: [119, 263]
+        size: [2, 2]
+      flagpole:
+        offset: [136, 263]
+        size: [2, 2]
+      cloud_top_left:
+        offset: [298, 32]
+        size: [2, 2]
+      cloud_top:
+        offset: [315, 32]
+        size: [2, 2]
+      cloud_top_right:
+        offset: [332, 32]
+        size: [2, 2]
+      water_top:
+        offset: [349, 32]
+        size: [2, 2]
+      cloud_block:
+        offset: [366, 32]
+        size: [2, 2]
+      cloud_bottom_left:
+        offset: [298, 49]
+        size: [2, 2]
+      cloud_bottom:
+        offset: [315, 49]
+        size: [2, 2]
+      cloud_bottom_right:
+        offset: [332, 49]
+        size: [2, 2]
+      water:
+        offset: [349, 49]
+        size: [2, 2]
+      piano:
+        offset: [366, 49]
+        size: [2, 2]
+      item_box:
+        offset: [298, 94]
+        size: [2, 2]
+      coin:
+        offset: [298, 111]
+        size: [2, 2]
+      axe:
+        offset: [298, 141]
+        size: [2, 2]

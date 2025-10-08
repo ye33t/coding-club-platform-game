@@ -1,0 +1,16 @@
+version = 1
+
+[[tiles]]
+slug = "bush_left"
+sprite_sheet = "background"
+sprite = "bush_left"
+
+[[tiles]]
+slug = "bush_center"
+sprite_sheet = "background"
+sprite = "bush_center"
+
+[[tiles]]
+slug = "bush_right"
+sprite_sheet = "background"
+sprite = "bush_right"

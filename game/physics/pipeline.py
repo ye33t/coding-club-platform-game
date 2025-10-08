@@ -8,8 +8,8 @@ from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
 from .death_event import DeathEventProcessor
 from .end_level_event import EndLevelEventProcessor
-from .gravity import GravityProcessor
 from .flagpole_clamp import FlagpoleClampProcessor
+from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor

@@ -1,0 +1,12 @@
+version: 1
+sprite_sheets:
+  other:
+    image: other.png
+    colorkey: [146, 144, 255]
+    sprites:
+      flag:
+        offset: [92, 102]
+        size: [2, 2]
+      flag_castle:
+        offset: [110, 102]
+        size: [2, 2]

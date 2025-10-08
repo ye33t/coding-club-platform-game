@@ -3,7 +3,7 @@
 from enum import Enum
 
 from ..constants import TILE_SIZE
-from ..tile_definitions import is_quadrant_solid
+from ..content.tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 from .config import WALL_DEAD_ZONE, WALL_SAMPLE_TOP_OFFSET
 
@@ -64,7 +64,7 @@ class WallCollisionProcessor(PhysicsProcessor):
             tile_type = level.get_terrain_tile(mario_state.screen, tile_x, tile_y)
             tile_def = level.get_tile_definition(tile_type)
 
-            if not tile_def or tile_def["collision_mask"] == 0:
+            if not tile_def or tile_def.collision_mask == 0:
                 continue
 
             # Determine which quadrant we're checking

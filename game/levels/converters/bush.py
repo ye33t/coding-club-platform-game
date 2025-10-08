@@ -2,10 +2,14 @@
 
 from typing import Dict, Optional, Tuple
 
-from ...tile_definitions import TILE_BUSH_CENTER, TILE_BUSH_LEFT, TILE_BUSH_RIGHT
+from ...content.tile_definitions import require_tile
 from ..types import Compound, ParserContext
 
-TilePlacement = Dict[Tuple[int, int], int]
+TilePlacement = Dict[Tuple[int, int], str]
+
+BUSH_LEFT = require_tile("bush_left")
+BUSH_CENTER = require_tile("bush_center")
+BUSH_RIGHT = require_tile("bush_right")
 
 
 def convert_bush(compound: Compound, context: ParserContext) -> Optional[TilePlacement]:
@@ -49,10 +53,10 @@ def convert_bush(compound: Compound, context: ParserContext) -> Optional[TilePla
 
     tiles: TilePlacement = {}
 
-    tiles[compound.to_world(0, 0)] = TILE_BUSH_LEFT
-    tiles[compound.to_world(compound.width - 1, 0)] = TILE_BUSH_RIGHT
+    tiles[compound.to_world(0, 0)] = BUSH_LEFT
+    tiles[compound.to_world(compound.width - 1, 0)] = BUSH_RIGHT
 
     for local_x in range(1, compound.width - 1):
-        tiles[compound.to_world(local_x, 0)] = TILE_BUSH_CENTER
+        tiles[compound.to_world(local_x, 0)] = BUSH_CENTER
 
     return tiles

@@ -8,7 +8,7 @@ import pygame
 
 from game.constants import TILE_SIZE
 
-from .sprites import sprites
+from .content import sprites
 
 
 def repeat(sprite: str, times: int) -> List[str]:

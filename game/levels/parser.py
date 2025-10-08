@@ -3,7 +3,7 @@
 from typing import List, Set, Tuple
 
 from ..constants import TILES_HORIZONTAL, TILES_VERTICAL
-from ..tile_definitions import TILE_BLOCK, TILE_BRICK_TOP, TILE_EMPTY, TILE_GROUND
+from ..content.tile_definitions import empty_tile_slug, simple_tile_mapping
 from .converters import CONVERTERS
 from .types import Compound, ParserContext
 
@@ -19,16 +19,12 @@ class LevelParser:
 
     def __init__(self):
         """Initialize the parser with tile mappings."""
-        # Simple 1:1 character to tile mappings
-        self.simple_tiles = {
-            "#": TILE_GROUND,
-            "=": TILE_BRICK_TOP,
-            "@": TILE_BLOCK,
-            ".": TILE_EMPTY,
-        }
+        # Simple 1:1 character to tile mappings loaded from asset definitions
+        self.simple_tiles = simple_tile_mapping()
+        self._empty_tile = self.simple_tiles.get(".", empty_tile_slug())
 
-    def parse_screen(self, layout: str, screen_index: int = 0) -> List[List[int]]:
-        """Parse a screen layout into a tile grid.
+    def parse_screen(self, layout: str, screen_index: int = 0) -> List[List[str]]:
+        """Parse a screen layout into a tile slug grid.
 
         The layout must be at least 16 columns wide and exactly 14 rows tall.
 
@@ -37,7 +33,7 @@ class LevelParser:
             screen_index: Index of the screen being parsed
 
         Returns:
-            2D list of tile IDs (14 rows x N columns, where N >= 16)
+            2D list of tile slugs (14 rows x N columns, where N >= 16)
 
         Raises:
             ParseError: If parsing fails
@@ -193,7 +189,7 @@ class LevelParser:
 
     def _parser_pass(
         self, compounds: List[Compound], context: ParserContext
-    ) -> List[List[int]]:
+    ) -> List[List[str]]:
         """Parser pass: Convert compounds and simple tiles to final tile grid.
 
         Args:
@@ -201,11 +197,12 @@ class LevelParser:
             context: Parser context
 
         Returns:
-            2D list of tile IDs
+            2D list of tile slugs
         """
         # Initialize with empty tiles
         tiles = [
-            [TILE_EMPTY for _ in range(context.width)] for _ in range(context.height)
+            [self._empty_tile for _ in range(context.width)]
+            for _ in range(context.height)
         ]
 
         # Track which positions have been processed
@@ -217,8 +214,8 @@ class LevelParser:
             if converter:
                 tile_placement = converter(compound, context)
                 if tile_placement:
-                    for (x, y), tile_id in tile_placement.items():
-                        tiles[y][x] = tile_id
+                    for (x, y), tile_slug in tile_placement.items():
+                        tiles[y][x] = tile_slug
                         processed.add((x, y))
             else:
                 # Unknown compound character - add to context errors

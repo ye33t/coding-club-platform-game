@@ -5,7 +5,7 @@
 - `game/` holds runtime code; key subpackages include `physics/` for the pipeline processors, `states/` for Mario state transitions, and `terrain/` plus `levels/` for tile data.
 - Art, level YAML, and runtime configs live under `game/assets/`; update these in tandem with code changes so assets remain in sync.
 - Reusable scripts (`main.py`, `sprite_extractor.py`, `format.py`) sit at the repo root, while automated checks belong in `format.py`.
-- Tests reside in `tests/`, mirroring the package layout (for example, physics tests live in `tests/physics/`); add new suites alongside the feature they cover.
+- Tests reside in `tests/`, mirroring the package layout, but we are not expanding the suite right now.
 
 ## Build, Test, and Development Commands
 
@@ -23,9 +23,8 @@
 
 ## Testing Guidelines
 
-- Pytest discovers files matching `tests/test_*.py`; mirror the package path and name test functions `test_<behavior>()`.
-- Run `poetry run pytest --cov=game` to gauge coverage when touching core gameplay or physics logic; prefer scenario-driven tests that validate the full pipeline.
-- When adding assets, include smoke tests that load the new resources to catch missing files early.
+- We are currently **not authoring new automated tests**; rely on manual QA plus the existing smoke test.
+- You can still run `poetry run pytest` to ensure the smoke check passes before shipping changes.
 
 ## Commit & Pull Request Guidelines
 

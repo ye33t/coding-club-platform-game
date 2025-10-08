@@ -13,7 +13,14 @@ poetry run game
 
 # Format and lint code
 poetry run format
+
+# Run existing smoke tests (no new tests should be added right now)
+poetry run pytest
 ```
+
+## Testing
+
+We keep the legacy smoke test around, but we're **not writing new automated tests** at the moment. Focus on manual playtesting when making changes; running `poetry run pytest` is still useful to ensure the existing check passes.
 
 ## Architecture (How the Game Works Inside)
 
@@ -52,9 +59,9 @@ game/
 ├── camera.py        # Camera following Mario
 ├── display.py       # Display scaling and double buffering
 ├── sprites.py       # Sprite sheet management (singleton pattern)
-├── sprite_sheet.py  # Individual sprite sheet loading
+├── content/         # Asset loaders, sprite sheet helpers, and tile metadata
 ├── constants.py     # Game configuration values
-└── sprite_definitions.py # Sprite coordinate mappings
+└── assets/          # Art, level YAML, and runtime config data
 ```
 
 ## Programming Concepts You'll Learn

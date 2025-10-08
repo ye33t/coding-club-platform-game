@@ -2,17 +2,17 @@
 
 from typing import Dict, Optional, Tuple
 
-from ...tile_definitions import (
-    TILE_CLOUD_BOTTOM,
-    TILE_CLOUD_BOTTOM_LEFT,
-    TILE_CLOUD_BOTTOM_RIGHT,
-    TILE_CLOUD_TOP,
-    TILE_CLOUD_TOP_LEFT,
-    TILE_CLOUD_TOP_RIGHT,
-)
+from ...content.tile_definitions import require_tile
 from ..types import Compound, ParserContext
 
-TilePlacement = Dict[Tuple[int, int], int]
+TilePlacement = Dict[Tuple[int, int], str]
+
+CLOUD_TOP_LEFT = require_tile("cloud_top_left")
+CLOUD_TOP = require_tile("cloud_top")
+CLOUD_TOP_RIGHT = require_tile("cloud_top_right")
+CLOUD_BOTTOM_LEFT = require_tile("cloud_bottom_left")
+CLOUD_BOTTOM = require_tile("cloud_bottom")
+CLOUD_BOTTOM_RIGHT = require_tile("cloud_bottom_right")
 
 
 def convert_cloud(
@@ -63,18 +63,18 @@ def convert_cloud(
             if local_y == expected_height - 1:
                 # Top row
                 if local_x == 0:
-                    tiles[world_pos] = TILE_CLOUD_TOP_LEFT
+                    tiles[world_pos] = CLOUD_TOP_LEFT
                 elif local_x == compound.width - 1:
-                    tiles[world_pos] = TILE_CLOUD_TOP_RIGHT
+                    tiles[world_pos] = CLOUD_TOP_RIGHT
                 else:
-                    tiles[world_pos] = TILE_CLOUD_TOP
+                    tiles[world_pos] = CLOUD_TOP
             else:
                 # Bottom row
                 if local_x == 0:
-                    tiles[world_pos] = TILE_CLOUD_BOTTOM_LEFT
+                    tiles[world_pos] = CLOUD_BOTTOM_LEFT
                 elif local_x == compound.width - 1:
-                    tiles[world_pos] = TILE_CLOUD_BOTTOM_RIGHT
+                    tiles[world_pos] = CLOUD_BOTTOM_RIGHT
                 else:
-                    tiles[world_pos] = TILE_CLOUD_BOTTOM
+                    tiles[world_pos] = CLOUD_BOTTOM
 
     return tiles
