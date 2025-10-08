@@ -54,3 +54,4 @@ class WarpEnterState(State):
         game.draw_mario(surface)
         # Draw tiles on top
         game.draw_terrain(surface)
+        game.draw_effects(surface)

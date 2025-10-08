@@ -67,4 +67,5 @@ class EndLevelState(State):
         """Draw Mario descending flagpole."""
         game.draw_background(surface)
         game.draw_terrain(surface)
+        game.draw_effects(surface)
         game.draw_mario(surface)

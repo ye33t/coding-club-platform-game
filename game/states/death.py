@@ -56,4 +56,5 @@ class DeathState(State):
         """Draw Mario during death animation."""
         game.draw_background(surface)
         game.draw_terrain(surface)
+        game.draw_effects(surface)
         game.draw_mario(surface)

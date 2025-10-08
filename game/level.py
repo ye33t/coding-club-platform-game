@@ -132,6 +132,20 @@ class Level:
             return self._empty_tile
         return cast(str, self.terrain_tiles[screen][tile_y][tile_x])
 
+    def set_terrain_tile(
+        self, screen: int, tile_x: int, tile_y: int, tile_slug: str
+    ) -> None:
+        """Replace a terrain tile with a new slug."""
+
+        if screen not in self.terrain_tiles:
+            raise ValueError(f"Screen {screen} not found in level data")
+        if tile_y < 0 or tile_y >= len(self.terrain_tiles[screen]):
+            raise ValueError(f"Tile Y {tile_y} out of bounds")
+        row = self.terrain_tiles[screen][tile_y]
+        if tile_x < 0 or tile_x >= len(row):
+            raise ValueError(f"Tile X {tile_x} out of bounds")
+        row[tile_x] = tile_slug
+
     def get_terrain_tile_at_position(
         self, screen: int, world_x: float, world_y: float
     ) -> str:
