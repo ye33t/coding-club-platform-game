@@ -20,7 +20,7 @@ class TileInstance:
 class TerrainManager:
     """Manages all tiles with behaviors in a level."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the terrain manager."""
         # Only store tiles that have behaviors
         self.instances: Dict[Tuple[int, int, int], TileInstance] = {}

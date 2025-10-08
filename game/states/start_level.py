@@ -1,13 +1,8 @@
 """Start level state - positions Mario and initializes level."""
 
-from typing import TYPE_CHECKING
-
 from ..camera import CameraState
 from ..mario import MarioState
 from .base import State
-
-if TYPE_CHECKING:
-    from ..game import Game
 
 
 class StartLevelState(State):
@@ -19,7 +14,7 @@ class StartLevelState(State):
     - Immediately transitions to PlayingState
     """
 
-    def on_enter(self, game: "Game") -> None:
+    def on_enter(self, game) -> None:
         """Initialize level start."""
         # Reset Mario to spawn point
         game.world.mario.state = MarioState(
@@ -31,17 +26,18 @@ class StartLevelState(State):
         # Reset camera to beginning (both position and ratchet)
         game.world.camera.state = CameraState(x=0, max_x=0)
 
-    def handle_events(self, game: "Game") -> None:
+    def handle_events(self, game) -> None:
         """No events during instant transition."""
         pass
 
-    def update(self, game: "Game", dt: float) -> None:
+    def update(self, game, dt: float) -> None:
         # Immediately transition to playing
         from .playing import PlayingState
 
         game.transition_to(PlayingState())
 
-    def draw(self, game: "Game", surface) -> None:
+    def draw(self, game, surface) -> None:
         """Draw the initial state."""
-        game.draw_level(surface)
+        game.draw_background(surface)
+        game.draw_terrain(surface)
         game.draw_mario(surface)
