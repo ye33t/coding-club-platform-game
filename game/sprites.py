@@ -10,8 +10,8 @@ from pygame import Surface
 
 from .constants import TRANSPARENT
 from .content import SpriteLibrary, load_sprite_sheets
+from .content.sprite_sheet import SpriteSheet
 from .content.sprites import SpriteSheetDef
-from .sprite_sheet import SpriteSheet
 
 
 class SpriteManager:

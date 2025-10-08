@@ -1,26 +1,15 @@
-"""Tile definitions mapping tile slugs to properties.
-
-Collision Masks:
-    Each tile (16x16 pixels) is divided into 4 quadrants (8x8 pixels each).
-    A 4-bit mask represents which quadrants are solid:
-
-    ┌────┬────┐
-    │ TL │ TR │  bit 3 (0b1000)  bit 2 (0b0100)
-    ├────┼────┤
-    │ BL │ BR │  bit 1 (0b0010)  bit 0 (0b0001)
-    └────┴────┘
-"""
+"""Tile definition registry backed by asset configuration."""
 
 from __future__ import annotations
 
 from typing import Dict, Optional, TypedDict
 
-from .content import load_tiles
-from .content.tiles import TileDefinition as TileDefinitionRecord
+from .loader import load_tiles
+from .tiles import TileDefinition as TileConfig
 
 
 class TileDefinition(TypedDict):
-    """Definition for a tile type referenced by slug."""
+    """Runtime metadata for a tile referenced by slug."""
 
     sprite_sheet: str
     sprite_name: str | None
@@ -30,7 +19,7 @@ class TileDefinition(TypedDict):
 _TILE_LIBRARY = load_tiles()
 
 
-def _build_tile_definition(record: TileDefinitionRecord) -> TileDefinition:
+def _build_tile_definition(record: TileConfig) -> TileDefinition:
     return TileDefinition(
         sprite_sheet=record.sprite_sheet,
         sprite_name=record.sprite,
@@ -93,7 +82,7 @@ __all__ = [
     "TILE_DEFS",
     "empty_tile_slug",
     "require_tile",
+    "simple_tile_mapping",
     "get_tile_definition",
     "is_quadrant_solid",
-    "simple_tile_mapping",
 ]

@@ -59,8 +59,7 @@ game/
 ├── camera.py        # Camera following Mario
 ├── display.py       # Display scaling and double buffering
 ├── sprites.py       # Sprite sheet management (singleton pattern)
-├── sprite_sheet.py  # Individual sprite sheet loading
-├── content/         # Loaders and dataclasses for sprite/tile metadata
+├── content/         # Asset loaders, sprite sheet helpers, and tile metadata
 ├── constants.py     # Game configuration values
 └── assets/          # Art, level YAML, and runtime config data
 ```

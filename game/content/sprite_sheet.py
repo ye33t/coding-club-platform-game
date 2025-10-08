@@ -7,7 +7,7 @@ from typing import Dict, Tuple, cast
 import pygame
 from pygame import Surface
 
-from .constants import SUB_TILE_SIZE
+from ..constants import SUB_TILE_SIZE
 
 ColorKey = Tuple[int, int, int] | str | None
 
@@ -36,18 +36,8 @@ class SpriteSheet:
             self.sheet.set_colorkey(self.colorkey)
 
     def get_sprite(self, x: int, y: int, tile_width: int, tile_height: int) -> Surface:
-        """Extract a sprite from the sheet using bottom-left coordinates.
+        """Extract a sprite from the sheet using bottom-left coordinates."""
 
-        Args:
-            x: X coordinate of sprite's bottom-left corner in pixels
-            y: Y coordinate of sprite's bottom-left corner in pixels
-            tile_width: Width of the sprite in tiles
-            tile_height: Height of the sprite in tiles
-
-        Returns:
-            pygame.Surface containing the sprite
-        """
-        # Calculate pixel dimensions
         width = tile_width * SUB_TILE_SIZE
         height = tile_height * SUB_TILE_SIZE
 
@@ -55,24 +45,18 @@ class SpriteSheet:
         top_left_x = x
         top_left_y = y - height
 
-        # Use coordinates as cache key
         cache_key = (x, y, tile_width, tile_height)
-
         if cache_key in self.sprite_cache:
             return self.sprite_cache[cache_key]
 
-        # Create surface for the sprite
         sprite = pygame.Surface((width, height))
 
         if self.colorkey:
             sprite.set_colorkey(self.colorkey)
             sprite.fill(self.colorkey)
 
-        # Copy the sprite area from the sheet
         sprite.blit(self.sheet, (0, 0), (top_left_x, top_left_y, width, height))
         sprite = sprite.convert()
 
-        # Cache the sprite
         self.sprite_cache[cache_key] = sprite
-
         return sprite

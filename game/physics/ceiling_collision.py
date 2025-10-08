@@ -1,8 +1,8 @@
 """Handle ceiling collision detection and resolution."""
 
 from ..constants import TILE_SIZE
+from ..content.tile_definitions import is_quadrant_solid
 from ..terrain import TileEvent
-from ..tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 from .config import CEILING_BOUNCE_VELOCITY, CEILING_SAMPLE_EDGE_OFFSET
 

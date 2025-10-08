@@ -2,7 +2,7 @@
 
 from typing import Dict, Optional, Tuple
 
-from ...tile_definitions import require_tile
+from ...content.tile_definitions import require_tile
 from ..types import Compound, ParserContext
 
 TilePlacement = Dict[Tuple[int, int], str]

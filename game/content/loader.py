@@ -235,7 +235,9 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                         f"{path}: collision mask '{alias}' already defined elsewhere"
                     )
                 if not isinstance(value, int):
-                    raise ValueError(f"{path}: collision mask '{alias}' must be an integer")
+                    raise ValueError(
+                        f"{path}: collision mask '{alias}' must be an integer"
+                    )
                 collision_masks[alias] = value
         else:
             raise ValueError(f"{path}: 'collision_masks' must be a mapping")

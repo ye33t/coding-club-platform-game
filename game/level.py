@@ -3,8 +3,12 @@
 from typing import List, Optional, Tuple, cast
 
 from .constants import TILE_SIZE, TILES_HORIZONTAL
+from .content.tile_definitions import (
+    TileDefinition,
+    empty_tile_slug,
+    get_tile_definition,
+)
 from .terrain import TerrainManager, VisualState
-from .tile_definitions import TileDefinition, empty_tile_slug, get_tile_definition
 
 
 class Level:

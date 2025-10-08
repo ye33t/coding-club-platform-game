@@ -3,7 +3,7 @@
 from typing import List, Set, Tuple
 
 from ..constants import TILES_HORIZONTAL, TILES_VERTICAL
-from ..tile_definitions import empty_tile_slug, simple_tile_mapping
+from ..content.tile_definitions import empty_tile_slug, simple_tile_mapping
 from .converters import CONVERTERS
 from .types import Compound, ParserContext
 

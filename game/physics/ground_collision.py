@@ -1,7 +1,7 @@
 """Handle ground collision detection and resolution."""
 
 from ..constants import TILE_SIZE
-from ..tile_definitions import is_quadrant_solid
+from ..content.tile_definitions import is_quadrant_solid
 from .base import PhysicsContext, PhysicsProcessor
 
 
