@@ -7,8 +7,8 @@ from typing import Dict
 
 import pygame
 
-from .content import load_sprite_sheets
 from .constants import TRANSPARENT
+from .content import load_sprite_sheets
 from .sprite_sheet import SpriteSheet
 
 
@@ -44,19 +44,9 @@ class SpriteManager:
         library = load_sprite_sheets()
         self.sheet_defs = dict(library.sheets)
 
-        # TODO: Move colorkey configuration into asset metadata if it diverges per sheet.
-        sheet_configs = {
-            "characters": ("characters.png", TRANSPARENT),
-            "blocks": ("blocks.png", "auto"),
-            "enemies": ("enemies.png", TRANSPARENT),
-            "background": ("background.png", TRANSPARENT),
-            "other": ("other.png", TRANSPARENT),
-        }
-
         for sheet_name, sheet_def in self.sheet_defs.items():
-            default_config = sheet_configs.get(sheet_name, (f"{sheet_name}.png", None))
-            filename = sheet_def.image or default_config[0]
-            colorkey = default_config[1]
+            filename = sheet_def.image or f"{sheet_name}.png"
+            colorkey = sheet_def.colorkey or TRANSPARENT
             filepath = os.path.join(assets_path, filename)
 
             if os.path.exists(filepath):

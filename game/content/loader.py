@@ -93,11 +93,19 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
             if not isinstance(sheet_name, str):
                 raise ValueError(f"{path}: sprite sheet keys must be strings")
             if not isinstance(sheet_payload, dict):
-                raise ValueError(f"{path}: sprite sheet '{sheet_name}' must be a mapping")
+                raise ValueError(
+                    f"{path}: sprite sheet '{sheet_name}' must be a mapping"
+                )
 
             # Initialize builder state
             builder = aggregated.setdefault(
-                sheet_name, {"image": None, "default_tile_size": None, "sprites": {}}
+                sheet_name,
+                {
+                    "image": None,
+                    "default_tile_size": None,
+                    "colorkey": None,
+                    "sprites": {},
+                },
             )
 
             image = sheet_payload.get("image")
@@ -118,7 +126,8 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
             default_tile_size = sheet_payload.get("default_tile_size")
             if default_tile_size is not None:
                 tile_size_tuple = _coerce_int_pair(
-                    default_tile_size, f"{path}: sprite sheet '{sheet_name}' default_tile_size"
+                    default_tile_size,
+                    f"{path}: sprite sheet '{sheet_name}' default_tile_size",
                 )
                 previous_default = builder["default_tile_size"]
                 if previous_default is None:
@@ -129,9 +138,26 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                         f"redefines default_tile_size from {previous_default} to {tile_size_tuple}"
                     )
 
+            colorkey_value = sheet_payload.get("colorkey")
+            if colorkey_value is not None:
+                coerced_colorkey = _coerce_colorkey(
+                    colorkey_value,
+                    f"{path}: sprite sheet '{sheet_name}' colorkey",
+                )
+                previous_colorkey = builder["colorkey"]
+                if previous_colorkey is None:
+                    builder["colorkey"] = coerced_colorkey
+                elif previous_colorkey != coerced_colorkey:
+                    raise ValueError(
+                        f"{path}: sprite sheet '{sheet_name}' "
+                        f"redefines colorkey from {previous_colorkey} to {coerced_colorkey}"
+                    )
+
             sprites = sheet_payload.get("sprites")
             if not isinstance(sprites, dict):
-                raise ValueError(f"{path}: sprite sheet '{sheet_name}' sprites must be a mapping")
+                raise ValueError(
+                    f"{path}: sprite sheet '{sheet_name}' sprites must be a mapping"
+                )
 
             sheet_sprites: Dict[str, SpriteFrame] = builder["sprites"]  # type: ignore[assignment]
             for sprite_name, sprite_data in sprites.items():
@@ -167,6 +193,7 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
             image=payload["image"],  # type: ignore[arg-type]
             sprites=sprites,
             default_tile_size=payload["default_tile_size"],  # type: ignore[arg-type]
+            colorkey=payload["colorkey"],  # type: ignore[arg-type]
         )
 
     return result
@@ -244,7 +271,9 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
 
             sprite = entry.get("sprite")
             if sprite is not None and not isinstance(sprite, str):
-                raise ValueError(f"{path}: tile '{slug}' sprite must be null or a string")
+                raise ValueError(
+                    f"{path}: tile '{slug}' sprite must be null or a string"
+                )
             if sprite is not None:
                 sheet = sprite_library.sheets[sprite_sheet]
                 if sprite not in sheet.sprites:
@@ -270,7 +299,9 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
 
             category = entry.get("category")
             if category is not None and not isinstance(category, str):
-                raise ValueError(f"{path}: tile '{slug}' category must be a string if present")
+                raise ValueError(
+                    f"{path}: tile '{slug}' category must be a string if present"
+                )
 
             definition = TileDefinition(
                 id=tile_id,
@@ -301,3 +332,20 @@ def _coerce_int_pair(value: object, context: str) -> tuple[int, int]:
         return raw
 
     return (_as_int(0, value[0]), _as_int(1, value[1]))
+
+
+def _coerce_colorkey(value: object, context: str) -> tuple[int, int, int] | str:
+    if isinstance(value, str):
+        if value != "auto":
+            raise ValueError(f"{context} string value must be 'auto'")
+        return value
+    if isinstance(value, (list, tuple)) and len(value) == 3:
+        components: list[int] = []
+        for idx, raw in enumerate(value):
+            if not isinstance(raw, int):
+                raise ValueError(f"{context}[{idx}] must be an integer")
+            if not 0 <= raw <= 255:
+                raise ValueError(f"{context}[{idx}] must be between 0 and 255")
+            components.append(raw)
+        return tuple(components)  # type: ignore[return-value]
+    raise ValueError(f"{context} must be 'auto' or a 3-item sequence of integers")

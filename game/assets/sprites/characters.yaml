@@ -2,6 +2,7 @@ version: 1
 sprite_sheets:
   characters:
     image: characters.png
+    colorkey: [146, 144, 255]
     sprites:
       small_mario_stand:
         offset: [0, 24]

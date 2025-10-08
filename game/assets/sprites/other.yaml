@@ -2,6 +2,7 @@ version: 1
 sprite_sheets:
   other:
     image: other.png
+    colorkey: [146, 144, 255]
     sprites:
       flag:
         offset: [92, 102]

@@ -20,3 +20,4 @@ class SpriteSheetDef:
     image: str | None
     sprites: Mapping[str, SpriteFrame]
     default_tile_size: tuple[int, int] | None = None
+    colorkey: tuple[int, int, int] | str | None = None

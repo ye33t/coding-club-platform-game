@@ -45,8 +45,7 @@ def _build_tile_definition(record: TileDefinitionRecord) -> TileDefinition:
 
 
 TILE_DEFS: Dict[int, TileDefinition] = {
-    tile.id: _build_tile_definition(tile)
-    for tile in _TILE_LIBRARY.tiles_by_id.values()
+    tile.id: _build_tile_definition(tile) for tile in _TILE_LIBRARY.tiles_by_id.values()
 }
 
 

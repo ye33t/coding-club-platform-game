@@ -2,6 +2,7 @@ version: 1
 sprite_sheets:
   background:
     image: background.png
+    colorkey: [146, 144, 255]
     sprites:
       ground:
         offset: [0, 32]

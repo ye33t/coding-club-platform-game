@@ -13,7 +13,14 @@ poetry run game
 
 # Format and lint code
 poetry run format
+
+# Run existing smoke tests (no new tests should be added right now)
+poetry run pytest
 ```
+
+## Testing
+
+We keep the legacy smoke test around, but we're **not writing new automated tests** at the moment. Focus on manual playtesting when making changes; running `poetry run pytest` is still useful to ensure the existing check passes.
 
 ## Architecture (How the Game Works Inside)
 

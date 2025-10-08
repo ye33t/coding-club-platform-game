@@ -2,6 +2,7 @@ version: 1
 sprite_sheets:
   enemies:
     image: enemies.png
+    colorkey: [146, 144, 255]
     sprites:
       goomba_walk1:
         offset: [0, 16]
