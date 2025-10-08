@@ -7,8 +7,7 @@ from typing import Dict, Mapping
 
 import yaml  # type: ignore[import]
 
-from .sprites import SpriteFrame, SpriteSheetDef
-from .tiles import TileDefinition
+from .types import SpriteFrame, SpriteSheetDef, TileConfig
 
 ASSET_ROOT = Path(__file__).resolve().parent.parent / "assets"
 SPRITE_DEFINITION_DIR = ASSET_ROOT / "sprites"
@@ -26,7 +25,7 @@ class SpriteLibrary:
 class TileLibrary:
     """Container for all tile definitions."""
 
-    tiles: Mapping[str, TileDefinition]
+    tiles: Mapping[str, TileConfig]
     simple_tiles: Mapping[str, str]
 
 
@@ -210,7 +209,7 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             f"No tile definition files found in {TILE_DEFINITION_DIR}"
         )
 
-    tiles_by_slug: Dict[str, TileDefinition] = {}
+    tiles_by_slug: Dict[str, TileConfig] = {}
     simple_tiles: Dict[str, str] = {}
 
     for path in files:
@@ -313,7 +312,7 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                         f"'{simple_tiles[simple_key]}'"
                     )
 
-            definition = TileDefinition(
+            definition = TileConfig(
                 slug=slug,
                 sprite_sheet=sprite_sheet,
                 sprite=sprite,

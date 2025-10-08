@@ -11,7 +11,7 @@ from pygame import Surface
 from .constants import TRANSPARENT
 from .content import SpriteLibrary, load_sprite_sheets
 from .content.sprite_sheet import SpriteSheet
-from .content.sprites import SpriteSheetDef
+from .content.types import SpriteSheetDef
 
 
 class SpriteManager:
@@ -26,7 +26,7 @@ class SpriteManager:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the sprite manager."""
         if getattr(self, "_initialized", False):
             return

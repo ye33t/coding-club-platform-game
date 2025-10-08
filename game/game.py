@@ -123,7 +123,7 @@ class Game:
 
         for tile_x, tile_y, tile_type in visible_tiles:
             tile_def = self.world.level.get_tile_definition(tile_type)
-            if not tile_def or not tile_def["sprite_name"]:
+            if not tile_def or not tile_def.sprite_name:
                 continue
 
             world_x = tile_x * TILE_SIZE
@@ -133,8 +133,8 @@ class Game:
 
             sprites.draw_at_position(
                 surface,
-                tile_def["sprite_sheet"],
-                tile_def["sprite_name"],
+                tile_def.sprite_sheet,
+                tile_def.sprite_name,
                 int(screen_x),
                 int(screen_y),
             )
@@ -149,7 +149,7 @@ class Game:
         for tile_x, tile_y, tile_type in visible_tiles:
             # Get tile definition
             tile_def = self.world.level.get_tile_definition(tile_type)
-            if not tile_def or not tile_def["sprite_name"]:
+            if not tile_def or not tile_def.sprite_name:
                 continue  # Skip empty tiles or tiles without sprites
 
             # Convert tile position to world pixels (each tile is 16x16 pixels)
@@ -170,8 +170,8 @@ class Game:
             # Draw the tile sprite
             sprites.draw_at_position(
                 surface,
-                tile_def["sprite_sheet"],
-                tile_def["sprite_name"],
+                tile_def.sprite_sheet,
+                tile_def.sprite_name,
                 int(screen_x),
                 int(screen_y),
             )

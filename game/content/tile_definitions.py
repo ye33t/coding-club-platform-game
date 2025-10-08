@@ -2,19 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional, TypedDict
+from typing import Dict, Optional
 
 from .loader import load_tiles
-from .tiles import TileDefinition as TileConfig
-
-
-class TileDefinition(TypedDict):
-    """Runtime metadata for a tile referenced by slug."""
-
-    sprite_sheet: str
-    sprite_name: str | None
-    collision_mask: int
-
+from .types import TileConfig, TileDefinition
 
 _TILE_LIBRARY = load_tiles()
 
@@ -74,7 +65,7 @@ def is_quadrant_solid(
 
     bit_pos = quadrant_y * 2 + quadrant_x
     quadrant_mask = 1 << bit_pos
-    return (tile_def["collision_mask"] & quadrant_mask) != 0
+    return (tile_def.collision_mask & quadrant_mask) != 0
 
 
 __all__ = [

@@ -161,7 +161,7 @@ class Level:
         tile_def = self.get_tile_definition(tile_type)
         if not tile_def:
             raise ValueError(f"Tile definition for slug {tile_type!r} not found")
-        return tile_def["collision_mask"] != 0
+        return tile_def.collision_mask != 0
 
     def get_visible_terrain_tiles(
         self, screen: int, camera_x: float

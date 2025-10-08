@@ -42,7 +42,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
                 tile_type = level.get_terrain_tile(mario_state.screen, tile_x, check_y)
                 tile_def = level.get_tile_definition(tile_type)
 
-                if not tile_def or tile_def["collision_mask"] == 0:
+                if not tile_def or tile_def.collision_mask == 0:
                     continue
 
                 # Each tile has 4 quadrants (8x8 pixels each)
