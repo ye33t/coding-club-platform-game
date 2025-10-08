@@ -1,6 +1,6 @@
 """Physics pipeline that orchestrates all physics processors."""
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from .action import ActionProcessor
 from .base import PhysicsContext, PhysicsProcessor
@@ -9,6 +9,7 @@ from .ceiling_collision import CeilingCollisionProcessor
 from .death_event import DeathEventProcessor
 from .end_level_event import EndLevelEventProcessor
 from .gravity import GravityProcessor
+from .flagpole_clamp import FlagpoleClampProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
@@ -16,15 +17,18 @@ from .velocity import VelocityProcessor
 from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
 
+if TYPE_CHECKING:
+    from ..mario import MarioState
+
 
 class PhysicsPipeline:
     """Orchestrates physics processors in a defined order.
 
     The pipeline processes physics in this order:
     1. Intent - Convert player input to target states
-    2. DeathEvent - Check if Mario fell below screen (short-circuits)
+    2. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
     3. WarpEvent - Check if Mario is warping (short-circuits)
-    4. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
+    4. DeathEvent - Check if Mario fell below screen (short-circuits)
     5. Movement - Apply friction/deceleration
     6. Gravity - Apply gravity and handle jumping
     7. Velocity - Update position from velocity
@@ -33,7 +37,8 @@ class PhysicsPipeline:
     10. WallCollision (RIGHT) - Detect and resolve right wall hits
     11. CeilingCollision - Detect and resolve ceiling hits
     12. GroundCollision - Detect and resolve ground/slopes
-    13. Action - Determine action from final state
+    13. FlagpoleClamp - Prevent Mario from sliding past the flagpole
+    14. Action - Determine action from final state
 
     This order ensures that:
     - Input is processed first
@@ -44,13 +49,13 @@ class PhysicsPipeline:
     - Final action is determined
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
             IntentProcessor(),
-            DeathEventProcessor(),
-            WarpEventProcessor(),
             EndLevelEventProcessor(),
+            WarpEventProcessor(),
+            DeathEventProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
@@ -59,6 +64,7 @@ class PhysicsPipeline:
             WallCollisionProcessor(Direction.RIGHT),
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
+            FlagpoleClampProcessor(),
             ActionProcessor(),
         ]
 
@@ -119,7 +125,7 @@ class PhysicsPipeline:
             p for p in self.processors if not isinstance(p, processor_type)
         ]
 
-    def _debug_state(self, mario_state, label: str) -> None:
+    def _debug_state(self, mario_state: "MarioState", label: str) -> None:
         """Debug helper to print state."""
         print(
             f"  {label}: pos=({mario_state.x:.1f}, {mario_state.y:.1f}), "

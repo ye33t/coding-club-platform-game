@@ -47,5 +47,6 @@ class PlayingState(State):
 
     def draw(self, game, surface) -> None:
         """Draw everything to the screen during gameplay."""
-        game.draw_level(surface)
+        game.draw_background(surface)
+        game.draw_terrain(surface)
         game.draw_mario(surface)

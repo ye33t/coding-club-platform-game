@@ -35,8 +35,10 @@ class EndLevelEventProcessor(PhysicsProcessor):
         flagpole_x = flagpole_instances[0].x
         flagpole_center_x = flagpole_x * TILE_SIZE + (TILE_SIZE / 2)
 
-        # Check if Mario is within trigger distance
-        if mario_state.x >= (flagpole_center_x - FLAGPOLE_TRIGGER_DISTANCE):
+        mario_right = mario_state.x + mario_state.width
+
+        # Check if Mario is within trigger distance using his right edge
+        if mario_right >= (flagpole_center_x - FLAGPOLE_TRIGGER_DISTANCE):
             # Calculate base Y position (minimum y among all flagpole instances)
             min_y = min(instance.y for instance in flagpole_instances)
             flagpole_base_y = min_y * TILE_SIZE

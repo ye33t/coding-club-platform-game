@@ -54,5 +54,6 @@ class DeathState(State):
 
     def draw(self, game: "Game", surface) -> None:
         """Draw Mario during death animation."""
-        game.draw_level(surface)
+        game.draw_background(surface)
+        game.draw_terrain(surface)
         game.draw_mario(surface)

@@ -11,6 +11,7 @@ from .constants import (
     SUB_TILE_SIZE,
     SUB_TILES_HORIZONTAL,
     SUB_TILES_VERTICAL,
+    TILE_SIZE,
     WHITE,
 )
 from .display import Display
@@ -22,7 +23,7 @@ from .world import World
 class Game:
     """Main game class handling the game loop and state."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize pygame and game components."""
         pygame.init()
         self.display = Display()
@@ -44,7 +45,7 @@ class Game:
         self.state: State = InitialState()
         self.state.on_enter(self)
 
-    def run(self):
+    def run(self) -> None:
         """Main game loop."""
         print("Starting NES Platform Game...")
         print("Controls:")
@@ -99,7 +100,7 @@ class Game:
         self.state = new_state
         self.state.on_enter(self)
 
-    def _handle_events(self):
+    def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -114,12 +115,34 @@ class Game:
                 elif event.key == pygame.K_F3:
                     self.show_debug = not self.show_debug
 
-    def draw_level(self, surface):
-        """Draw the visible level tiles."""
-        from .constants import TILE_SIZE
+    def draw_background(self, surface: pygame.Surface) -> None:
+        """Draw the visible background tiles."""
+        visible_tiles = self.world.level.get_visible_background_tiles(
+            self.world.mario.state.screen, self.world.camera.x
+        )
 
+        for tile_x, tile_y, tile_type in visible_tiles:
+            tile_def = self.world.level.get_tile_definition(tile_type)
+            if not tile_def or not tile_def["sprite_name"]:
+                continue
+
+            world_x = tile_x * TILE_SIZE
+            world_y = tile_y * TILE_SIZE
+
+            screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
+
+            sprites.draw_at_position(
+                surface,
+                tile_def["sprite_sheet"],
+                tile_def["sprite_name"],
+                int(screen_x),
+                int(screen_y),
+            )
+
+    def draw_terrain(self, surface: pygame.Surface) -> None:
+        """Draw the visible terrain tiles."""
         # Get visible tiles from level
-        visible_tiles = self.world.level.get_visible_tiles(
+        visible_tiles = self.world.level.get_visible_terrain_tiles(
             self.world.mario.state.screen, self.world.camera.x
         )
 
@@ -134,7 +157,7 @@ class Game:
             world_y = tile_y * TILE_SIZE
 
             # Apply visual state from behaviors
-            visual = self.world.level.get_tile_visual_state(
+            visual = self.world.level.get_terrain_tile_visual_state(
                 self.world.mario.state.screen, tile_x, tile_y
             )
             if visual:
@@ -153,7 +176,7 @@ class Game:
                 int(screen_y),
             )
 
-    def draw_mario(self, surface):
+    def draw_mario(self, surface: pygame.Surface) -> None:
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position
         screen_x, screen_y = self.world.camera.world_to_screen(
@@ -176,7 +199,7 @@ class Game:
                 reflected,
             )
 
-    def _draw_tile_grid(self, surface):
+    def _draw_tile_grid(self, surface: pygame.Surface) -> None:
         """Draw the 8x8 tile grid for debugging."""
         # Draw vertical lines
         for x in range(0, SUB_TILES_HORIZONTAL + 1):
@@ -196,7 +219,7 @@ class Game:
                 (SUB_TILES_HORIZONTAL * SUB_TILE_SIZE, y * SUB_TILE_SIZE),
             )
 
-    def _draw_debug_info(self, surface):
+    def _draw_debug_info(self, surface: pygame.Surface) -> None:
         """Draw debug information."""
         fps = self.clock.get_fps()
         mario = self.world.mario.state
@@ -217,6 +240,6 @@ class Game:
             surface.blit(text_surface, (4, y))
             y += 12
 
-    def quit(self):
+    def quit(self) -> None:
         """Quit the game."""
         self.running = False
