@@ -107,7 +107,9 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.running = False
+                    from .states.start_level import StartLevelState
+
+                    self.transition_to(StartLevelState())
                 elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
                     self.display.change_scale(-1)
                 elif event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:

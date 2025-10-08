@@ -1,7 +1,7 @@
 """Detect when Mario enters a warp pipe and raise warp event."""
 
 from ..constants import TILE_SIZE
-from ..terrain import WarpBehavior
+from ..terrain.warp import WarpBehavior
 from .base import PhysicsContext, PhysicsProcessor
 from .events import WarpEvent
 

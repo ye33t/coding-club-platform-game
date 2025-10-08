@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
-from ..physics.config import BOUNCE_DURATION, BOUNCE_GRAVITY, BOUNCE_VELOCITY
 from .base import BehaviorContext, TerrainBehavior, TileEvent
+from .bounce import BounceBehavior
 
 
 @dataclass(slots=True)
@@ -17,6 +17,7 @@ class ItemBoxBehavior(TerrainBehavior):
     used_slug: str = "item_box_used"
     coin_sheet: str = "background"
     coin_sprite: str = "coin"
+    _bounce: BounceBehavior = field(default_factory=BounceBehavior, init=False)
 
     def process(self, context: BehaviorContext) -> None:
         state = context.state
@@ -24,8 +25,6 @@ class ItemBoxBehavior(TerrainBehavior):
 
         if context.event == TileEvent.HIT_FROM_BELOW and not used:
             state.data["used"] = True
-            state.data["bounce_timer"] = BOUNCE_DURATION
-            state.visual.offset_y = 0.0
 
             context.queue_tile_change(
                 context.screen, context.tile_x, context.tile_y, self.used_slug
@@ -43,17 +42,4 @@ class ItemBoxBehavior(TerrainBehavior):
                 )
             )
 
-        timer = state.data.get("bounce_timer", 0.0)
-        if timer > 0:
-            elapsed = BOUNCE_DURATION - timer
-            offset = (BOUNCE_VELOCITY * elapsed) - (
-                0.5 * BOUNCE_GRAVITY * elapsed * elapsed
-            )
-            state.visual.offset_y = max(0.0, offset)
-
-            timer -= context.dt
-            if timer <= 0:
-                state.visual.offset_y = 0.0
-                state.data.pop("bounce_timer", None)
-            else:
-                state.data["bounce_timer"] = timer
+        self._bounce.process(context)

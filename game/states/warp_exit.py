@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .base import State
 
 if TYPE_CHECKING:
-    from ..terrain import WarpBehavior
+    from ..terrain.warp import WarpBehavior
 
 
 class WarpExitState(State):

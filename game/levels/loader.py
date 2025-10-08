@@ -217,7 +217,7 @@ def _process_zones_and_behaviors(
         )
 
     # Create behavior factory (import here to avoid circular imports)
-    from ..terrain import BehaviorFactory
+    from ..terrain.factory import BehaviorFactory
 
     factory = BehaviorFactory()
 
