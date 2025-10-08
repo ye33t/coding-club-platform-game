@@ -44,12 +44,6 @@ collision_mask = "full"
 simple_key = "@"
 
 [[tiles]]
-slug = "block_flat"
-sprite_sheet = "background"
-sprite = "block_flat"
-collision_mask = "full"
-
-[[tiles]]
 slug = "earth"
 sprite_sheet = "background"
 sprite = "earth"
