@@ -2,10 +2,14 @@
 
 from typing import Dict, Optional, Tuple
 
-from ...tile_definitions import TILE_BLOCK, TILE_FLAGPOLE, TILE_FLAGPOLE_TOP
+from ...tile_definitions import require_tile
 from ..types import Compound, ParserContext
 
-TilePlacement = Dict[Tuple[int, int], int]
+TilePlacement = Dict[Tuple[int, int], str]
+
+FLAGPOLE_BLOCK = require_tile("block")
+FLAGPOLE_MID = require_tile("flagpole")
+FLAGPOLE_TOP = require_tile("flagpole_top")
 
 
 def convert_flagpole(
@@ -52,12 +56,12 @@ def convert_flagpole(
     for y in range(compound.height):
         if y == 0:
             # Base block at the bottom
-            tiles[compound.to_world(0, y)] = TILE_BLOCK
+            tiles[compound.to_world(0, y)] = FLAGPOLE_BLOCK
         elif compound.is_top(y):
             # Flagpole top
-            tiles[compound.to_world(0, y)] = TILE_FLAGPOLE_TOP
+            tiles[compound.to_world(0, y)] = FLAGPOLE_TOP
         else:
             # Middle sections
-            tiles[compound.to_world(0, y)] = TILE_FLAGPOLE
+            tiles[compound.to_world(0, y)] = FLAGPOLE_MID
 
     return tiles

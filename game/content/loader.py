@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Mapping
 
-import yaml
+import yaml  # type: ignore[import]
 
 from .sprites import SpriteFrame, SpriteSheetDef
 from .tiles import TileDefinition
@@ -27,12 +27,19 @@ class TileLibrary:
     """Container for all tile definitions."""
 
     collision_masks: Mapping[str, int]
-    tiles_by_id: Mapping[int, TileDefinition]
-    tiles_by_slug: Mapping[str, TileDefinition]
+    tiles: Mapping[str, TileDefinition]
 
 
 _SPRITE_CACHE: SpriteLibrary | None = None
 _TILE_CACHE: TileLibrary | None = None
+
+
+@dataclass(slots=True)
+class _SpriteSheetBuilder:
+    image: str | None = None
+    default_tile_size: tuple[int, int] | None = None
+    colorkey: tuple[int, int, int] | str | None = None
+    sprites: Dict[str, SpriteFrame] = field(default_factory=dict)
 
 
 def load_sprite_sheets(reload: bool = False) -> SpriteLibrary:
@@ -68,7 +75,7 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
             f"Missing sprite definition directory: {SPRITE_DEFINITION_DIR}"
         )
 
-    aggregated: Dict[str, Dict[str, object]] = {}
+    aggregated: Dict[str, _SpriteSheetBuilder] = {}
 
     files = sorted(SPRITE_DEFINITION_DIR.glob("*.yaml"))
     if not files:
@@ -97,16 +104,7 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     f"{path}: sprite sheet '{sheet_name}' must be a mapping"
                 )
 
-            # Initialize builder state
-            builder = aggregated.setdefault(
-                sheet_name,
-                {
-                    "image": None,
-                    "default_tile_size": None,
-                    "colorkey": None,
-                    "sprites": {},
-                },
-            )
+            builder = aggregated.setdefault(sheet_name, _SpriteSheetBuilder())
 
             image = sheet_payload.get("image")
             if image is not None:
@@ -114,9 +112,9 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     raise ValueError(
                         f"{path}: sprite sheet '{sheet_name}' image must be a string"
                     )
-                previous_image = builder["image"]
+                previous_image = builder.image
                 if previous_image is None:
-                    builder["image"] = image
+                    builder.image = image
                 elif previous_image != image:
                     raise ValueError(
                         f"{path}: sprite sheet '{sheet_name}' "
@@ -129,13 +127,14 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     default_tile_size,
                     f"{path}: sprite sheet '{sheet_name}' default_tile_size",
                 )
-                previous_default = builder["default_tile_size"]
+                previous_default = builder.default_tile_size
                 if previous_default is None:
-                    builder["default_tile_size"] = tile_size_tuple
+                    builder.default_tile_size = tile_size_tuple
                 elif previous_default != tile_size_tuple:
                     raise ValueError(
                         f"{path}: sprite sheet '{sheet_name}' "
-                        f"redefines default_tile_size from {previous_default} to {tile_size_tuple}"
+                        f"redefines default_tile_size from {previous_default} "
+                        f"to {tile_size_tuple}"
                     )
 
             colorkey_value = sheet_payload.get("colorkey")
@@ -144,13 +143,14 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     colorkey_value,
                     f"{path}: sprite sheet '{sheet_name}' colorkey",
                 )
-                previous_colorkey = builder["colorkey"]
+                previous_colorkey = builder.colorkey
                 if previous_colorkey is None:
-                    builder["colorkey"] = coerced_colorkey
+                    builder.colorkey = coerced_colorkey
                 elif previous_colorkey != coerced_colorkey:
                     raise ValueError(
                         f"{path}: sprite sheet '{sheet_name}' "
-                        f"redefines colorkey from {previous_colorkey} to {coerced_colorkey}"
+                        f"redefines colorkey from {previous_colorkey} "
+                        f"to {coerced_colorkey}"
                     )
 
             sprites = sheet_payload.get("sprites")
@@ -159,19 +159,20 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     f"{path}: sprite sheet '{sheet_name}' sprites must be a mapping"
                 )
 
-            sheet_sprites: Dict[str, SpriteFrame] = builder["sprites"]  # type: ignore[assignment]
             for sprite_name, sprite_data in sprites.items():
                 if not isinstance(sprite_name, str):
                     raise ValueError(
                         f"{path}: sprite names in '{sheet_name}' must be strings"
                     )
-                if sprite_name in sheet_sprites:
+                if sprite_name in builder.sprites:
                     raise ValueError(
-                        f"{path}: sprite '{sprite_name}' already defined in sheet '{sheet_name}'"
+                        f"{path}: sprite '{sprite_name}' already defined "
+                        f"in sheet '{sheet_name}'"
                     )
                 if not isinstance(sprite_data, dict):
                     raise ValueError(
-                        f"{path}: sprite '{sprite_name}' in sheet '{sheet_name}' must be a mapping"
+                        f"{path}: sprite '{sprite_name}' in sheet "
+                        f"'{sheet_name}' must be a mapping"
                     )
 
                 offset = _coerce_int_pair(
@@ -183,20 +184,18 @@ def _parse_sprite_definitions() -> Dict[str, SpriteSheetDef]:
                     f"{path}: sprite '{sprite_name}' in sheet '{sheet_name}' size",
                 )
 
-                sheet_sprites[sprite_name] = SpriteFrame(offset=offset, size=size)
+                builder.sprites[sprite_name] = SpriteFrame(offset=offset, size=size)
 
-    result: Dict[str, SpriteSheetDef] = {}
-    for sheet_name, payload in aggregated.items():
-        sprites: Dict[str, SpriteFrame] = payload["sprites"]  # type: ignore[assignment]
-        result[sheet_name] = SpriteSheetDef(
+    return {
+        sheet_name: SpriteSheetDef(
             name=sheet_name,
-            image=payload["image"],  # type: ignore[arg-type]
-            sprites=sprites,
-            default_tile_size=payload["default_tile_size"],  # type: ignore[arg-type]
-            colorkey=payload["colorkey"],  # type: ignore[arg-type]
+            image=builder.image,
+            sprites=builder.sprites,
+            default_tile_size=builder.default_tile_size,
+            colorkey=builder.colorkey,
         )
-
-    return result
+        for sheet_name, builder in aggregated.items()
+    }
 
 
 def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
@@ -266,7 +265,8 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                 raise ValueError(f"{path}: tile '{slug}' sprite_sheet must be a string")
             if sprite_sheet not in sprite_library.sheets:
                 raise ValueError(
-                    f"{path}: tile '{slug}' references unknown sprite sheet '{sprite_sheet}'"
+                    f"{path}: tile '{slug}' references unknown sprite sheet "
+                    f"'{sprite_sheet}'"
                 )
 
             sprite = entry.get("sprite")
@@ -315,11 +315,7 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             tiles_by_id[tile_id] = definition
             tiles_by_slug[slug] = definition
 
-    return TileLibrary(
-        collision_masks=collision_masks,
-        tiles_by_id=tiles_by_id,
-        tiles_by_slug=tiles_by_slug,
-    )
+    return TileLibrary(collision_masks=collision_masks, tiles=tiles_by_slug)
 
 
 def _coerce_int_pair(value: object, context: str) -> tuple[int, int]:

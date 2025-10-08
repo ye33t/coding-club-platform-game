@@ -1,4 +1,4 @@
-"""Tile definitions mapping tile IDs to properties.
+"""Tile definitions mapping tile slugs to properties.
 
 Collision Masks:
     Each tile (16x16 pixels) is divided into 4 quadrants (8x8 pixels each).
@@ -20,18 +20,12 @@ from .content.tiles import TileDefinition as TileDefinitionRecord
 
 
 class TileDefinition(TypedDict):
-    """Definition for a tile type."""
+    """Definition for a tile type referenced by slug."""
 
     sprite_sheet: str
     sprite_name: str | None
     collision_mask: int
 
-
-# Quadrant bit masks
-QUAD_TL = 0b1000  # Top-left quadrant
-QUAD_TR = 0b0100  # Top-right quadrant
-QUAD_BL = 0b0010  # Bottom-left quadrant
-QUAD_BR = 0b0001  # Bottom-right quadrant
 
 _TILE_LIBRARY = load_tiles()
 
@@ -44,41 +38,50 @@ def _build_tile_definition(record: TileDefinitionRecord) -> TileDefinition:
     )
 
 
-TILE_DEFS: Dict[int, TileDefinition] = {
-    tile.id: _build_tile_definition(tile) for tile in _TILE_LIBRARY.tiles_by_id.values()
+TILE_DEFS: Dict[str, TileDefinition] = {
+    tile.slug: _build_tile_definition(tile) for tile in _TILE_LIBRARY.tiles.values()
 }
 
-
-def _register_constants():
-    # Collision mask aliases
-    for alias, value in _TILE_LIBRARY.collision_masks.items():
-        name = f"MASK_{alias.upper()}"
-        if name in globals():
-            raise ValueError(f"Duplicate collision mask constant '{name}'")
-        globals()[name] = value
-
-    # Tile ID constants
-    for tile in _TILE_LIBRARY.tiles_by_id.values():
-        const_name = f"TILE_{tile.slug.upper()}"
-        if const_name in globals():
-            raise ValueError(f"Duplicate tile constant '{const_name}'")
-        globals()[const_name] = tile.id
+_EMPTY_TILE_SLUG = "empty"
+if _EMPTY_TILE_SLUG not in TILE_DEFS:
+    raise RuntimeError("Tile slug 'empty' must be defined in tile assets.")
 
 
-_register_constants()
+def empty_tile_slug() -> str:
+    """Return the slug used for empty space tiles."""
+
+    return _EMPTY_TILE_SLUG
 
 
-def get_tile_definition(tile_type: int) -> Optional[TileDefinition]:
-    """Get the definition for a tile type."""
+def require_tile(tile_slug: str) -> str:
+    """Ensure a tile slug is defined, returning it for convenience."""
 
-    return TILE_DEFS.get(tile_type)
+    if tile_slug not in TILE_DEFS:
+        raise KeyError(f"Tile '{tile_slug}' is not defined in tile assets.")
+    return tile_slug
+
+
+def get_tile_definition(tile_slug: str) -> Optional[TileDefinition]:
+    """Get the definition for a tile slug."""
+
+    return TILE_DEFS.get(tile_slug)
 
 
 def is_quadrant_solid(
     tile_def: TileDefinition, quadrant_x: int, quadrant_y: int
 ) -> bool:
-    """Check if a specific quadrant of a tile is solid using bitwise operations."""
+    """Check if a specific quadrant of a tile is solid."""
 
     bit_pos = quadrant_y * 2 + quadrant_x
     quadrant_mask = 1 << bit_pos
     return (tile_def["collision_mask"] & quadrant_mask) != 0
+
+
+__all__ = [
+    "TileDefinition",
+    "TILE_DEFS",
+    "empty_tile_slug",
+    "require_tile",
+    "get_tile_definition",
+    "is_quadrant_solid",
+]

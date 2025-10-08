@@ -2,15 +2,15 @@
 
 from typing import Dict, Optional, Tuple
 
-from ...tile_definitions import (
-    TILE_PIPE_LEFT,
-    TILE_PIPE_MOUTH_LEFT,
-    TILE_PIPE_MOUTH_RIGHT,
-    TILE_PIPE_RIGHT,
-)
+from ...tile_definitions import require_tile
 from ..types import Compound, ParserContext
 
-TilePlacement = Dict[Tuple[int, int], int]
+TilePlacement = Dict[Tuple[int, int], str]
+
+PIPE_LEFT = require_tile("pipe_left")
+PIPE_RIGHT = require_tile("pipe_right")
+PIPE_MOUTH_LEFT = require_tile("pipe_mouth_left")
+PIPE_MOUTH_RIGHT = require_tile("pipe_mouth_right")
 
 
 def convert_pipe(compound: Compound, context: ParserContext) -> Optional[TilePlacement]:
@@ -46,11 +46,11 @@ def convert_pipe(compound: Compound, context: ParserContext) -> Optional[TilePla
     for y in range(compound.height):
         if compound.is_top(y):
             # Mouth tiles at the top
-            tiles[compound.to_world(0, y)] = TILE_PIPE_MOUTH_LEFT
-            tiles[compound.to_world(1, y)] = TILE_PIPE_MOUTH_RIGHT
+            tiles[compound.to_world(0, y)] = PIPE_MOUTH_LEFT
+            tiles[compound.to_world(1, y)] = PIPE_MOUTH_RIGHT
         else:
             # Body tiles
-            tiles[compound.to_world(0, y)] = TILE_PIPE_LEFT
-            tiles[compound.to_world(1, y)] = TILE_PIPE_RIGHT
+            tiles[compound.to_world(0, y)] = PIPE_LEFT
+            tiles[compound.to_world(1, y)] = PIPE_RIGHT
 
     return tiles

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import os
-from typing import Dict
+from typing import Dict, Iterable
 
 import pygame
+from pygame import Surface
 
 from .constants import TRANSPARENT
-from .content import load_sprite_sheets
+from .content import SpriteLibrary, load_sprite_sheets
+from .content.sprites import SpriteSheetDef
 from .sprite_sheet import SpriteSheet
 
 
@@ -30,8 +32,8 @@ class SpriteManager:
             return
 
         self.sheets: Dict[str, SpriteSheet] = {}
-        self.sprites: Dict[str, Dict[str, pygame.Surface]] = {}
-        self.sheet_defs = {}
+        self.sprites: Dict[str, Dict[str, Surface]] = {}
+        self.sheet_defs: Dict[str, SpriteSheetDef] = {}
         self._initialized = True
 
     def load_sheets(self, assets_path: str):
@@ -41,7 +43,7 @@ class SpriteManager:
             assets_path: Path to the directory containing sprite sheet images.
         """
 
-        library = load_sprite_sheets()
+        library: SpriteLibrary = load_sprite_sheets()
         self.sheet_defs = dict(library.sheets)
 
         for sheet_name, sheet_def in self.sheet_defs.items():
@@ -56,7 +58,7 @@ class SpriteManager:
             else:
                 print(f"Warning: Could not find sprite sheet image {filename}")
 
-    def get(self, sheet_name: str, sprite_name: str) -> pygame.Surface | None:
+    def get(self, sheet_name: str, sprite_name: str) -> Surface | None:
         """Get a sprite by sheet and sprite name."""
 
         # Use cached surface if available
@@ -91,7 +93,7 @@ class SpriteManager:
 
     def draw_at_position(
         self,
-        surface: pygame.Surface,
+        surface: Surface,
         sheet_name: str,
         sprite_name: str,
         x: int,
@@ -115,7 +117,9 @@ class SpriteManager:
 
         surface.blit(sprite, (x, draw_y))
 
-    def preload_sprites(self, sheet_name: str, sprite_names=None):
+    def preload_sprites(
+        self, sheet_name: str, sprite_names: Iterable[str] | None = None
+    ):
         """Preload sprites into cache for faster access."""
 
         sheet_def = self.sheet_defs.get(sheet_name)
