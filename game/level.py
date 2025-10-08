@@ -1,6 +1,6 @@
 """Level data and tile management."""
 
-from typing import List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from .constants import TILE_SIZE, TILES_HORIZONTAL
 from .content.tile_definitions import (
@@ -40,6 +40,10 @@ class Level:
         # terrain_tiles[screen][y][x] where y=0 is bottom of each screen
         # Each entry represents a 16x16 pixel terrain tile
         self.terrain_tiles: dict[int, List[List[str]]] = {}
+        self._original_terrain_tiles: dict[int, List[List[str]]] = {}
+        self._behavior_specs: dict[
+            int, Dict[Tuple[int, int], Tuple[str, Dict[str, object]]]
+        ] = {}
 
         # Initialize background tile data (screen -> y -> x)
         self.background_tiles: dict[int, List[List[str]]] = {}
@@ -145,6 +149,49 @@ class Level:
         if tile_x < 0 or tile_x >= len(row):
             raise ValueError(f"Tile X {tile_x} out of bounds")
         row[tile_x] = tile_slug
+
+    def register_behavior_spec(
+        self,
+        screen: int,
+        tile_x: int,
+        tile_y: int,
+        behavior_type: str,
+        params: Dict[str, object],
+    ) -> None:
+        """Record behavior configuration for later resets."""
+
+        specs = self._behavior_specs.setdefault(screen, {})
+        specs[(tile_x, tile_y)] = (behavior_type, dict(params))
+
+    def snapshot_terrain(self) -> None:
+        """Capture the current terrain layout for future resets."""
+
+        self._original_terrain_tiles = {
+            screen: [row[:] for row in rows]
+            for screen, rows in self.terrain_tiles.items()
+        }
+
+    def reset_terrain(self) -> None:
+        """Restore terrain tiles and behaviors to the last snapshot."""
+
+        if not self._original_terrain_tiles:
+            return
+        self.terrain_tiles = {
+            screen: [row[:] for row in rows]
+            for screen, rows in self._original_terrain_tiles.items()
+        }
+        self.terrain_manager.instances.clear()
+
+        if not self._behavior_specs:
+            return
+
+        from .terrain.factory import BehaviorFactory
+
+        factory = BehaviorFactory()
+        for screen, specs in self._behavior_specs.items():
+            for (tile_x, tile_y), (behavior_type, params) in specs.items():
+                behavior = factory.create(behavior_type, params or None)
+                self.terrain_manager.set_tile_behavior(screen, tile_x, tile_y, behavior)
 
     def get_terrain_tile_at_position(
         self, screen: int, world_x: float, world_y: float

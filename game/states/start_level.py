@@ -23,6 +23,10 @@ class StartLevelState(State):
             screen=game.world.level.spawn_screen,
         )
 
+        # Reset terrain and clear active effects
+        game.world.level.reset_terrain()
+        game.world.effects.clear()
+
         # Reset camera to beginning (both position and ratchet)
         game.world.camera.state = CameraState(x=0, max_x=0)
 
