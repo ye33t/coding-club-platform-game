@@ -26,7 +26,6 @@ class SpriteLibrary:
 class TileLibrary:
     """Container for all tile definitions."""
 
-    collision_masks: Mapping[str, int]
     tiles: Mapping[str, TileDefinition]
     simple_tiles: Mapping[str, str]
 
@@ -211,7 +210,6 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             f"No tile definition files found in {TILE_DEFINITION_DIR}"
         )
 
-    collision_masks: Dict[str, int] = {}
     tiles_by_slug: Dict[str, TileDefinition] = {}
     simple_tiles: Dict[str, str] = {}
 
@@ -227,19 +225,20 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             raise ValueError(f"{path}: unsupported version {version!r}")
 
         mask_table = data.get("collision_masks", {})
-        if not isinstance(mask_table, dict):
-            raise ValueError(f"{path}: 'collision_masks' must be a table")
-
-        for alias, value in mask_table.items():
-            if not isinstance(alias, str):
-                raise ValueError(f"{path}: collision mask keys must be strings")
-            if alias in collision_masks:
-                raise ValueError(
-                    f"{path}: collision mask '{alias}' already defined elsewhere"
-                )
-            if not isinstance(value, int):
-                raise ValueError(f"{path}: collision mask '{alias}' must be an integer")
-            collision_masks[alias] = value
+        collision_masks: Dict[str, int] = {}
+        if isinstance(mask_table, dict):
+            for alias, value in mask_table.items():
+                if not isinstance(alias, str):
+                    raise ValueError(f"{path}: collision mask keys must be strings")
+                if alias in collision_masks:
+                    raise ValueError(
+                        f"{path}: collision mask '{alias}' already defined elsewhere"
+                    )
+                if not isinstance(value, int):
+                    raise ValueError(f"{path}: collision mask '{alias}' must be an integer")
+                collision_masks[alias] = value
+        else:
+            raise ValueError(f"{path}: 'collision_masks' must be a mapping")
 
         tile_entries = data.get("tiles")
         if not isinstance(tile_entries, list):
@@ -288,9 +287,7 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
             elif isinstance(collision_mask_value, int):
                 mask = collision_mask_value
             else:
-                raise ValueError(
-                    f"{path}: tile '{slug}' collision_mask must be string or integer"
-                )
+                mask = 0
 
             category = entry.get("category")
             if category is not None and not isinstance(category, str):
@@ -328,7 +325,6 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                 simple_tiles[simple_key] = slug
 
     return TileLibrary(
-        collision_masks=collision_masks,
         tiles=tiles_by_slug,
         simple_tiles=simple_tiles,
     )

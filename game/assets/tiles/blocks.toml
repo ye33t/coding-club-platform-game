@@ -1,0 +1,56 @@
+version = 1
+
+[collision_masks]
+full = 0b1111
+top_half = 0b1100
+
+[[tiles]]
+slug = "bridge"
+sprite_sheet = "background"
+sprite = "bridge"
+collision_mask = "top_half"
+
+[[tiles]]
+slug = "rocks"
+sprite_sheet = "background"
+sprite = "rocks"
+collision_mask = "full"
+
+[[tiles]]
+slug = "ground"
+sprite_sheet = "background"
+sprite = "ground"
+collision_mask = "full"
+simple_key = "#"
+
+[[tiles]]
+slug = "brick"
+sprite_sheet = "background"
+sprite = "brick"
+collision_mask = "full"
+
+[[tiles]]
+slug = "brick_top"
+sprite_sheet = "background"
+sprite = "brick_top"
+collision_mask = "full"
+simple_key = "="
+
+[[tiles]]
+slug = "block"
+sprite_sheet = "background"
+sprite = "block"
+collision_mask = "full"
+simple_key = "@"
+
+[[tiles]]
+slug = "block_flat"
+sprite_sheet = "background"
+sprite = "block_flat"
+collision_mask = "full"
+
+[[tiles]]
+slug = "earth"
+sprite_sheet = "background"
+sprite = "earth"
+collision_mask = "full"

@@ -1,0 +1,16 @@
+version = 1
+
+[[tiles]]
+slug = "flagpole_top"
+sprite_sheet = "background"
+sprite = "flagpole_top"
+
+[[tiles]]
+slug = "flagpole"
+sprite_sheet = "background"
+sprite = "flagpole"
+
+[[tiles]]
+slug = "flag"
+sprite_sheet = "other"
+sprite = "flag"

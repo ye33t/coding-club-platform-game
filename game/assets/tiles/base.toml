@@ -1,7 +1,6 @@
 version = 1
 
 [collision_masks]
-empty = 0
 bottom_half = 0b11
 right_half = 0b101
 left_half = 0b1010
@@ -11,59 +10,8 @@ full = 0b1111
 [[tiles]]
 slug = "empty"
 sprite_sheet = "background"
-collision_mask = "empty"
 simple_key = "."
 
-[[tiles]]
-slug = "ground"
-sprite_sheet = "background"
-sprite = "ground"
-collision_mask = "full"
-simple_key = "#"
-
-[[tiles]]
-slug = "brick"
-sprite_sheet = "background"
-sprite = "brick"
-collision_mask = "full"
-
-[[tiles]]
-slug = "brick_top"
-sprite_sheet = "background"
-sprite = "brick_top"
-collision_mask = "full"
-simple_key = "="
-
-[[tiles]]
-slug = "block"
-sprite_sheet = "background"
-sprite = "block"
-collision_mask = "full"
-simple_key = "@"
-
-[[tiles]]
-slug = "block_flat"
-sprite_sheet = "background"
-sprite = "block_flat"
-collision_mask = "full"
-
-[[tiles]]
-slug = "earth"
-sprite_sheet = "background"
-sprite = "earth"
-collision_mask = "full"
-
-[[tiles]]
-slug = "bridge"
-sprite_sheet = "background"
-sprite = "bridge"
-collision_mask = "top_half"
-
-[[tiles]]
-slug = "rocks"
-sprite_sheet = "background"
-sprite = "rocks"
-collision_mask = "full"
 
 [[tiles]]
 slug = "sand"
@@ -93,7 +41,6 @@ collision_mask = "full"
 slug = "void"
 sprite_sheet = "background"
 sprite = "void"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "arch_left"
@@ -105,7 +52,6 @@ collision_mask = "left_half"
 slug = "arch_center"
 sprite_sheet = "background"
 sprite = "arch_center"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "arch_right"
@@ -129,67 +75,6 @@ collision_mask = "full"
 slug = "bridge_rails"
 sprite_sheet = "background"
 sprite = "bridge_rails"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "pipe_left"
-sprite_sheet = "background"
-sprite = "pipe_left"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_right"
-sprite_sheet = "background"
-sprite = "pipe_right"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_mouth_left"
-sprite_sheet = "background"
-sprite = "pipe_mouth_left"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_mouth_right"
-sprite_sheet = "background"
-sprite = "pipe_mouth_right"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_horizontal_top"
-sprite_sheet = "background"
-sprite = "pipe_horizontal_top"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_horizontal_bottom"
-sprite_sheet = "background"
-sprite = "pipe_horizontal_bottom"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_horizontal_mouth_top"
-sprite_sheet = "background"
-sprite = "pipe_horizontal_mouth_top"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_horizontal_mouth_bottom"
-sprite_sheet = "background"
-sprite = "pipe_horizontal_mouth_bottom"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_junction_top"
-sprite_sheet = "background"
-sprite = "pipe_junction_top"
-collision_mask = "full"
-
-[[tiles]]
-slug = "pipe_junction_bottom"
-sprite_sheet = "background"
-sprite = "pipe_junction_bottom"
-collision_mask = "full"
 
 [[tiles]]
 slug = "cannon_top"
@@ -213,25 +98,21 @@ collision_mask = "full"
 slug = "conveyor_corner_left"
 sprite_sheet = "background"
 sprite = "conveyor_corner_left"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "conveyor_horizontal"
 sprite_sheet = "background"
 sprite = "conveyor_horizontal"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "conveyor_right"
 sprite_sheet = "background"
 sprite = "conveyor_right"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "conveyor_vertical"
 sprite_sheet = "background"
 sprite = "conveyor_vertical"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "ladder"
@@ -249,55 +130,46 @@ collision_mask = "full"
 slug = "mound_top"
 sprite_sheet = "background"
 sprite = "mound_top"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mound_left_45"
 sprite_sheet = "background"
 sprite = "mound_left_45"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mound_left"
 sprite_sheet = "background"
 sprite = "mound_left"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mound_center"
 sprite_sheet = "background"
 sprite = "mound_center"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mound_right"
 sprite_sheet = "background"
 sprite = "mound_right"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mound_right_45"
 sprite_sheet = "background"
 sprite = "mound_right_45"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "treetop_left"
 sprite_sheet = "background"
 sprite = "treetop_left"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "treetop_center"
 sprite_sheet = "background"
 sprite = "treetop_center"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "treetop_right"
 sprite_sheet = "background"
 sprite = "treetop_right"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "mushroom_left"
@@ -318,118 +190,34 @@ sprite = "mushroom_right"
 collision_mask = "full"
 
 [[tiles]]
-slug = "bush_left"
-sprite_sheet = "background"
-sprite = "bush_left"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "bush_center"
-sprite_sheet = "background"
-sprite = "bush_center"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "bush_right"
-sprite_sheet = "background"
-sprite = "bush_right"
-collision_mask = "empty"
-
-[[tiles]]
 slug = "leaves"
 sprite_sheet = "background"
 sprite = "leaves"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "lollipop_top"
 sprite_sheet = "background"
 sprite = "lollipop_top"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "lollipop"
 sprite_sheet = "background"
 sprite = "lollipop"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "lollipop_bottom"
 sprite_sheet = "background"
 sprite = "lollipop_bottom"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "flagpole_top"
-sprite_sheet = "background"
-sprite = "flagpole_top"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "flagpole"
-sprite_sheet = "background"
-sprite = "flagpole"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "flag"
-sprite_sheet = "other"
-sprite = "flag"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_top_left"
-sprite_sheet = "background"
-sprite = "cloud_top_left"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_top"
-sprite_sheet = "background"
-sprite = "cloud_top"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_top_right"
-sprite_sheet = "background"
-sprite = "cloud_top_right"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_bottom_left"
-sprite_sheet = "background"
-sprite = "cloud_bottom_left"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_bottom"
-sprite_sheet = "background"
-sprite = "cloud_bottom"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_bottom_right"
-sprite_sheet = "background"
-sprite = "cloud_bottom_right"
-collision_mask = "empty"
-
-[[tiles]]
-slug = "cloud_block"
-sprite_sheet = "background"
-sprite = "cloud_block"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "water_top"
 sprite_sheet = "background"
 sprite = "water_top"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "water"
 sprite_sheet = "background"
 sprite = "water"
-collision_mask = "empty"
 
 [[tiles]]
 slug = "piano"
