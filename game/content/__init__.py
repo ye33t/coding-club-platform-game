@@ -1,8 +1,8 @@
 """Helpers for loading structured asset metadata."""
 
 from .loader import SpriteLibrary, TileLibrary, load_sprite_sheets, load_tiles
-from .sprites import sprites
 from .sprite_sheet import SpriteSheet
+from .sprites import sprites
 from .tile_definitions import (
     TILE_DEFS,
     empty_tile_slug,

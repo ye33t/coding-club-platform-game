@@ -14,8 +14,8 @@ from .constants import (
     TILE_SIZE,
     WHITE,
 )
-from .display import Display
 from .content import sprites
+from .display import Display
 from .states import InitialState, State
 from .world import World
 
