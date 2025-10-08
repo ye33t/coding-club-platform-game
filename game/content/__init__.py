@@ -1,6 +1,7 @@
 """Helpers for loading structured asset metadata."""
 
 from .loader import SpriteLibrary, TileLibrary, load_sprite_sheets, load_tiles
+from .sprites import sprites
 from .sprite_sheet import SpriteSheet
 from .tile_definitions import (
     TILE_DEFS,
@@ -28,4 +29,5 @@ __all__ = [
     "is_quadrant_solid",
     "load_sprite_sheets",
     "load_tiles",
+    "sprites",
 ]

@@ -8,10 +8,10 @@ from typing import Dict, Iterable
 import pygame
 from pygame import Surface
 
-from .constants import TRANSPARENT
-from .content import SpriteLibrary, load_sprite_sheets
-from .content.sprite_sheet import SpriteSheet
-from .content.types import SpriteSheetDef
+from ..constants import TRANSPARENT
+from .loader import SpriteLibrary, load_sprite_sheets
+from .sprite_sheet import SpriteSheet
+from .types import SpriteSheetDef
 
 
 class SpriteManager:
@@ -107,7 +107,7 @@ class SpriteManager:
             return
 
         # Lazy import to avoid circular dependency during initialization
-        from .constants import NATIVE_HEIGHT
+        from ..constants import NATIVE_HEIGHT
 
         if reflected:
             sprite = pygame.transform.flip(sprite, True, False)

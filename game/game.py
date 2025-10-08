@@ -15,7 +15,7 @@ from .constants import (
     WHITE,
 )
 from .display import Display
-from .sprites import sprites
+from .content import sprites
 from .states import InitialState, State
 from .world import World
 
