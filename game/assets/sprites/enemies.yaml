@@ -1,0 +1,8 @@
+version: 1
+sprite_sheets:
+  enemies:
+    image: enemies.png
+    sprites:
+      goomba_walk1:
+        offset: [0, 16]
+        size: [2, 2]

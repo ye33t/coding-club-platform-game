@@ -53,8 +53,9 @@ game/
 ├── display.py       # Display scaling and double buffering
 ├── sprites.py       # Sprite sheet management (singleton pattern)
 ├── sprite_sheet.py  # Individual sprite sheet loading
+├── content/         # Loaders and dataclasses for sprite/tile metadata
 ├── constants.py     # Game configuration values
-└── sprite_definitions.py # Sprite coordinate mappings
+└── assets/          # Art, level YAML, and runtime config data
 ```
 
 ## Programming Concepts You'll Learn

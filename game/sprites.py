@@ -1,11 +1,14 @@
 """Global sprite manager for all sprite sheets."""
 
+from __future__ import annotations
+
 import os
+from typing import Dict
 
 import pygame
 
+from .content import load_sprite_sheets
 from .constants import TRANSPARENT
-from .sprite_definitions import SPRITE_SHEETS
 from .sprite_sheet import SpriteSheet
 
 
@@ -23,20 +26,25 @@ class SpriteManager:
 
     def __init__(self):
         """Initialize the sprite manager."""
-        if self._initialized:
+        if getattr(self, "_initialized", False):
             return
 
-        self.sheets = {}
-        self.sprites = {}
+        self.sheets: Dict[str, SpriteSheet] = {}
+        self.sprites: Dict[str, Dict[str, pygame.Surface]] = {}
+        self.sheet_defs = {}
         self._initialized = True
 
-    def load_sheets(self, assets_path):
+    def load_sheets(self, assets_path: str):
         """Load all sprite sheets.
 
         Args:
-            assets_path: Path to the assets directory
+            assets_path: Path to the directory containing sprite sheet images.
         """
 
+        library = load_sprite_sheets()
+        self.sheet_defs = dict(library.sheets)
+
+        # TODO: Move colorkey configuration into asset metadata if it diverges per sheet.
         sheet_configs = {
             "characters": ("characters.png", TRANSPARENT),
             "blocks": ("blocks.png", "auto"),
@@ -45,9 +53,10 @@ class SpriteManager:
             "other": ("other.png", TRANSPARENT),
         }
 
-        for sheet_name, config in sheet_configs.items():
-            filename = config[0]
-            colorkey = config[1]
+        for sheet_name, sheet_def in self.sheet_defs.items():
+            default_config = sheet_configs.get(sheet_name, (f"{sheet_name}.png", None))
+            filename = sheet_def.image or default_config[0]
+            colorkey = default_config[1]
             filepath = os.path.join(assets_path, filename)
 
             if os.path.exists(filepath):
@@ -55,98 +64,78 @@ class SpriteManager:
                 self.sprites[sheet_name] = {}
                 print(f"Loaded sprite sheet: {sheet_name}")
             else:
-                print(f"Warning: Could not find sprite sheet {filename}")
+                print(f"Warning: Could not find sprite sheet image {filename}")
 
-    def get(self, sheet_name, sprite_name):
-        """Get a sprite by sheet and sprite name.
+    def get(self, sheet_name: str, sprite_name: str) -> pygame.Surface | None:
+        """Get a sprite by sheet and sprite name."""
 
-        Args:
-            sheet_name: Name of the sprite sheet (e.g., "characters")
-            sprite_name: Name of the sprite (e.g., "small_mario_stand")
+        # Use cached surface if available
+        cached_sheet = self.sprites.get(sheet_name)
+        if cached_sheet and sprite_name in cached_sheet:
+            return cached_sheet[sprite_name]
 
-        Returns:
-            pygame.Surface containing the sprite, or None if not found
-        """
-        # Check if sprite is already cached
-        if sheet_name in self.sprites and sprite_name in self.sprites[sheet_name]:
-            return self.sprites[sheet_name][sprite_name]
-
-        # Check if sheet exists
-        if sheet_name not in self.sheets:
+        sprite_sheet = self.sheets.get(sheet_name)
+        if sprite_sheet is None:
             print(f"Warning: Sheet '{sheet_name}' not loaded")
             return None
 
-        # Check if sprite definition exists
-        if (
-            sheet_name not in SPRITE_SHEETS
-            or sprite_name not in SPRITE_SHEETS[sheet_name]
-        ):
+        sheet_def = self.sheet_defs.get(sheet_name)
+        if sheet_def is None:
+            print(f"Warning: No definitions loaded for sheet '{sheet_name}'")
+            return None
+
+        sprite_def = sheet_def.sprites.get(sprite_name)
+        if sprite_def is None:
             print(
                 f"Warning: Sprite '{sprite_name}' not defined in sheet '{sheet_name}'"
             )
             return None
 
-        # Extract sprite using definition
-        # Format: (x, y, tile_width, tile_height)
-        sprite_def = SPRITE_SHEETS[sheet_name][sprite_name]
-        if len(sprite_def) == 4:
-            x, y, tile_width, tile_height = sprite_def
-            # Extract sprite using bottom-left coordinates
-            sprite = self.sheets[sheet_name].get_sprite(x, y, tile_width, tile_height)
-        else:
-            print(f"Warning: Invalid sprite definition format for {sprite_name}")
-            return None
+        x, y = sprite_def.offset
+        tile_width, tile_height = sprite_def.size
+        surface = sprite_sheet.get_sprite(x, y, tile_width, tile_height)
 
-        # Cache the sprite
-        self.sprites[sheet_name][sprite_name] = sprite
+        cached_sheet = self.sprites.setdefault(sheet_name, {})
+        cached_sheet[sprite_name] = surface
+        return surface
 
-        return sprite
+    def draw_at_position(
+        self,
+        surface: pygame.Surface,
+        sheet_name: str,
+        sprite_name: str,
+        x: int,
+        y: int,
+        reflected: bool = False,
+    ):
+        """Draw a sprite at pixel coordinates with bottom-left alignment."""
 
-    def draw_at_position(self, surface, sheet_name, sprite_name, x, y, reflected=False):
-        """Draw a sprite at pixel coordinates with bottom-left alignment.
-
-        Uses bottom-up coordinate system where y=0 is at the bottom of the screen.
-
-        Args:
-            surface: Surface to draw on
-            sheet_name: Name of the sprite sheet
-            sprite_name: Name of the sprite
-            x: X position in pixels (left edge)
-            y: Y position in pixels from bottom (bottom edge of sprite)
-            reflected: If True, flip the sprite horizontally
-        """
         sprite = self.get(sheet_name, sprite_name)
-        if not sprite:
+        if sprite is None:
             return
 
-        # Get screen height in pixels
+        # Lazy import to avoid circular dependency during initialization
         from .constants import NATIVE_HEIGHT
 
-        # Flip horizontally if reflected
         if reflected:
             sprite = pygame.transform.flip(sprite, True, False)
 
-        # Convert from bottom-up to top-down coordinates
-        # y is from bottom, so flip it
         screen_y = NATIVE_HEIGHT - y
-
-        # Adjust Y for bottom alignment (draw from top of sprite)
-        sprite_height = sprite.get_height()
-        draw_y = screen_y - sprite_height
+        draw_y = screen_y - sprite.get_height()
 
         surface.blit(sprite, (x, draw_y))
 
-    def preload_sprites(self, sheet_name, sprite_names=None):
-        """Preload sprites into cache for faster access.
+    def preload_sprites(self, sheet_name: str, sprite_names=None):
+        """Preload sprites into cache for faster access."""
 
-        Args:
-            sheet_name: Name of the sprite sheet
-            sprite_names: List of sprite names to preload, or None for all
-        """
-        if sheet_name not in SPRITE_SHEETS:
+        sheet_def = self.sheet_defs.get(sheet_name)
+        if sheet_def is None:
             return
 
-        sprites_to_load = sprite_names or SPRITE_SHEETS[sheet_name].keys()
+        if sprite_names is None:
+            sprites_to_load = list(sheet_def.sprites.keys())
+        else:
+            sprites_to_load = list(sprite_names)
 
         for sprite_name in sprites_to_load:
             self.get(sheet_name, sprite_name)
