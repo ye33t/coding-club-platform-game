@@ -76,3 +76,4 @@ class WarpExitState(State):
         # Draw tiles on top
         game.draw_terrain(surface)
         game.draw_effects(surface)
+        game.draw_entities(surface)

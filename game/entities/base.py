@@ -116,6 +116,9 @@ class Entity(ABC):
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:
         """Check if entity is off screen and should be removed.
 
+        Only removes entities that are behind or below the viewport.
+        Entities ahead of the viewport are kept active.
+
         Args:
             mario_screen: Mario's current screen
             camera_x: Camera X position
@@ -123,22 +126,16 @@ class Entity(ABC):
         Returns:
             True if entity should be culled
         """
-        from ..constants import NATIVE_WIDTH
-
-        if self.state.screen != mario_screen:
-            return True
-
         entity_right = self.state.x + self.state.width
-        entity_left = self.state.x
-
         screen_left = camera_x
-        screen_right = camera_x + NATIVE_WIDTH
 
         MARGIN = TILE_SIZE * 2
+        BELOW_SCREEN_THRESHOLD = -100
 
         if entity_right < screen_left - MARGIN:
             return True
-        if entity_left > screen_right + MARGIN:
+
+        if self.state.y < BELOW_SCREEN_THRESHOLD:
             return True
 
         return False

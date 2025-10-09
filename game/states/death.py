@@ -57,4 +57,5 @@ class DeathState(State):
         game.draw_background(surface)
         game.draw_terrain(surface)
         game.draw_effects(surface)
+        game.draw_entities(surface)
         game.draw_mario(surface)
