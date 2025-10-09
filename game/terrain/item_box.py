@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
@@ -11,13 +11,13 @@ from .bounce import BounceBehavior
 
 
 @dataclass(slots=True)
-class ItemBoxBehavior(TerrainBehavior):
+class ItemBoxBehavior(BounceBehavior):
     """Spawns a coin effect and turns into a used item box when hit."""
 
     used_slug: str = "item_box_used"
     coin_sheet: str = "background"
     coin_sprite: str = "coin"
-    _bounce: BounceBehavior = field(default_factory=BounceBehavior, init=False)
+
 
     def process(self, context: BehaviorContext) -> None:
         state = context.state
@@ -25,10 +25,6 @@ class ItemBoxBehavior(TerrainBehavior):
 
         if context.event == TileEvent.HIT_FROM_BELOW and not used:
             state.data["used"] = True
-
-            context.queue_tile_change(
-                context.screen, context.tile_x, context.tile_y, self.used_slug
-            )
 
             coin_x = context.tile_x * TILE_SIZE
             coin_y = (context.tile_y + 1) * TILE_SIZE
@@ -42,4 +38,11 @@ class ItemBoxBehavior(TerrainBehavior):
                 )
             )
 
-        self._bounce.process(context)
+        # Call BounceBehavior directly to avoid super() issues when hot-reloading
+        BounceBehavior.process(self, context)
+        
+    def on_complete(self, context: BehaviorContext) -> None:
+        """Handle completion of bounce animation."""
+        context.queue_tile_change(
+                context.screen, context.tile_x, context.tile_y, self.used_slug
+            )

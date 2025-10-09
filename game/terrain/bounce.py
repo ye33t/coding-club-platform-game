@@ -30,5 +30,10 @@ class BounceBehavior(TerrainBehavior):
                 # Animation complete - reset
                 context.state.visual.offset_y = 0.0
                 context.state.data.pop("bounce_timer", None)
+                self.on_complete(context)
             else:
                 context.state.data["bounce_timer"] = timer
+
+    def on_complete(self, context: BehaviorContext) -> None:
+        """Handle completion of bounce animation."""
+        pass
