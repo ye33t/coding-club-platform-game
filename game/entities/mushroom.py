@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 MUSHROOM_SPEED = 50.0
 MUSHROOM_GRAVITY = 400.0
+MUSHROOM_EMERGE_SPEED = 30.0
 GROUND_DETECTION_TOLERANCE = 2.0
 
 
@@ -41,9 +42,14 @@ class MushroomEntity(Entity):
         """
         super().__init__(world_x, world_y, screen)
         self.state.direction = direction
-        self.state.vx = MUSHROOM_SPEED * direction
+        self.state.vx = 0
         self.state.width = TILE_SIZE
         self.state.height = TILE_SIZE
+
+        self.emerging = True
+        self.emerge_target_y = world_y + TILE_SIZE
+        self.z_index = -10
+        self.final_direction = direction
 
     def update(self, dt: float, level: Level) -> bool:
         """Update mushroom physics.
@@ -55,10 +61,19 @@ class MushroomEntity(Entity):
         Returns:
             True to keep entity active
         """
-        self._apply_gravity(dt)
-        self._apply_horizontal_movement(dt)
-        self._check_wall_collision(level)
-        self._check_ground_collision(level)
+        if self.emerging:
+            self.state.y += MUSHROOM_EMERGE_SPEED * dt
+
+            if self.state.y >= self.emerge_target_y:
+                self.state.y = self.emerge_target_y
+                self.emerging = False
+                self.z_index = 10
+                self.state.vx = MUSHROOM_SPEED * self.final_direction
+        else:
+            self._apply_gravity(dt)
+            self._apply_horizontal_movement(dt)
+            self._check_wall_collision(level)
+            self._check_ground_collision(level)
 
         return True
 

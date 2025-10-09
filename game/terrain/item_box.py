@@ -31,8 +31,8 @@ class ItemBoxBehavior(TerrainBehavior):
                 )
             )
 
-            mushroom_x = context.tile_x * TILE_SIZE
-            mushroom_y = (context.tile_y + 1) * TILE_SIZE
+            mushroom_x = context.tile_x * TILE_SIZE - (TILE_SIZE // 4)
+            mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
             context.spawn_entity(
                 MushroomEntity(
                     world_x=mushroom_x,
