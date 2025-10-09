@@ -11,12 +11,13 @@ from .tile_definitions import (
     require_tile,
     simple_tile_mapping,
 )
-from .types import SpriteFrame, SpriteSheetDef, TileConfig, TileDefinition
+from .types import SpriteFrame, SpriteKey, SpriteSheetDef, TileConfig, TileDefinition
 
 __all__ = [
     "SpriteLibrary",
     "TileLibrary",
     "SpriteSheet",
+    "SpriteKey",
     "SpriteFrame",
     "SpriteSheetDef",
     "TileConfig",

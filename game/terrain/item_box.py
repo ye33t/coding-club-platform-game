@@ -27,7 +27,6 @@ class ItemBoxBehavior(TerrainBehavior):
                 CoinEffect(
                     world_x=coin_x,
                     world_y=coin_y,
-                    on_collect=None,
                 )
             )
 

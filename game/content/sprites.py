@@ -104,6 +104,8 @@ class SpriteManager:
 
         sprite = self.get(sheet_name, sprite_name)
         if sprite is None:
+            if sprite_name != "empty":
+                raise ValueError(f"Sprite not found: {sheet_name}/{sprite_name}")
             return
 
         # Lazy import to avoid circular dependency during initialization

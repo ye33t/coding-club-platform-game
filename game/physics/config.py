@@ -4,7 +4,7 @@ import tomllib
 from pathlib import Path
 
 # Load config file - fail fast if missing or invalid
-CONFIG_PATH = Path(__file__).parent.parent / "assets" / "config" / "physics_config.toml"
+CONFIG_PATH = Path(__file__).parent.parent / "assets" / "config" / "physics.toml"
 
 try:
     with open(CONFIG_PATH, "rb") as f:
@@ -12,7 +12,7 @@ try:
 except FileNotFoundError:
     raise FileNotFoundError(
         f"Physics config file not found: {CONFIG_PATH}\n"
-        "The game requires physics_config.toml to run."
+        "The game requires physics.toml to run."
     )
 except tomllib.TOMLDecodeError as e:
     raise ValueError(f"Invalid TOML in physics config: {CONFIG_PATH}\n" f"Error: {e}")
@@ -67,6 +67,11 @@ RESET_THRESHOLD_Y = config["death"]["reset_threshold_y"]
 # Flagpole
 FLAGPOLE_TRIGGER_DISTANCE = config["flagpole"]["trigger_distance"]
 FLAGPOLE_DESCENT_SPEED = config["flagpole"]["descent_speed"]
+
+# Coin
+COIN_JUMP_VELOCITY = config["coin"]["jump_velocity"]
+COIN_GRAVITY = config["coin"]["gravity"]
+COIN_OFFSET = config["coin"]["offset"]
 
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)
