@@ -35,7 +35,8 @@ class BehaviorFactory:
             BehaviorFactoryError: If behavior type is unknown or parameters are invalid
         """
         if behavior_type == "bounce":
-            return BounceBehavior()
+            one_shot = params.get("one_shot", False) if params else False
+            return BounceBehavior(one_shot=one_shot)
         elif behavior_type == "none":
             return NoneBehavior()
         elif behavior_type == "warp":
@@ -53,12 +54,7 @@ class BehaviorFactory:
         elif behavior_type == "flagpole":
             return FlagpoleBehavior()
         elif behavior_type == "item_box":
-            params = params or {}
-            return ItemBoxBehavior(
-                used_slug=params.get("used_slug", "item_box_used"),
-                coin_sheet=params.get("coin_sheet", "background"),
-                coin_sprite=params.get("coin_sprite", "coin"),
-            )
+            return ItemBoxBehavior()
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "

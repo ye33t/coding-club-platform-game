@@ -42,7 +42,9 @@ class BehaviorContext:
     state: TileState
     event: Optional[TileEvent]
     dt: float
-    queue_tile_change: Callable[[int, int, int, str], None]
+    queue_tile_change: Callable[
+        ..., None
+    ]  # Takes screen, x, y, slug, and optional params
     spawn_effect: Callable[["Effect"], None]
 
 

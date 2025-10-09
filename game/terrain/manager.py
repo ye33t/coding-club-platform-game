@@ -1,7 +1,7 @@
 """Manager for terrain behaviors in a level."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState
 
@@ -16,6 +16,8 @@ class _TileChangeCommand:
     x: int
     y: int
     slug: str
+    behavior_type: Optional[str] = None
+    behavior_params: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -66,10 +68,29 @@ class TerrainManager:
         """
         return self.instances.get((screen, x, y))
 
-    def queue_tile_change(self, screen: int, x: int, y: int, slug: str) -> None:
-        """Request that a tile be replaced after the physics step."""
+    def queue_tile_change(
+        self,
+        screen: int,
+        x: int,
+        y: int,
+        slug: str,
+        behavior_type: Optional[str] = None,
+        behavior_params: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """Request that a tile be replaced after the physics step.
 
-        self._tile_change_commands.append(_TileChangeCommand(screen, x, y, slug))
+        Args:
+            screen: Screen index
+            x: Tile X coordinate
+            y: Tile Y coordinate
+            slug: New tile visual slug
+            behavior_type: Optional behavior type to attach to new tile
+            behavior_params: Optional parameters for the behavior
+        """
+
+        self._tile_change_commands.append(
+            _TileChangeCommand(screen, x, y, slug, behavior_type, behavior_params)
+        )
 
     def queue_effect(self, effect: "Effect | EffectFactory") -> None:
         """Request that an effect be spawned after the physics step."""
@@ -124,9 +145,33 @@ class TerrainManager:
     ) -> None:
         """Apply queued tile changes and spawn requested effects."""
 
+        from .factory import BehaviorFactory
+
+        factory = BehaviorFactory()
+
         for command in self._tile_change_commands:
+            # Change the tile visual
             level.set_terrain_tile(command.screen, command.x, command.y, command.slug)
+
+            # Remove old behavior instance
             self.instances.pop((command.screen, command.x, command.y), None)
+
+            # Create and attach new behavior if specified
+            if command.behavior_type:
+                try:
+                    behavior = factory.create(
+                        command.behavior_type, command.behavior_params
+                    )
+                    self.set_tile_behavior(
+                        command.screen, command.x, command.y, behavior
+                    )
+                except Exception as e:
+                    # Log error but don't crash - tile change still happened
+                    print(
+                        f"Warning: Failed to create behavior "
+                        f"'{command.behavior_type}': {e}"
+                    )
+
         self._tile_change_commands.clear()
 
         if effect_manager is not None:
