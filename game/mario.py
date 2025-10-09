@@ -11,11 +11,6 @@ from game.constants import TILE_SIZE
 from .content import sprites
 
 
-def repeat(sprite: str, times: int) -> List[str]:
-    """Helper to repeat a sprite n times in animation."""
-    return [sprite] * times
-
-
 @dataclass
 class MarioIntent:
     """What Mario wants to do based on input."""
@@ -81,7 +76,7 @@ class Mario:
         # Animation configurations (each element = 1 frame at 60 FPS)
         self.animations: Dict[str, Dict[str, Any]] = {
             "idle": {
-                "sprites": repeat("small_mario_stand", 60),  # Hold for 1 second
+                "sprites": ["small_mario_stand"],
                 "loop": True,
             },
             "walking": {
@@ -104,15 +99,15 @@ class Mario:
             },
             "jumping": {
                 # Single static jump frame
-                "sprites": repeat("small_mario_jump", 1),  # Hold entire jump
+                "sprites": ["small_mario_jump"],  # Hold entire jump
                 "loop": True,
             },
             "skidding": {
-                "sprites": repeat("small_mario_skid", 1),  # Hold for 0.2 seconds
+                "sprites": ["small_mario_skid"],  # Hold for 0.2 seconds
                 "loop": True,
             },
             "dying": {
-                "sprites": repeat("small_mario_die", 1),  # Hold for 1 second
+                "sprites": ["small_mario_die"],  # Hold for 1 second
                 "loop": True,
             },
         }
