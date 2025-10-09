@@ -4,6 +4,7 @@ from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState, Visual
 from .bounce import BounceBehavior
 from .factory import BehaviorFactory, BehaviorFactoryError
 from .flagpole import FlagpoleBehavior
+from .item_box import ItemBoxBehavior
 from .manager import TerrainManager
 from .none import NoneBehavior
 from .warp import WarpBehavior
@@ -16,6 +17,7 @@ __all__ = [
     "VisualState",
     "BounceBehavior",
     "FlagpoleBehavior",
+    "ItemBoxBehavior",
     "NoneBehavior",
     "WarpBehavior",
     "BehaviorFactory",

@@ -129,6 +129,9 @@ def load(filepath: str) -> Level:
                 level, screen_idx, screen_data, parser, level.terrain_tiles[screen_idx]
             )
 
+    # Snapshot original terrain for resets
+    level.snapshot_terrain()
+
     # Set level dimensions based on parsed screens
     if level.terrain_tiles:
         # Assume all screens have the same dimensions
@@ -214,7 +217,7 @@ def _process_zones_and_behaviors(
         )
 
     # Create behavior factory (import here to avoid circular imports)
-    from ..terrain import BehaviorFactory
+    from ..terrain.factory import BehaviorFactory
 
     factory = BehaviorFactory()
 
@@ -251,6 +254,7 @@ def _process_zones_and_behaviors(
 
             # Create behavior instance and assign to tile
             try:
+                level.register_behavior_spec(screen_idx, x, y, behavior_type, params)
                 behavior = factory.create(behavior_type, params if params else None)
                 level.terrain_manager.set_tile_behavior(screen_idx, x, y, behavior)
             except Exception as e:

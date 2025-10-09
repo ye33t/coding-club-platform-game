@@ -6,6 +6,14 @@ from dataclasses import dataclass
 from typing import Mapping
 
 
+@dataclass(frozen=True)
+class SpriteKey:
+    """Runtime metadata for a sprite referenced by slug."""
+
+    sprite_sheet: str
+    sprite_name: str
+
+
 @dataclass(frozen=True, slots=True)
 class SpriteFrame:
     """Normalized sprite metadata loaded from YAML definitions."""

@@ -123,3 +123,13 @@ trigger_distance = 2.0
 
 # Speed at which Mario descends the flagpole (px/s)
 descent_speed = 45.0
+
+[coin]
+# Initial upward velocity when coin spawns from item box (px/s)
+jump_velocity = 240.0
+
+# Gravity applied to coin during jump animation (px/s²)
+gravity = 600.0
+
+# Pixels starting point at which the coin vanishes
+offset = 24.0  

@@ -1,0 +1,22 @@
+version = 1
+
+[collision_masks]
+full = 0b1111
+
+[[tiles]]
+slug = "item_box"
+sprite_sheet = "background"
+sprite = "item_box"
+collision_mask = "full"
+simple_key = "?"
+
+[[tiles]]
+slug = "item_box_used"
+sprite_sheet = "background"
+sprite = "item_box_used"
+collision_mask = "full"
+
+[[tiles]]
+slug = "coin"
+sprite_sheet = "background"
+sprite = "coin"

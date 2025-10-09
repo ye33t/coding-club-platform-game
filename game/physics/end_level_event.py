@@ -1,7 +1,7 @@
 """Detect when Mario touches the flagpole and raise end level event."""
 
 from ..constants import TILE_SIZE
-from ..terrain import FlagpoleBehavior
+from ..terrain.flagpole import FlagpoleBehavior
 from .base import PhysicsContext, PhysicsProcessor
 from .config import FLAGPOLE_TRIGGER_DISTANCE
 from .events import EndLevelEvent

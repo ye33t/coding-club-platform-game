@@ -13,7 +13,7 @@ sprite_sheets:
       brick:
         offset: [34, 32]
         size: [2, 2]
-      block_flat:
+      item_box_used:
         offset: [51, 32]
         size: [2, 2]
       battlement:

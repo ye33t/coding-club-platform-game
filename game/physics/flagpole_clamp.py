@@ -1,7 +1,7 @@
 """Clamp Mario against the flagpole during the end-level sequence."""
 
 from ..constants import TILE_SIZE
-from ..terrain import FlagpoleBehavior
+from ..terrain.flagpole import FlagpoleBehavior
 from .base import PhysicsContext, PhysicsProcessor
 
 

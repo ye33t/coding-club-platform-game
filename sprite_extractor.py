@@ -122,10 +122,12 @@ def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):
 
 
 def print_sprite_definitions(sprites, prefix="sprite"):
-    """Print sprite definitions in Python dictionary format."""
+    """Print sprite definitions formatted for the YAML sprite schema."""
     print("\n# Extracted sprite definitions:")
     for i, (x, y, w, h) in enumerate(sprites):
-        print(f'    "{prefix}_{i}": ({x}, {y}, {w}, {h}),')
+        print(f"  {prefix}_{i}:")
+        print(f"    offset: [{x}, {y}]")
+        print(f"    size: [{w}, {h}]")
 
 
 def main():

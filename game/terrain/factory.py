@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from .base import TerrainBehavior
 from .bounce import BounceBehavior
 from .flagpole import FlagpoleBehavior
+from .item_box import ItemBoxBehavior
 from .none import NoneBehavior
 from .warp import WarpBehavior
 
@@ -34,7 +35,8 @@ class BehaviorFactory:
             BehaviorFactoryError: If behavior type is unknown or parameters are invalid
         """
         if behavior_type == "bounce":
-            return BounceBehavior()
+            one_shot = params.get("one_shot", False) if params else False
+            return BounceBehavior(one_shot=one_shot)
         elif behavior_type == "none":
             return NoneBehavior()
         elif behavior_type == "warp":
@@ -51,8 +53,10 @@ class BehaviorFactory:
             return WarpBehavior(params["to_screen"], params["to_zone"])
         elif behavior_type == "flagpole":
             return FlagpoleBehavior()
+        elif behavior_type == "item_box":
+            return ItemBoxBehavior()
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "
-                f"Available types: bounce, none, warp, flagpole"
+                f"Available types: bounce, none, warp, flagpole, item_box"
             )

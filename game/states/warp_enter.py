@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .base import State
 
 if TYPE_CHECKING:
-    from ..terrain import WarpBehavior
+    from ..terrain.warp import WarpBehavior
 
 
 class WarpEnterState(State):
@@ -54,3 +54,4 @@ class WarpEnterState(State):
         game.draw_mario(surface)
         # Draw tiles on top
         game.draw_terrain(surface)
+        game.draw_effects(surface)

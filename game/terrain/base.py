@@ -3,9 +3,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Callable, Dict, Optional
 
 if TYPE_CHECKING:
+    from ..effects import Effect
     from ..level import Level
 
 
@@ -41,6 +42,10 @@ class BehaviorContext:
     state: TileState
     event: Optional[TileEvent]
     dt: float
+    queue_tile_change: Callable[
+        ..., None
+    ]  # Takes screen, x, y, slug, and optional params
+    spawn_effect: Callable[["Effect"], None]
 
 
 class TerrainBehavior(ABC):

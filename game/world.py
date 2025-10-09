@@ -3,6 +3,7 @@
 from typing import Optional
 
 from .camera import Camera
+from .effects import EffectManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
@@ -18,6 +19,7 @@ class World:
         self.level = loader.load("game/assets/levels/world_1_1.yaml")
         self.camera = Camera()
         self.physics_pipeline = PhysicsPipeline()
+        self.effects = EffectManager()
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -47,6 +49,9 @@ class World:
         # Step 3: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
 
+        # Apply any tile or effect commands queued during behavior processing.
+        self.level.terrain_manager.apply_pending_commands(self.level, self.effects)
+
         # Step 4: Check if an event was raised (short-circuits normal processing)
         event: Optional[PhysicsEvent] = processed_context.event
         if event is not None:
@@ -64,7 +69,10 @@ class World:
         # Step 8: Update terrain behaviors
         self.level.terrain_manager.update(dt)
 
-        # Step 9: Update camera based on Mario's new position
+        # Step 9: Update transient effects
+        self.effects.update(dt)
+
+        # Step 10: Update camera based on Mario's new position
         self.camera.update(self.mario.state.x, self.level.width_pixels)
 
         return None

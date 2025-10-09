@@ -107,7 +107,9 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.running = False
+                    from .states.start_level import StartLevelState
+
+                    self.transition_to(StartLevelState())
                 elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
                     self.display.change_scale(-1)
                 elif event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:
@@ -175,6 +177,10 @@ class Game:
                 int(screen_x),
                 int(screen_y),
             )
+
+    def draw_effects(self, surface: pygame.Surface) -> None:
+        """Draw transient effects like coins."""
+        self.world.effects.draw(surface, self.world.camera)
 
     def draw_mario(self, surface: pygame.Surface) -> None:
         """Draw Mario at his screen position."""
