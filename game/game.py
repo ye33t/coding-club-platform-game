@@ -209,6 +209,37 @@ class Game:
                 reflected,
             )
 
+    def draw_world(self, surface: pygame.Surface) -> None:
+        """Draw the entire world using z-index based rendering.
+
+        Render order:
+        1. Background (fixed)
+        2. Drawables with negative z-index (sorted, behind terrain)
+        3. Terrain (fixed)
+        4. Drawables with zero/positive z-index (sorted, in front of terrain)
+        """
+        # Get all drawables
+        drawables = self.world.get_drawables()
+
+        # Split into behind and front based on z-index
+        behind = sorted(
+            [d for d in drawables if d.z_index < 0], key=lambda d: d.z_index
+        )
+        front = sorted(
+            [d for d in drawables if d.z_index >= 0], key=lambda d: d.z_index
+        )
+
+        # Render in order
+        self.draw_background(surface)
+
+        for drawable in behind:
+            drawable.draw(surface, self.world.camera)
+
+        self.draw_terrain(surface)
+
+        for drawable in front:
+            drawable.draw(surface, self.world.camera)
+
     def _draw_tile_grid(self, surface: pygame.Surface) -> None:
         """Draw the 8x8 tile grid for debugging."""
         # Draw vertical lines

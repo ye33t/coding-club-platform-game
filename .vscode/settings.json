@@ -6,6 +6,7 @@
         "blit",
         "bounceable",
         "colorkey",
+        "drawables",
         "goomba",
         "koopa",
         "NTSC"

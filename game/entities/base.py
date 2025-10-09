@@ -58,6 +58,8 @@ class CollisionResponse:
 class Entity(ABC):
     """Base class for all game entities."""
 
+    z_index: int = 10
+
     def __init__(self, world_x: float, world_y: float, screen: int = 0):
         """Initialize entity.
 

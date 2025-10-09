@@ -72,6 +72,7 @@ class Mario:
         """
         self.state = MarioState(x=x, y=y, screen=screen)
         self.size = "small"  # small, big, fire
+        self.z_index = 20  # Render in front of effects and entities by default
 
         # Animation configurations (each element = 1 frame at 60 FPS)
         self.animations: Dict[str, Dict[str, Any]] = {
@@ -183,16 +184,28 @@ class Mario:
                 else:
                     self.state.frame = len(sprites) - 1
 
-    def draw(self, surface):
-        """Draw Mario at current state."""
+    def draw(self, surface, camera):
+        """Draw Mario at current state.
+
+        Args:
+            surface: Surface to draw on
+            camera: Camera for coordinate transformation
+        """
         sprite_name = self._get_sprite_name()
         if sprite_name:
+            # Transform Mario's world position to screen position
+            screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
+
             # Use reflection when facing left
-            draw_x = int(self.state.x)
             reflected = not self.state.facing_right
 
             sprites.draw_at_position(
-                surface, "characters", sprite_name, draw_x, int(self.state.y), reflected
+                surface,
+                "characters",
+                sprite_name,
+                int(screen_x),
+                int(screen_y),
+                reflected,
             )
 
     def _get_sprite_name(self) -> str:

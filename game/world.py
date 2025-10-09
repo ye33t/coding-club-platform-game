@@ -1,6 +1,6 @@
 """World physics and game logic."""
 
-from typing import Optional
+from typing import Any, List, Optional
 
 from .camera import Camera
 from .effects import EffectManager
@@ -84,3 +84,14 @@ class World:
         self.camera.update(self.mario.state.x, self.level.width_pixels)
 
         return None
+
+    def get_drawables(self) -> List[Any]:
+        """Get all drawable objects with z-index for rendering.
+
+        Returns:
+            List of all drawable objects (Mario, effects, entities)
+        """
+        drawables: List[Any] = [self.mario]
+        drawables.extend(self.effects._effects)
+        drawables.extend(self.entities._entities)
+        return drawables
