@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
+from ..entities.mushroom import MushroomEntity
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 
 
@@ -27,6 +28,17 @@ class ItemBoxBehavior(TerrainBehavior):
                 CoinEffect(
                     world_x=coin_x,
                     world_y=coin_y,
+                )
+            )
+
+            mushroom_x = context.tile_x * TILE_SIZE
+            mushroom_y = (context.tile_y + 1) * TILE_SIZE
+            context.spawn_entity(
+                MushroomEntity(
+                    world_x=mushroom_x,
+                    world_y=mushroom_y,
+                    screen=context.screen,
+                    direction=1,
                 )
             )
 

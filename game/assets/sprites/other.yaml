@@ -10,3 +10,7 @@ sprite_sheets:
       flag_castle:
         offset: [110, 102]
         size: [2, 2]
+
+      mushroom:
+        offset: [0, 24]
+        size: [2, 2]

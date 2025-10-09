@@ -8,6 +8,7 @@ from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
 from .death_event import DeathEventProcessor
 from .end_level_event import EndLevelEventProcessor
+from .entity_collision import EntityCollisionProcessor
 from .flagpole_clamp import FlagpoleClampProcessor
 from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
@@ -39,6 +40,7 @@ class PhysicsPipeline:
     12. GroundCollision - Detect and resolve ground/slopes
     13. FlagpoleClamp - Prevent Mario from sliding past the flagpole
     14. Action - Determine action from final state
+    15. EntityCollision - Check collisions between Mario and entities
 
     This order ensures that:
     - Input is processed first
@@ -47,6 +49,7 @@ class PhysicsPipeline:
     - Position is updated
     - Collisions are resolved separately
     - Final action is determined
+    - Entity collisions checked after Mario's state is finalized
     """
 
     def __init__(self) -> None:
@@ -66,6 +69,7 @@ class PhysicsPipeline:
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
             ActionProcessor(),
+            EntityCollisionProcessor(),
         ]
 
         # Optional: Enable/disable debugging

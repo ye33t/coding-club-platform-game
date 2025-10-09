@@ -182,6 +182,10 @@ class Game:
         """Draw transient effects like coins."""
         self.world.effects.draw(surface, self.world.camera)
 
+    def draw_entities(self, surface: pygame.Surface) -> None:
+        """Draw active entities like mushrooms and enemies."""
+        self.world.entities.draw(surface, self.world.camera)
+
     def draw_mario(self, surface: pygame.Surface) -> None:
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position

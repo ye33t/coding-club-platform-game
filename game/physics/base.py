@@ -1,13 +1,14 @@
 """Base classes for the physics pipeline system."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, List, Optional
 
 from ..camera import CameraState
 from ..mario import MarioIntent, MarioState
 
 if TYPE_CHECKING:
+    from ..entities import Entity
     from ..level import Level
     from .events import PhysicsEvent
 
@@ -26,11 +27,7 @@ class PhysicsContext:
     camera_state: CameraState  # Camera state for boundary checks
     dt: float  # Delta time for this frame
     event: Optional["PhysicsEvent"] = None  # Event that triggers state transition
-
-    # Future extensibility - these will be added as needed:
-    # enemies: List[Enemy] = field(default_factory=list)
-    # items: List[Item] = field(default_factory=list)
-    # effects: List[Effect] = field(default_factory=list)
+    entities: List["Entity"] = field(default_factory=list)  # Active game entities
 
 
 class PhysicsProcessor(ABC):

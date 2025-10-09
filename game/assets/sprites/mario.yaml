@@ -46,3 +46,49 @@ sprite_sheets:
       small_mario_swim5:
         offset: [246, 24]
         size: [2, 2]
+
+      big_mario_stand:
+        offset: [136, 62]
+        size: [2, 4]
+      big_mario_walk1:
+        offset: [154, 62]
+        size: [2, 4]
+      big_mario_walk2:
+        offset: [174, 62]
+        size: [2, 4]
+      big_mario_walk3:
+        offset: [192, 62]
+        size: [2, 4]
+      big_mario_skid:
+        offset: [210, 62]
+        size: [2, 4]
+      big_mario_jump:
+        offset: [228, 62]
+        size: [2, 4]
+      big_mario_crouch:
+        offset: [246, 62]
+        size: [2, 4]
+      big_mario_bounce1:
+        offset: [264, 62]
+        size: [2, 4]
+      big_mario_bounce2:
+        offset: [282, 62]
+        size: [2, 4]
+      big_mario_swim1:
+        offset: [20, 62]
+        size: [2, 4]
+      big_mario_swim2:
+        offset: [38, 62]
+        size: [2, 4]
+      big_mario_swim3:
+        offset: [56, 62]
+        size: [2, 4]
+      big_mario_swim4:
+        offset: [76, 62]
+        size: [2, 4]
+      big_mario_swim5:
+        offset: [96, 62]
+        size: [2, 4]
+      big_mario_swim6:
+        offset: [116, 62]
+        size: [2, 3]
