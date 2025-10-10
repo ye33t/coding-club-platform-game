@@ -1,8 +1,9 @@
-"""Item box behavior that spawns a coin and converts to a used state."""
+"""Item box behavior that spawns a configured reward and converts to used state."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
@@ -10,9 +11,27 @@ from ..entities.mushroom import MushroomEntity
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 
 
+class ItemBoxSpawnType(Enum):
+    """Available rewards that an item box can produce."""
+
+    COIN = "coin"
+    MUSHROOM = "mushroom"
+
+    @classmethod
+    def from_string(cls, raw_value: str) -> "ItemBoxSpawnType":
+        """Parse a spawn type from configuration input."""
+        normalized = raw_value.strip().lower()
+        try:
+            return cls(normalized)
+        except ValueError as exc:
+            raise ValueError(f"Unknown item box spawn type '{raw_value}'") from exc
+
+
 @dataclass(slots=True)
 class ItemBoxBehavior(TerrainBehavior):
-    """Spawns a coin effect and turns into a used item box when hit."""
+    """Spawns the configured reward and turns into a used item box when hit."""
+
+    spawn_type: ItemBoxSpawnType = ItemBoxSpawnType.COIN
 
     def process(self, context: BehaviorContext) -> None:
         state = context.state
@@ -22,25 +41,26 @@ class ItemBoxBehavior(TerrainBehavior):
 
             state.data["used"] = True
 
-            coin_x = context.tile_x * TILE_SIZE
-            coin_y = (context.tile_y + 1) * TILE_SIZE
-            context.spawn_effect(
-                CoinEffect(
-                    world_x=coin_x,
-                    world_y=coin_y,
+            if self.spawn_type is ItemBoxSpawnType.COIN:
+                coin_x = context.tile_x * TILE_SIZE
+                coin_y = (context.tile_y + 1) * TILE_SIZE
+                context.spawn_effect(
+                    CoinEffect(
+                        world_x=coin_x,
+                        world_y=coin_y,
+                    )
                 )
-            )
-
-            mushroom_x = context.tile_x * TILE_SIZE - (TILE_SIZE // 4)
-            mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
-            context.spawn_entity(
-                MushroomEntity(
-                    world_x=mushroom_x,
-                    world_y=mushroom_y,
-                    screen=context.screen,
-                    direction=1,
+            elif self.spawn_type is ItemBoxSpawnType.MUSHROOM:
+                mushroom_x = context.tile_x * TILE_SIZE - (TILE_SIZE // 4)
+                mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
+                context.spawn_entity(
+                    MushroomEntity(
+                        world_x=mushroom_x,
+                        world_y=mushroom_y,
+                        screen=context.screen,
+                        direction=1,
+                    )
                 )
-            )
 
             context.queue_tile_change(
                 context.screen,
