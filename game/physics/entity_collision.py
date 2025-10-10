@@ -2,8 +2,8 @@
 
 from pygame import Rect
 
-from ..constants import TILE_SIZE
 from .base import PhysicsContext, PhysicsProcessor
+from .config import SMALL_TO_BIG_TRANSITION_DURATION
 
 
 class EntityCollisionProcessor(PhysicsProcessor):
@@ -13,18 +13,11 @@ class EntityCollisionProcessor(PhysicsProcessor):
     - Checks AABB collision between Mario and each entity
     - Calls entity's on_collide_mario() method
     - Handles collision responses (power-up, damage, etc.)
-    - Removes entities marked for removal
+    - Marks entities for removal when appropriate
     """
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
-        """Check for collisions between Mario and entities.
-
-        Args:
-            context: Physics context containing Mario state and entities
-
-        Returns:
-            Modified context with collision responses applied
-        """
+        """Check for collisions between Mario and entities."""
         mario_state = context.mario_state
         mario_rect = Rect(
             int(mario_state.x),
@@ -36,18 +29,21 @@ class EntityCollisionProcessor(PhysicsProcessor):
         for entity in context.entities:
             entity_rect = entity.get_collision_bounds()
 
-            if mario_rect.colliderect(entity_rect):
-                response = entity.on_collide_mario(mario_state)
+            if not mario_rect.colliderect(entity_rect):
+                continue
 
-                if response:
-                    if response.power_up_type is not None:
-                        self._apply_power_up(context, response.power_up_type)
+            response = entity.on_collide_mario(mario_state)
+            if not response:
+                continue
 
-                    if response.damage:
-                        pass
+            if response.power_up_type is not None:
+                self._apply_power_up(context, response.power_up_type)
 
-                    if response.remove:
-                        context.entities_to_remove.append(entity)
+            if response.damage:
+                pass
+
+            if response.remove:
+                context.entities_to_remove.append(entity)
 
         return context
 
@@ -65,6 +61,11 @@ class EntityCollisionProcessor(PhysicsProcessor):
         if mario_state.size == "big":
             return
 
-        mario_state.size = "big"
-        mario_state.width = TILE_SIZE
-        mario_state.height = TILE_SIZE * 2
+        original_size = mario_state.size
+        mario_state.transition_from_size = original_size
+        mario_state.transition_to_size = "big"
+        mario_state.power_up_transition = "small_to_big"
+        mario_state.transition_time_remaining = SMALL_TO_BIG_TRANSITION_DURATION
+        mario_state.transition_toggle_timer = 0.0
+        mario_state.transition_show_target = True
+        mario_state.set_size("big")

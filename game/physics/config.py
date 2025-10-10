@@ -73,5 +73,9 @@ COIN_JUMP_VELOCITY = config["coin"]["jump_velocity"]
 COIN_GRAVITY = config["coin"]["gravity"]
 COIN_OFFSET = config["coin"]["offset"]
 
+# Power-ups
+SMALL_TO_BIG_TRANSITION_MS = config["powerups"]["small_to_big_transition_ms"]
+SMALL_TO_BIG_TRANSITION_DURATION = SMALL_TO_BIG_TRANSITION_MS / 1000.0
+
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)

@@ -133,3 +133,7 @@ gravity = 600.0
 
 # Pixels starting point at which the coin vanishes
 offset = 24.0  
+
+[powerups]
+# Duration in milliseconds that Mario cycles between sizes after grabbing a mushroom
+small_to_big_transition_ms = 1000

@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pygame
 
@@ -42,6 +42,12 @@ class MarioState:
     on_ground: bool = True
     is_jumping: bool = False  # True when in a player-initiated jump
     size: str = "small"  # small, big, fire
+    power_up_transition: Optional[str] = None
+    transition_from_size: Optional[str] = None
+    transition_to_size: Optional[str] = None
+    transition_time_remaining: float = 0.0
+    transition_toggle_timer: float = 0.0
+    transition_show_target: bool = True
 
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
@@ -58,6 +64,16 @@ class MarioState:
         if self.animation_length <= 1:
             return 1.0
         return self.frame / (self.animation_length - 1)
+
+    def set_size(self, size: str) -> None:
+        """Update Mario's size and adjust hitbox dimensions."""
+        self.size = size
+        if size == "big":
+            self.width = TILE_SIZE
+            self.height = TILE_SIZE * 2
+        else:
+            self.width = TILE_SIZE
+            self.height = TILE_SIZE
 
 
 class Mario:
