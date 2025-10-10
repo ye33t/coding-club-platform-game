@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Set
 
 from ..camera import CameraState
 from ..mario import MarioIntent, MarioState
@@ -28,8 +28,8 @@ class PhysicsContext:
     dt: float  # Delta time for this frame
     event: Optional["PhysicsEvent"] = None  # Event that triggers state transition
     entities: List["Entity"] = field(default_factory=list)  # Active game entities
-    entities_to_remove: List["Entity"] = field(
-        default_factory=list
+    entities_to_remove: Set["Entity"] = field(
+        default_factory=set
     )  # Entities flagged for removal during processing
 
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from game.mario import MarioState
-
 from .base import PhysicsContext, PhysicsProcessor
 
 
@@ -18,4 +16,3 @@ class MarioTransitionProcessor(PhysicsProcessor):
             transition.update(context.dt, context.mario_state)
 
         return context
-

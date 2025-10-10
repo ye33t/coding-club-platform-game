@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterable, List
 
 from pygame import Surface
 
@@ -68,7 +68,7 @@ class EntityManager:
         """Remove all active entities."""
         self._entities.clear()
 
-    def remove_entities(self, entities: List[Entity]) -> None:
+    def remove_entities(self, entities: Iterable[Entity]) -> None:
         """Remove specified entities from the manager."""
         if not entities:
             return

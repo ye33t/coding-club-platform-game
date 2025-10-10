@@ -42,7 +42,7 @@ class EntityCollisionProcessor(PhysicsProcessor):
                 pass
 
             if response.remove:
-                context.entities_to_remove.append(entity)
+                context.entities_to_remove.add(entity)
 
         return context
 

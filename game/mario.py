@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional
 import pygame
 
 from game.constants import TILE_SIZE
-from game.physics.config import MARIO_TRANSITION_DURATION
+from game.physics.config import MARIO_TRANSITION_DURATION, MARIO_TRANSITION_INTERVAL
 
 from .content import sprites
 
@@ -28,26 +28,31 @@ class MarioIntent:
 @dataclass
 class MarioTransition:
     """Represents an in-progress transition (e.g., size change)."""
+
     from_action: Callable[[MarioState], None]
     to_action: Callable[[MarioState], None]
     time_remaining: float = MARIO_TRANSITION_DURATION
-    toggle_counter: int = 0
+    toggle_time: float = 0.0
     show_target: bool = True
-    
+
     def update(self, dt: float, mario_state: MarioState) -> None:
         self.time_remaining -= dt
         if self.time_remaining > 0:
-            self.toggle_counter += 1
-            
-            if self.toggle_counter >= 1:
-                self.toggle_counter = 0
+            # Update toggle timer
+            self.toggle_time += dt
+
+            # Toggle visibility at specified interval
+            if self.toggle_time >= MARIO_TRANSITION_INTERVAL:
+                self.toggle_time = 0.0
                 self.show_target = not self.show_target
-                
+
+            # Apply the appropriate state
             if self.show_target:
                 self.to_action(mario_state)
             else:
                 self.from_action(mario_state)
         else:
+            # Transition complete - apply final state
             self.show_target = True
             self.to_action(mario_state)
             mario_state.transition = None
@@ -97,16 +102,15 @@ class MarioState:
             return
 
         self.transition = MarioTransition(
-            from_action=self._small_action,
-            to_action=self._big_action
+            from_action=self._small_action, to_action=self._big_action
         )
-        
+
     @staticmethod
     def _small_action(state: MarioState) -> None:
         state.size = "small"
         state.width = TILE_SIZE
         state.height = TILE_SIZE
-        
+
     @staticmethod
     def _big_action(state: MarioState) -> None:
         state.size = "big"
