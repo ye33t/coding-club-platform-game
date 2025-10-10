@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional
 from pygame import Surface
 
 from ..camera import Camera
-from ..constants import SUB_TILE_SIZE, TILE_SIZE
+from ..constants import TILE_SIZE
 from ..content import sprites
 from ..content.tile_definitions import is_quadrant_solid
 from .base import CollisionResponse, Entity
@@ -90,7 +90,7 @@ class MushroomEntity(Entity):
             surface,
             "other",
             "mushroom",
-            int(screen_x) + SUB_TILE_SIZE // 2,
+            int(screen_x),
             int(screen_y),
         )
 

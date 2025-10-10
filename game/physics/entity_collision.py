@@ -2,7 +2,10 @@
 
 from pygame import Rect
 
+from game.constants import TILE_SIZE
+
 from .base import PhysicsContext, PhysicsProcessor
+from .config import STOMP_VELOCITY_Y_SCALE
 from .events import DeathEvent
 
 
@@ -30,6 +33,35 @@ class EntityCollisionProcessor(PhysicsProcessor):
             int(mario_state.height),
         )
 
+        # First pass: Check if Mario is about to stomp an enemy
+        if mario_state.vy < 0 and not mario_state.on_ground:
+            # Mario is falling - check if there's an enemy below
+
+            # Create a rect below Mario to check for potential stomps
+            stomp_check_rect = Rect(
+                int(mario_state.x + MARIO_HORIZONTAL_MARGIN),
+                int(mario_state.y - TILE_SIZE),
+                int(mario_state.width - (MARIO_HORIZONTAL_MARGIN * 2)),
+                TILE_SIZE,
+            )
+
+            for entity in context.entities:
+                # Check if this entity can be stomped
+                if entity.is_stompable:
+                    entity_rect = entity.get_collision_bounds()
+
+                    # Check if Mario is aligned to stomp this enemy
+                    if stomp_check_rect.colliderect(entity_rect):
+                        # Check if Mario would be in stomp position (above top third)
+                        entity_top = entity_rect.y + entity_rect.height
+                        stomp_threshold = entity_top - (entity_rect.height * 0.33)
+
+                        if mario_state.y > stomp_threshold:
+                            # Mario is about to stomp - activate stomp mode
+                            mario_state.is_stomping = True
+                            break
+
+        # Second pass: Handle actual collisions
         for entity in context.entities:
             entity_rect = entity.get_collision_bounds()
 
@@ -42,7 +74,9 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
             # Apply bounce velocity if specified (e.g., from stomping enemies)
             if response.bounce_velocity is not None:
-                mario_state.vy = response.bounce_velocity
+                # Apply bounce but scale it down for more controlled stomping
+                # This prevents excessive bouncing and gives players better control
+                mario_state.vy = response.bounce_velocity * STOMP_VELOCITY_Y_SCALE
 
             if response.power_up_type is not None:
                 self._apply_power_up(context, response.power_up_type)
@@ -73,18 +107,14 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
         - Small Mario: Dies
         - Big Mario: Shrinks to small
-        - Invincible (during transition): No effect
+        - Invincible: No effect
         """
         mario_state = context.mario_state
 
-        # Check if Mario is invincible (during a transition)
         if mario_state.is_invincible:
             return
 
-        # Check Mario's size and apply appropriate damage
         if mario_state.size == "small":
-            # Small Mario dies
             context.event = DeathEvent()
         elif mario_state.size == "big":
-            # Big Mario shrinks
             mario_state.shrink()

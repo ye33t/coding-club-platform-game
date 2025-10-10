@@ -115,6 +115,15 @@ class Entity(ABC):
         """
         return None
 
+    @property
+    def is_stompable(self) -> bool:
+        """Check if this entity can be stomped by Mario.
+
+        Returns:
+            True if entity can be stomped, False otherwise
+        """
+        return False
+
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:
         """Check if entity is off screen and should be removed.
 

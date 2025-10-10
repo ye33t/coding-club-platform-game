@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional
 from pygame import Rect, Surface
 
 from ..camera import Camera
-from ..constants import SUB_TILE_SIZE, TILE_SIZE
+from ..constants import TILE_SIZE
 from ..content import sprites
 from ..content.tile_definitions import is_quadrant_solid
 from .base import CollisionResponse, Entity
@@ -96,7 +96,7 @@ class GoombaEntity(Entity):
                 surface,
                 "enemies",
                 "goomba_dead",
-                int(screen_x) + SUB_TILE_SIZE // 2,
+                int(screen_x),
                 int(screen_y),
             )
         else:
@@ -108,7 +108,7 @@ class GoombaEntity(Entity):
                 surface,
                 "enemies",
                 sprite_name,
-                int(screen_x) + SUB_TILE_SIZE // 2,
+                int(screen_x),
                 int(screen_y),
             )
 
@@ -144,20 +144,26 @@ class GoombaEntity(Entity):
             # Mario ran into the Goomba - damage Mario
             return CollisionResponse(damage=True)
 
-    def get_collision_bounds(self) -> Rect:
-        """Get collision rectangle for Goomba with more accurate bounds.
+    @property
+    def is_stompable(self) -> bool:
+        """Goombas can be stomped when they're alive.
 
         Returns:
-            Pygame Rect with smaller horizontal collision area
+            True if Goomba can be stomped, False if already dead
         """
-        # Shrink the collision box horizontally to better match the visual sprite
-        # Goomba sprites are narrower than a full tile
-        HORIZONTAL_MARGIN = 3  # Pixels to shrink on each side
+        return not self.is_dead
 
+    def get_collision_bounds(self) -> Rect:
+        """Get collision rectangle for Goomba.
+
+        Returns:
+            Pygame Rect for collision detection
+        """
+        # Goomba sprite fits the tile perfectly, no margins needed
         return Rect(
-            int(self.state.x + HORIZONTAL_MARGIN),
+            int(self.state.x),
             int(self.state.y),
-            int(self.state.width - (HORIZONTAL_MARGIN * 2)),
+            int(self.state.width),
             int(self.state.height),
         )
 

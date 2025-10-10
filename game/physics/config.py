@@ -77,5 +77,8 @@ COIN_OFFSET = config["coin"]["offset"]
 MARIO_TRANSITION_DURATION = config["transitions"]["duration"]
 MARIO_TRANSITION_INTERVAL = config["transitions"]["interval"]
 
+# Stomp
+STOMP_VELOCITY_Y_SCALE = config["stomp"]["velocity_y_scale"]
+
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)
