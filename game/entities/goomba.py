@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from pygame import Surface
+from pygame import Rect, Surface
 
 from ..camera import Camera
 from ..constants import SUB_TILE_SIZE, TILE_SIZE
@@ -128,8 +128,10 @@ class GoombaEntity(Entity):
         mario_bottom = mario_state.y
         goomba_top = self.state.y + self.state.height
 
-        # Mario is stomping if falling and bottom is above Goomba's midpoint
-        if mario_state.vy < 0 and mario_bottom > goomba_top - (self.state.height * 0.5):
+        # Mario is stomping if falling and bottom is above top 1/3 of Goomba
+        # This is more forgiving - allows stomping when hitting top portion
+        stomp_threshold = goomba_top - (self.state.height * 0.33)  # Top third
+        if mario_state.vy < 0 and mario_bottom > stomp_threshold:
             # Mario stomped the Goomba
             self.is_dead = True
             self.state.vx = 0  # Stop horizontal movement
@@ -141,6 +143,23 @@ class GoombaEntity(Entity):
         else:
             # Mario ran into the Goomba - damage Mario
             return CollisionResponse(damage=True)
+
+    def get_collision_bounds(self) -> Rect:
+        """Get collision rectangle for Goomba with more accurate bounds.
+
+        Returns:
+            Pygame Rect with smaller horizontal collision area
+        """
+        # Shrink the collision box horizontally to better match the visual sprite
+        # Goomba sprites are narrower than a full tile
+        HORIZONTAL_MARGIN = 3  # Pixels to shrink on each side
+
+        return Rect(
+            int(self.state.x + HORIZONTAL_MARGIN),
+            int(self.state.y),
+            int(self.state.width - (HORIZONTAL_MARGIN * 2)),
+            int(self.state.height),
+        )
 
     def _apply_gravity(self, dt: float) -> None:
         """Apply gravity to Goomba velocity."""

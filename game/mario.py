@@ -105,6 +105,20 @@ class MarioState:
             from_action=self._small_action, to_action=self._big_action
         )
 
+    def shrink(self) -> None:
+        """Trigger big-to-small transformation if Mario is big."""
+        if self.size == "small":
+            return
+
+        self.transition = MarioTransition(
+            from_action=self._big_action, to_action=self._small_action
+        )
+
+    @property
+    def is_invincible(self) -> bool:
+        """Check if Mario is invincible (during transition)."""
+        return self.transition is not None
+
     @staticmethod
     def _small_action(state: MarioState) -> None:
         state.size = "small"
