@@ -5,5 +5,11 @@ sprite_sheets:
     colorkey: [146, 144, 255]
     sprites:
       goomba_walk1:
-        offset: [0, 16]
+        offset: [0, 32]
         size: [2, 2]
+      goomba_walk2:
+        offset: [18, 32]
+        size: [2, 2]
+      goomba_dead:
+        offset: [36, 32]
+        size: [2, 1]
