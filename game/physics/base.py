@@ -28,6 +28,9 @@ class PhysicsContext:
     dt: float  # Delta time for this frame
     event: Optional["PhysicsEvent"] = None  # Event that triggers state transition
     entities: List["Entity"] = field(default_factory=list)  # Active game entities
+    entities_to_remove: List["Entity"] = field(
+        default_factory=list
+    )  # Entities flagged for removal during processing
 
 
 class PhysicsProcessor(ABC):

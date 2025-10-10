@@ -33,8 +33,6 @@ class EntityCollisionProcessor(PhysicsProcessor):
             int(mario_state.height),
         )
 
-        entities_to_keep = []
-
         for entity in context.entities:
             entity_rect = entity.get_collision_bounds()
 
@@ -42,18 +40,14 @@ class EntityCollisionProcessor(PhysicsProcessor):
                 response = entity.on_collide_mario(mario_state)
 
                 if response:
-                    if response.power_up_type != None:
+                    if response.power_up_type is not None:
                         self._apply_power_up(context, response.power_up_type)
 
                     if response.damage:
                         pass
 
                     if response.remove:
-                        continue
-
-            entities_to_keep.append(entity)
-
-        context.entities[:] = entities_to_keep
+                        context.entities_to_remove.append(entity)
 
         return context
 

@@ -67,3 +67,12 @@ class EntityManager:
     def clear(self) -> None:
         """Remove all active entities."""
         self._entities.clear()
+
+    def remove_entities(self, entities: List[Entity]) -> None:
+        """Remove specified entities from the manager."""
+        if not entities:
+            return
+        removal_ids = {id(entity) for entity in entities}
+        self._entities = [
+            entity for entity in self._entities if id(entity) not in removal_ids
+        ]
