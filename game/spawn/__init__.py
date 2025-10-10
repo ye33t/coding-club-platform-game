@@ -1,10 +1,9 @@
 """Spawn system for camera-triggered entity spawning."""
 
-from .types import SpawnLocation, SpawnManager, SpawnSpec, SpawnTrigger
+from .types import EntitySpec, SpawnManager, SpawnTrigger
 
 __all__ = [
-    "SpawnSpec",
-    "SpawnLocation",
+    "EntitySpec",
     "SpawnTrigger",
     "SpawnManager",
 ]

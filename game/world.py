@@ -105,23 +105,28 @@ class World:
 
     def _check_spawn_triggers(self) -> None:
         """Check and activate spawn triggers based on camera position."""
-        # Get triggered spawn IDs
+        from .constants import TILE_SIZE
+
+        # Get triggered spawn triggers
         triggered = self.level.spawn_manager.check_triggers(self.camera.x)
 
-        # Spawn entities for each triggered ID
-        for trigger_id in triggered:
-            locations = self.level.spawn_manager.get_locations_for_trigger(trigger_id)
-            for location in locations:
-                # Create entity from specification
-                entity = self.entity_factory.create(
-                    location.spec.entity_type,
-                    location.world_x,
-                    location.world_y,
-                    location.screen,
-                    location.spec.params,
-                )
-                if entity:
-                    self.entities.spawn(entity)
+        # Spawn entities for each triggered trigger
+        for trigger in triggered:
+            for entity_spec in trigger.entities:
+                # Spawn each entity at all its locations
+                for tile_x, tile_y, screen in entity_spec.locations:
+                    world_x = tile_x * TILE_SIZE
+                    world_y = tile_y * TILE_SIZE
+
+                    entity = self.entity_factory.create(
+                        entity_spec.entity_type,
+                        world_x,
+                        world_y,
+                        screen,
+                        entity_spec.params,
+                    )
+                    if entity:
+                        self.entities.spawn(entity)
 
     def reset_spawn_triggers(self) -> None:
         """Reset all spawn triggers and clear enemy entities.

@@ -89,12 +89,14 @@ screens:
         ............................................................
         ............................................................
         A...............B...........................................
-      a:
-        type: goomba
-        facing: left
-        triggers: ["A"]
-
-      b:
-        type: goomba
-        facing: right
-        triggers: ["B"]
+      triggers:
+        A:
+          entities:
+            a:
+              type: goomba
+              facing: left
+        B:
+          entities:
+            b:
+              type: goomba
+              facing: right

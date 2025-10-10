@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Set
+from typing import Dict, List, Set, Tuple
 
 import yaml  # type: ignore[import-untyped]
 
@@ -283,7 +283,7 @@ def _process_spawn_data(
     Raises:
         ParseError: If validation fails
     """
-    from ..spawn import SpawnLocation, SpawnSpec, SpawnTrigger
+    from ..spawn import EntitySpec, SpawnTrigger
 
     spawn_data = screen_data["spawn"]
     if not isinstance(spawn_data, dict):
@@ -309,72 +309,87 @@ def _process_spawn_data(
     # The rest contains spawn location symbols
     location_rows = lines[1:] if len(lines) > 1 else []
 
-    # Process triggers from the bottom row
-    for tile_x, char in enumerate(trigger_row):
-        if char == ".":
-            continue
-
-        # Create trigger for this position
-        trigger_id = char
-        camera_x = tile_x * TILE_SIZE
-        trigger = SpawnTrigger(
-            trigger_id=trigger_id,
-            camera_x=camera_x,
-            screen=screen_idx,
-            tile_x=tile_x,
-        )
-        level.spawn_manager.add_trigger(trigger)
-
-    # Process spawn locations from the upper rows
+    # First pass: collect all entity locations from layout
+    entity_locations: Dict[str, List[Tuple[int, int, int]]] = {}
     for tile_y, row in enumerate(location_rows):
         for tile_x, char in enumerate(row):
             if char == ".":
                 continue
+            if char not in entity_locations:
+                entity_locations[char] = []
+            entity_locations[char].append((tile_x, tile_y, screen_idx))
 
-            # Check if this symbol has a definition
-            if char not in spawn_data:
-                continue
+    # Parse triggers section if present
+    if "triggers" not in spawn_data:
+        return
 
-            symbol_def = spawn_data[char]
-            if not isinstance(symbol_def, dict):
+    triggers_data = spawn_data["triggers"]
+    if not isinstance(triggers_data, dict):
+        raise ParseError(f"Screen {screen_idx} triggers must be a dictionary")
+
+    # Process each trigger
+    for trigger_id, trigger_def in triggers_data.items():
+        if not isinstance(trigger_def, dict):
+            raise ParseError(
+                f"Screen {screen_idx}: Trigger '{trigger_id}' must be a dictionary"
+            )
+
+        # Find trigger position in the layout
+        trigger_tile_x = -1
+        for tile_x, char in enumerate(trigger_row):
+            if char == trigger_id:
+                trigger_tile_x = tile_x
+                break
+
+        if trigger_tile_x == -1:
+            raise ParseError(
+                f"Screen {screen_idx}: Trigger '{trigger_id}' not found in layout"
+            )
+
+        # Create trigger
+        camera_x = trigger_tile_x * TILE_SIZE
+        trigger = SpawnTrigger(
+            trigger_id=trigger_id,
+            camera_x=camera_x,
+            screen=screen_idx,
+            tile_x=trigger_tile_x,
+        )
+
+        # Process entities for this trigger
+        entities_data = trigger_def.get("entities", {})
+        if not isinstance(entities_data, dict):
+            raise ParseError(
+                f"Screen {screen_idx}: Trigger '{trigger_id}' "
+                f"entities must be a dictionary"
+            )
+
+        for entity_symbol, entity_def in entities_data.items():
+            if not isinstance(entity_def, dict):
                 raise ParseError(
-                    f"Screen {screen_idx}: Spawn symbol '{char}' "
-                    f"definition must be a dictionary"
+                    f"Screen {screen_idx}: Entity '{entity_symbol}' "
+                    f"must be a dictionary"
                 )
 
-            # Extract spawn specification
-            entity_type = symbol_def.get("type")
+            entity_type = entity_def.get("type")
             if not entity_type:
                 raise ParseError(
-                    f"Screen {screen_idx}: Spawn symbol '{char}' "
+                    f"Screen {screen_idx}: Entity '{entity_symbol}' "
                     f"must have a 'type' field"
-                )
-
-            triggers = symbol_def.get("triggers", [])
-            if not isinstance(triggers, list):
-                raise ParseError(
-                    f"Screen {screen_idx}: Spawn symbol '{char}' "
-                    f"triggers must be a list"
                 )
 
             # Get optional parameters
             params = {}
-            if "facing" in symbol_def:
-                params["facing"] = symbol_def["facing"]
+            if "facing" in entity_def:
+                params["facing"] = entity_def["facing"]
 
-            # Create spawn specification and location
-            spec = SpawnSpec(
+            # Create entity spec with locations from layout
+            entity_spec = EntitySpec(
                 entity_type=entity_type,
                 params=params,
-                triggers=triggers,
+                symbol=entity_symbol,
+                locations=entity_locations.get(entity_symbol, []),
             )
 
-            location = SpawnLocation(
-                tile_x=tile_x,
-                tile_y=tile_y,
-                screen=screen_idx,
-                spec=spec,
-                symbol=char,
-            )
+            trigger.entities.append(entity_spec)
 
-            level.spawn_manager.add_location(location)
+        level.spawn_manager.add_trigger(trigger)
