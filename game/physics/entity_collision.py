@@ -2,6 +2,7 @@
 
 from pygame import Rect
 
+from ..constants import TILE_SIZE
 from .base import PhysicsContext, PhysicsProcessor
 
 
@@ -41,20 +42,35 @@ class EntityCollisionProcessor(PhysicsProcessor):
                 response = entity.on_collide_mario(mario_state)
 
                 if response:
-                    if response.remove:
-                        continue
-
-                    if response.power_up:
-                        pass
+                    if response.power_up_type != None:
+                        self._apply_power_up(context, response.power_up_type)
 
                     if response.damage:
                         pass
 
-                    if response.bounce:
-                        pass
+                    if response.remove:
+                        continue
 
             entities_to_keep.append(entity)
 
         context.entities[:] = entities_to_keep
 
         return context
+
+    def _apply_power_up(
+        self, context: PhysicsContext, power_up_type: str | None
+    ) -> None:
+        """Apply a power-up effect to Mario based on collision response."""
+        if power_up_type == "mushroom":
+            self._apply_mushroom(context)
+
+    def _apply_mushroom(self, context: PhysicsContext) -> None:
+        """Handle mushroom collection: grow Mario to big size."""
+        mario_state = context.mario_state
+
+        if mario_state.size == "big":
+            return
+
+        mario_state.size = "big"
+        mario_state.width = TILE_SIZE
+        mario_state.height = TILE_SIZE * 2

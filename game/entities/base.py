@@ -37,9 +37,8 @@ class CollisionResponse:
     def __init__(
         self,
         remove: bool = False,
-        power_up: bool = False,
         damage: bool = False,
-        bounce: bool = False,
+        power_up_type: Optional[str] = None,
     ):
         """Initialize collision response.
 
@@ -48,11 +47,11 @@ class CollisionResponse:
             power_up: Apply power-up effect to Mario
             damage: Damage Mario
             bounce: Bounce Mario upward
+            power_up_type: Specific power-up identifier (e.g., "mushroom")
         """
         self.remove = remove
-        self.power_up = power_up
         self.damage = damage
-        self.bounce = bounce
+        self.power_up_type = power_up_type
 
 
 class Entity(ABC):

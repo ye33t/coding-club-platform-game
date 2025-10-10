@@ -103,7 +103,10 @@ class MushroomEntity(Entity):
         Returns:
             CollisionResponse to remove mushroom and apply power-up
         """
-        return CollisionResponse(remove=True, power_up=True)
+        return CollisionResponse(
+            remove=True,
+            power_up_type="mushroom",
+        )
 
     def _apply_gravity(self, dt: float) -> None:
         """Apply gravity to mushroom velocity."""
