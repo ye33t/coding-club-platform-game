@@ -46,7 +46,7 @@ class MarioState:
     transition_from_size: Optional[str] = None
     transition_to_size: Optional[str] = None
     transition_time_remaining: float = 0.0
-    transition_toggle_timer: float = 0.0
+    transition_toggle_counter: int = 0
     transition_show_target: bool = True
 
     # Animation state

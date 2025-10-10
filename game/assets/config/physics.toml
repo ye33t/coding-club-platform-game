@@ -136,4 +136,4 @@ offset = 24.0
 
 [powerups]
 # Duration in milliseconds that Mario cycles between sizes after grabbing a mushroom
-small_to_big_transition_ms = 1000
+small_to_big_transition_ms = 1500

@@ -66,6 +66,6 @@ class EntityCollisionProcessor(PhysicsProcessor):
         mario_state.transition_to_size = "big"
         mario_state.power_up_transition = "small_to_big"
         mario_state.transition_time_remaining = SMALL_TO_BIG_TRANSITION_DURATION
-        mario_state.transition_toggle_timer = 0.0
+        mario_state.transition_toggle_counter = 0
         mario_state.transition_show_target = True
         mario_state.set_size("big")
