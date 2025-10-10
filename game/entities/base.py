@@ -39,19 +39,20 @@ class CollisionResponse:
         remove: bool = False,
         damage: bool = False,
         power_up_type: Optional[str] = None,
+        bounce_velocity: Optional[float] = None,
     ):
         """Initialize collision response.
 
         Args:
             remove: Remove the entity after collision
-            power_up: Apply power-up effect to Mario
             damage: Damage Mario
-            bounce: Bounce Mario upward
             power_up_type: Specific power-up identifier (e.g., "mushroom")
+            bounce_velocity: Upward velocity to apply to Mario (e.g., for stomping)
         """
         self.remove = remove
         self.damage = damage
         self.power_up_type = power_up_type
+        self.bounce_velocity = bounce_velocity
 
 
 class Entity(ABC):

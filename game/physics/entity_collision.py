@@ -35,6 +35,10 @@ class EntityCollisionProcessor(PhysicsProcessor):
             if not response:
                 continue
 
+            # Apply bounce velocity if specified (e.g., from stomping enemies)
+            if response.bounce_velocity is not None:
+                mario_state.vy = response.bounce_velocity
+
             if response.power_up_type is not None:
                 self._apply_power_up(context, response.power_up_type)
 

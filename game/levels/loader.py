@@ -129,6 +129,10 @@ def load(filepath: str) -> Level:
                 level, screen_idx, screen_data, parser, level.terrain_tiles[screen_idx]
             )
 
+        # Process spawn data if present
+        if "spawn" in screen_data:
+            _process_spawn_data(level, screen_idx, screen_data)
+
     # Snapshot original terrain for resets
     level.snapshot_terrain()
 
@@ -262,3 +266,115 @@ def _process_zones_and_behaviors(
                     f"Screen {screen_idx}: Failed to create behavior "
                     f"for zone '{zone_char}': {e}"
                 )
+
+
+def _process_spawn_data(
+    level: Level,
+    screen_idx: int,
+    screen_data: dict,
+) -> None:
+    """Process spawn data for a screen.
+
+    Args:
+        level: The level being constructed
+        screen_idx: Screen index
+        screen_data: Screen data from YAML
+
+    Raises:
+        ParseError: If validation fails
+    """
+    from ..spawn import SpawnLocation, SpawnSpec, SpawnTrigger
+
+    spawn_data = screen_data["spawn"]
+    if not isinstance(spawn_data, dict):
+        raise ParseError(f"Screen {screen_idx} spawn must be a dictionary")
+
+    # Parse the layout if present
+    if "layout" not in spawn_data:
+        return
+
+    layout_str = spawn_data["layout"]
+    if not isinstance(layout_str, str):
+        raise ParseError(f"Screen {screen_idx} spawn layout must be a string")
+
+    # Split layout into lines and reverse to get bottom-up order
+    lines = layout_str.strip().split("\n")
+    lines.reverse()
+
+    if not lines:
+        return
+
+    # The bottom row contains trigger symbols
+    trigger_row = lines[0]
+    # The rest contains spawn location symbols
+    location_rows = lines[1:] if len(lines) > 1 else []
+
+    # Process triggers from the bottom row
+    for tile_x, char in enumerate(trigger_row):
+        if char == ".":
+            continue
+
+        # Create trigger for this position
+        trigger_id = char
+        camera_x = tile_x * TILE_SIZE
+        trigger = SpawnTrigger(
+            trigger_id=trigger_id,
+            camera_x=camera_x,
+            screen=screen_idx,
+            tile_x=tile_x,
+        )
+        level.spawn_manager.add_trigger(trigger)
+
+    # Process spawn locations from the upper rows
+    for tile_y, row in enumerate(location_rows):
+        for tile_x, char in enumerate(row):
+            if char == ".":
+                continue
+
+            # Check if this symbol has a definition
+            if char not in spawn_data:
+                continue
+
+            symbol_def = spawn_data[char]
+            if not isinstance(symbol_def, dict):
+                raise ParseError(
+                    f"Screen {screen_idx}: Spawn symbol '{char}' "
+                    f"definition must be a dictionary"
+                )
+
+            # Extract spawn specification
+            entity_type = symbol_def.get("type")
+            if not entity_type:
+                raise ParseError(
+                    f"Screen {screen_idx}: Spawn symbol '{char}' "
+                    f"must have a 'type' field"
+                )
+
+            triggers = symbol_def.get("triggers", [])
+            if not isinstance(triggers, list):
+                raise ParseError(
+                    f"Screen {screen_idx}: Spawn symbol '{char}' "
+                    f"triggers must be a list"
+                )
+
+            # Get optional parameters
+            params = {}
+            if "facing" in symbol_def:
+                params["facing"] = symbol_def["facing"]
+
+            # Create spawn specification and location
+            spec = SpawnSpec(
+                entity_type=entity_type,
+                params=params,
+                triggers=triggers,
+            )
+
+            location = SpawnLocation(
+                tile_x=tile_x,
+                tile_y=tile_y,
+                screen=screen_idx,
+                spec=spec,
+                symbol=char,
+            )
+
+            level.spawn_manager.add_location(location)
