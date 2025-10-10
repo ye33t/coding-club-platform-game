@@ -1,12 +1,15 @@
 """Mario character management with intent-based architecture."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 import pygame
 
 from game.constants import TILE_SIZE
+from game.physics.config import MARIO_TRANSITION_DURATION, MARIO_TRANSITION_INTERVAL
 
 from .content import sprites
 
@@ -20,6 +23,39 @@ class MarioIntent:
     run: bool = False
     jump: bool = False
     duck: bool = False
+
+
+@dataclass
+class MarioTransition:
+    """Represents an in-progress transition (e.g., size change)."""
+
+    from_action: Callable[[MarioState], None]
+    to_action: Callable[[MarioState], None]
+    time_remaining: float = MARIO_TRANSITION_DURATION
+    toggle_time: float = 0.0
+    show_target: bool = True
+
+    def update(self, dt: float, mario_state: MarioState) -> None:
+        self.time_remaining -= dt
+        if self.time_remaining > 0:
+            # Update toggle timer
+            self.toggle_time += dt
+
+            # Toggle visibility at specified interval
+            if self.toggle_time >= MARIO_TRANSITION_INTERVAL:
+                self.toggle_time = 0.0
+                self.show_target = not self.show_target
+
+            # Apply the appropriate state
+            if self.show_target:
+                self.to_action(mario_state)
+            else:
+                self.from_action(mario_state)
+        else:
+            # Transition complete - apply final state
+            self.show_target = True
+            self.to_action(mario_state)
+            mario_state.transition = None
 
 
 @dataclass
@@ -41,6 +77,8 @@ class MarioState:
     facing_right: bool = True
     on_ground: bool = True
     is_jumping: bool = False  # True when in a player-initiated jump
+    size: str = "small"  # small, big, fire
+    transition: Optional[MarioTransition] = None
 
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
@@ -58,6 +96,27 @@ class MarioState:
             return 1.0
         return self.frame / (self.animation_length - 1)
 
+    def grow(self) -> None:
+        """Trigger small-to-big transformation if Mario is small."""
+        if self.size == "big":
+            return
+
+        self.transition = MarioTransition(
+            from_action=self._small_action, to_action=self._big_action
+        )
+
+    @staticmethod
+    def _small_action(state: MarioState) -> None:
+        state.size = "small"
+        state.width = TILE_SIZE
+        state.height = TILE_SIZE
+
+    @staticmethod
+    def _big_action(state: MarioState) -> None:
+        state.size = "big"
+        state.width = TILE_SIZE
+        state.height = TILE_SIZE * 2
+
 
 class Mario:
     """Manages Mario's input processing and rendering."""
@@ -71,44 +130,80 @@ class Mario:
             screen: Which vertical screen Mario is on
         """
         self.state = MarioState(x=x, y=y, screen=screen)
-        self.size = "small"  # small, big, fire
+        self.z_index = 20  # Render in front of effects and entities by default
 
         # Animation configurations (each element = 1 frame at 60 FPS)
-        self.animations: Dict[str, Dict[str, Any]] = {
-            "idle": {
-                "sprites": ["small_mario_stand"],
-                "loop": True,
+        self.animations: Dict[str, Dict[str, Dict[str, Any]]] = {
+            "small": {
+                "idle": {
+                    "sprites": ["small_mario_stand"],
+                    "loop": True,
+                },
+                "walking": {
+                    # Use single frames - speed controlled by velocity
+                    "sprites": [
+                        "small_mario_walk1",
+                        "small_mario_walk2",
+                        "small_mario_walk3",
+                    ],
+                    "loop": True,
+                },
+                "running": {
+                    # Same animation as walking - speed controlled by velocity
+                    "sprites": [
+                        "small_mario_walk1",
+                        "small_mario_walk2",
+                        "small_mario_walk3",
+                    ],
+                    "loop": True,
+                },
+                "jumping": {
+                    # Single static jump frame
+                    "sprites": ["small_mario_jump"],  # Hold entire jump
+                    "loop": True,
+                },
+                "skidding": {
+                    "sprites": ["small_mario_skid"],  # Hold for 0.2 seconds
+                    "loop": True,
+                },
+                "dying": {
+                    "sprites": ["small_mario_die"],  # Hold for 1 second
+                    "loop": True,
+                },
             },
-            "walking": {
-                # Use single frames - speed controlled by velocity
-                "sprites": [
-                    "small_mario_walk1",
-                    "small_mario_walk2",
-                    "small_mario_walk3",
-                ],
-                "loop": True,
-            },
-            "running": {
-                # Same animation as walking - speed controlled by velocity
-                "sprites": [
-                    "small_mario_walk1",
-                    "small_mario_walk2",
-                    "small_mario_walk3",
-                ],
-                "loop": True,
-            },
-            "jumping": {
-                # Single static jump frame
-                "sprites": ["small_mario_jump"],  # Hold entire jump
-                "loop": True,
-            },
-            "skidding": {
-                "sprites": ["small_mario_skid"],  # Hold for 0.2 seconds
-                "loop": True,
-            },
-            "dying": {
-                "sprites": ["small_mario_die"],  # Hold for 1 second
-                "loop": True,
+            "big": {
+                "idle": {
+                    "sprites": ["big_mario_stand"],
+                    "loop": True,
+                },
+                "walking": {
+                    "sprites": [
+                        "big_mario_walk1",
+                        "big_mario_walk2",
+                        "big_mario_walk3",
+                    ],
+                    "loop": True,
+                },
+                "running": {
+                    "sprites": [
+                        "big_mario_walk1",
+                        "big_mario_walk2",
+                        "big_mario_walk3",
+                    ],
+                    "loop": True,
+                },
+                "jumping": {
+                    "sprites": ["big_mario_jump"],
+                    "loop": True,
+                },
+                "skidding": {
+                    "sprites": ["big_mario_skid"],
+                    "loop": True,
+                },
+                "dying": {
+                    "sprites": ["small_mario_die"],
+                    "loop": True,
+                },
             },
         }
 
@@ -125,11 +220,16 @@ class Mario:
     def apply_state(self, new_state: MarioState):
         """Accept the authoritative state from the world."""
         # Check if action changed
-        if new_state.action != self.state.action:
-            # Set animation length for the new action
-            if new_state.action in self.animations:
+        current_animations = self.animations.get(
+            new_state.size, self.animations["small"]
+        )
+
+        previous_size = self.state.size
+        if new_state.action != self.state.action or new_state.size != previous_size:
+            # Set animation length for the new action using current size palette.
+            if new_state.action in current_animations:
                 new_state.animation_length = len(
-                    self.animations[new_state.action]["sprites"]
+                    current_animations[new_state.action]["sprites"]
                 )
             else:
                 new_state.animation_length = 1
@@ -152,10 +252,14 @@ class Mario:
 
     def update_animation(self):
         """Update animation frame based on velocity for movement animations."""
-        if self.state.action not in self.animations:
+        current_animations = self.animations.get(
+            self.state.size, self.animations["small"]
+        )
+
+        if self.state.action not in current_animations:
             return
 
-        anim = self.animations[self.state.action]
+        anim = current_animations[self.state.action]
         sprites = anim["sprites"]
 
         # For movement animations, advance based on velocity
@@ -183,24 +287,40 @@ class Mario:
                 else:
                     self.state.frame = len(sprites) - 1
 
-    def draw(self, surface):
-        """Draw Mario at current state."""
+    def draw(self, surface, camera):
+        """Draw Mario at current state.
+
+        Args:
+            surface: Surface to draw on
+            camera: Camera for coordinate transformation
+        """
         sprite_name = self._get_sprite_name()
         if sprite_name:
+            # Transform Mario's world position to screen position
+            screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
+
             # Use reflection when facing left
-            draw_x = int(self.state.x)
             reflected = not self.state.facing_right
 
             sprites.draw_at_position(
-                surface, "characters", sprite_name, draw_x, int(self.state.y), reflected
+                surface,
+                "characters",
+                sprite_name,
+                int(screen_x),
+                int(screen_y),
+                reflected,
             )
 
     def _get_sprite_name(self) -> str:
         """Get the current sprite name based on state."""
-        if self.state.action not in self.animations:
-            return f"{self.size}_mario_stand"
+        current_animations = self.animations.get(
+            self.state.size, self.animations["small"]
+        )
 
-        anim = self.animations[self.state.action]
+        if self.state.action not in current_animations:
+            return f"{self.state.size}_mario_stand"
+
+        anim = current_animations[self.state.action]
         sprite_list: List[str] = anim["sprites"]
 
         # Ensure frame is valid

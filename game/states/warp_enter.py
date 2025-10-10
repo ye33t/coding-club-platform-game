@@ -23,10 +23,16 @@ class WarpEnterState(State):
     def on_enter(self, game) -> None:
         """Start warp enter animation."""
         self.distance_moved = 0.0
+        # Set Mario to render behind terrain
+        game.world.mario.z_index = -10
 
     def handle_events(self, game) -> None:
         """No input during warp."""
         pass
+
+    def on_exit(self, game) -> None:
+        """Reset Mario's z_index when exiting warp."""
+        game.world.mario.z_index = 20
 
     def update(self, game, dt: float) -> None:
         """Move mario down into pipe."""
@@ -49,9 +55,4 @@ class WarpEnterState(State):
 
     def draw(self, game, surface) -> None:
         """Draw with mario behind tiles."""
-        game.draw_background(surface)
-        # Draw mario first (behind)
-        game.draw_mario(surface)
-        # Draw tiles on top
-        game.draw_terrain(surface)
-        game.draw_effects(surface)
+        game.draw_world(surface)

@@ -7,6 +7,7 @@ from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState
 
 if TYPE_CHECKING:
     from ..effects import Effect, EffectFactory, EffectManager
+    from ..entities import Entity, EntityManager
     from ..level import Level
 
 
@@ -40,6 +41,7 @@ class TerrainManager:
         self.instances: Dict[Tuple[int, int, int], TileInstance] = {}
         self._tile_change_commands: List[_TileChangeCommand] = []
         self._effect_commands: List["Effect | EffectFactory"] = []
+        self._entity_commands: List["Entity"] = []
 
     def set_tile_behavior(
         self, screen: int, x: int, y: int, behavior: TerrainBehavior
@@ -97,6 +99,11 @@ class TerrainManager:
 
         self._effect_commands.append(effect)
 
+    def queue_entity(self, entity: "Entity") -> None:
+        """Request that an entity be spawned after the physics step."""
+
+        self._entity_commands.append(entity)
+
     def trigger_event(self, screen: int, x: int, y: int, event: TileEvent) -> None:
         """Trigger an event on a specific tile.
 
@@ -117,6 +124,7 @@ class TerrainManager:
                 0,  # dt=0 for events
                 self.queue_tile_change,
                 self.queue_effect,
+                self.queue_entity,
             )
             instance.behavior.process(context)
 
@@ -137,13 +145,17 @@ class TerrainManager:
                     dt,
                     self.queue_tile_change,
                     self.queue_effect,
+                    self.queue_entity,
                 )
                 instance.behavior.process(context)
 
     def apply_pending_commands(
-        self, level: "Level", effect_manager: Optional["EffectManager"] = None
+        self,
+        level: "Level",
+        effect_manager: Optional["EffectManager"] = None,
+        entity_manager: Optional["EntityManager"] = None,
     ) -> None:
-        """Apply queued tile changes and spawn requested effects."""
+        """Apply queued tile changes and spawn requested effects and entities."""
 
         from .factory import BehaviorFactory
 
@@ -178,3 +190,8 @@ class TerrainManager:
             for effect in self._effect_commands:
                 effect_manager.spawn(effect)
         self._effect_commands.clear()
+
+        if entity_manager is not None:
+            for entity in self._entity_commands:
+                entity_manager.spawn(entity)
+        self._entity_commands.clear()

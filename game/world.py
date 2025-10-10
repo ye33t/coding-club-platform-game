@@ -1,9 +1,10 @@
 """World physics and game logic."""
 
-from typing import Optional
+from typing import Any, List, Optional
 
 from .camera import Camera
 from .effects import EffectManager
+from .entities import EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
@@ -20,6 +21,7 @@ class World:
         self.camera = Camera()
         self.physics_pipeline = PhysicsPipeline()
         self.effects = EffectManager()
+        self.entities = EntityManager()
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -37,42 +39,62 @@ class World:
         # Step 1: Get Mario's intent from input
         mario_intent = self.mario.get_intent(keys)
 
-        # Step 2: Create physics context with cloned states
+        # Step 2: Update entities physics (before Mario physics)
+        self.entities.update(dt, self.level, self.mario.state.screen, self.camera.x)
+
+        # Step 3: Create physics context with cloned states
         context = PhysicsContext(
             mario_state=self.mario.state.clone(),  # Work with a copy
             mario_intent=mario_intent,
             level=self.level,
             camera_state=self.camera.state.clone(),  # Work with a copy
             dt=dt,
+            entities=self.entities.get_entities(),
         )
 
-        # Step 3: Process through physics pipeline
+        # Step 4: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
 
         # Apply any tile or effect commands queued during behavior processing.
-        self.level.terrain_manager.apply_pending_commands(self.level, self.effects)
+        self.level.terrain_manager.apply_pending_commands(
+            self.level, self.effects, self.entities
+        )
 
-        # Step 4: Check if an event was raised (short-circuits normal processing)
+        # Remove any entities flagged during physics processing
+        self.entities.remove_entities(processed_context.entities_to_remove)
+
+        # Step 5: Check if an event was raised (short-circuits normal processing)
         event: Optional[PhysicsEvent] = processed_context.event
         if event is not None:
             return event
 
-        # Step 5: Push state back to Mario
+        # Step 6: Push state back to Mario
         self.mario.apply_state(processed_context.mario_state)
 
-        # Step 6: Apply camera state changes
+        # Step 7: Apply camera state changes
         self.camera.apply_state(processed_context.camera_state)
 
-        # Step 7: Update Mario's animation
+        # Step 8: Update Mario's animation
         self.mario.update_animation()
 
-        # Step 8: Update terrain behaviors
+        # Step 9: Update terrain behaviors
         self.level.terrain_manager.update(dt)
 
-        # Step 9: Update transient effects
+        # Step 10: Update transient effects
         self.effects.update(dt)
 
-        # Step 10: Update camera based on Mario's new position
+        # Step 11: Update camera based on Mario's new position
         self.camera.update(self.mario.state.x, self.level.width_pixels)
 
         return None
+
+    def get_drawables(self) -> List[Any]:
+        """Get all drawable objects with z-index for rendering.
+
+        Returns:
+            List of all drawable objects (Mario, effects, entities)
+        """
+        drawables: List[Any] = [self.mario]
+        drawables.extend(self.effects._effects)
+        drawables.extend(self.entities._entities)
+        return drawables

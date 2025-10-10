@@ -123,11 +123,13 @@ def extract_sprites_from_region(sheet_path, x1, y1, x2, y2):
 
 def print_sprite_definitions(sprites, prefix="sprite"):
     """Print sprite definitions formatted for the YAML sprite schema."""
+    ordered = sorted(sprites, key=lambda sprite: (sprite[1], sprite[0]))
     print("\n# Extracted sprite definitions:")
-    for i, (x, y, w, h) in enumerate(sprites):
+    for i, (x, y, w, h) in enumerate(ordered):
         print(f"  {prefix}_{i}:")
         print(f"    offset: [{x}, {y}]")
         print(f"    size: [{w}, {h}]")
+    return ordered
 
 
 def main():
@@ -160,11 +162,11 @@ def main():
     sprites = extract_sprites_from_region(sheet_path, x1, y1, x2, y2)
 
     print(f"\nFound {len(sprites)} sprites:")
-    print_sprite_definitions(sprites)
+    ordered = print_sprite_definitions(sprites)
 
     # Also print pixel info for verification
     print("\n# Pixel dimensions (for reference):")
-    for i, (x, y, w, h) in enumerate(sprites):
+    for i, (x, y, w, h) in enumerate(ordered):
         pixel_w = w * 8
         pixel_h = h * 8
         print(f"# sprite_{i}: {pixel_w}x{pixel_h} pixels at ({x}, {y})")

@@ -5,15 +5,7 @@ import sys
 
 import pygame
 
-from .constants import (
-    BACKGROUND_COLOR,
-    FPS,
-    SUB_TILE_SIZE,
-    SUB_TILES_HORIZONTAL,
-    SUB_TILES_VERTICAL,
-    TILE_SIZE,
-    WHITE,
-)
+from .constants import BACKGROUND_COLOR, FPS, SUB_TILE_SIZE, TILE_SIZE, WHITE
 from .content import sprites
 from .display import Display
 from .states import InitialState, State
@@ -182,6 +174,10 @@ class Game:
         """Draw transient effects like coins."""
         self.world.effects.draw(surface, self.world.camera)
 
+    def draw_entities(self, surface: pygame.Surface) -> None:
+        """Draw active entities like mushrooms and enemies."""
+        self.world.entities.draw(surface, self.world.camera)
+
     def draw_mario(self, surface: pygame.Surface) -> None:
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position
@@ -205,25 +201,58 @@ class Game:
                 reflected,
             )
 
+    def draw_world(self, surface: pygame.Surface) -> None:
+        """Draw the entire world using z-index based rendering.
+
+        Render order:
+        1. Background (fixed)
+        2. Drawables with negative z-index (sorted, behind terrain)
+        3. Terrain (fixed)
+        4. Drawables with zero/positive z-index (sorted, in front of terrain)
+        """
+        # Get all drawables
+        drawables = self.world.get_drawables()
+
+        # Split into behind and front based on z-index
+        behind = sorted(
+            [d for d in drawables if d.z_index < 0], key=lambda d: d.z_index
+        )
+        front = sorted(
+            [d for d in drawables if d.z_index >= 0], key=lambda d: d.z_index
+        )
+
+        # Render in order
+        self.draw_background(surface)
+
+        for drawable in behind:
+            drawable.draw(surface, self.world.camera)
+
+        self.draw_terrain(surface)
+
+        for drawable in front:
+            drawable.draw(surface, self.world.camera)
+
     def _draw_tile_grid(self, surface: pygame.Surface) -> None:
         """Draw the 8x8 tile grid for debugging."""
-        # Draw vertical lines
-        for x in range(0, SUB_TILES_HORIZONTAL + 1):
-            pygame.draw.line(
-                surface,
-                (100, 100, 100),
-                (x * SUB_TILE_SIZE, 0),
-                (x * SUB_TILE_SIZE, SUB_TILES_VERTICAL * SUB_TILE_SIZE),
-            )
+        width = surface.get_width()
+        height = surface.get_height()
+        camera_x = self.world.camera.x
 
-        # Draw horizontal lines
-        for y in range(0, SUB_TILES_VERTICAL + 1):
-            pygame.draw.line(
-                surface,
-                (100, 100, 100),
-                (0, y * SUB_TILE_SIZE),
-                (SUB_TILES_HORIZONTAL * SUB_TILE_SIZE, y * SUB_TILE_SIZE),
-            )
+        # Draw vertical lines aligned to world grid
+        offset_x = -(camera_x % SUB_TILE_SIZE)
+        x = offset_x
+        while x <= width:
+            if x >= 0:
+                pygame.draw.line(
+                    surface, (100, 100, 100), (int(x), 0), (int(x), height)
+                )
+            x += SUB_TILE_SIZE
+
+        # Draw horizontal lines (camera does not scroll vertically yet)
+        y = 0
+        while y <= height:
+            pygame.draw.line(surface, (100, 100, 100), (0, int(y)), (width, int(y)))
+            y += SUB_TILE_SIZE
 
     def _draw_debug_info(self, surface: pygame.Surface) -> None:
         """Draw debug information."""

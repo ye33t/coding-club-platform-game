@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 from .base import TerrainBehavior
 from .bounce import BounceBehavior
 from .flagpole import FlagpoleBehavior
-from .item_box import ItemBoxBehavior
+from .item_box import ItemBoxBehavior, ItemBoxSpawnType
 from .none import NoneBehavior
 from .warp import WarpBehavior
 
@@ -54,7 +54,33 @@ class BehaviorFactory:
         elif behavior_type == "flagpole":
             return FlagpoleBehavior()
         elif behavior_type == "item_box":
-            return ItemBoxBehavior()
+            spawn_param = params.get("spawn") if params else None
+            if spawn_param is None:
+                spawn_type = ItemBoxSpawnType.COIN
+            elif isinstance(spawn_param, str):
+                try:
+                    spawn_type = ItemBoxSpawnType.from_string(spawn_param)
+                except ValueError as exc:
+                    raise BehaviorFactoryError(str(exc)) from exc
+            else:
+                raise BehaviorFactoryError(
+                    "Item box spawn parameter must be a string if provided."
+                )
+
+            spawn_count_param = params.get("spawns") if params else None
+            if spawn_count_param is None:
+                spawn_count = 1
+            elif isinstance(spawn_count_param, int):
+                if spawn_count_param < 1:
+                    raise BehaviorFactoryError(
+                        "Item box spawns parameter must be at least 1."
+                    )
+                spawn_count = spawn_count_param
+            else:
+                raise BehaviorFactoryError(
+                    "Item box spawns parameter must be an integer if provided."
+                )
+            return ItemBoxBehavior(spawn_type=spawn_type, spawn_count=spawn_count)
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "

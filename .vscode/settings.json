@@ -5,10 +5,13 @@
     "cSpell.words": [
         "blit",
         "bounceable",
+        "colliderect",
         "colorkey",
+        "drawables",
         "goomba",
         "koopa",
-        "NTSC"
+        "NTSC",
+        "powerups"
     ],
     "python.testing.pytestArgs": [
         "tests"

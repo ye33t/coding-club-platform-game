@@ -22,6 +22,9 @@ class WarpExitState(State):
 
     def on_enter(self, game) -> None:
         """Setup exit: change screen, position mario at destination."""
+        # Set Mario to render behind terrain
+        game.world.mario.z_index = -10
+
         # Find destination pipe position
         center_x, pipe_y = game.world.level.find_zone_position(
             self.warp_behavior.to_screen, self.warp_behavior.to_zone
@@ -54,6 +57,10 @@ class WarpExitState(State):
         """No input during warp."""
         pass
 
+    def on_exit(self, game) -> None:
+        """Reset Mario's z_index when exiting warp."""
+        game.world.mario.z_index = 20
+
     def update(self, game, dt: float) -> None:
         """Move mario up out of pipe."""
         from ..physics.config import WARP_SPEED
@@ -70,9 +77,4 @@ class WarpExitState(State):
 
     def draw(self, game, surface) -> None:
         """Draw with mario behind tiles."""
-        game.draw_background(surface)
-        # Draw mario first (behind)
-        game.draw_mario(surface)
-        # Draw tiles on top
-        game.draw_terrain(surface)
-        game.draw_effects(surface)
+        game.draw_world(surface)

@@ -73,5 +73,9 @@ COIN_JUMP_VELOCITY = config["coin"]["jump_velocity"]
 COIN_GRAVITY = config["coin"]["gravity"]
 COIN_OFFSET = config["coin"]["offset"]
 
+# transitions
+MARIO_TRANSITION_DURATION = config["transitions"]["duration"]
+MARIO_TRANSITION_INTERVAL = config["transitions"]["interval"]
+
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)

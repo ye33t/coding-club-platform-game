@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional
 
 if TYPE_CHECKING:
     from ..effects import Effect
+    from ..entities import Entity
     from ..level import Level
 
 
@@ -46,6 +47,7 @@ class BehaviorContext:
         ..., None
     ]  # Takes screen, x, y, slug, and optional params
     spawn_effect: Callable[["Effect"], None]
+    spawn_entity: Callable[["Entity"], None]
 
 
 class TerrainBehavior(ABC):

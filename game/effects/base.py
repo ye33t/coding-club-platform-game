@@ -13,6 +13,8 @@ from ..camera import Camera
 class Effect(ABC):
     """Simple lifecycle for transient effects."""
 
+    z_index: int = 0
+
     @abstractmethod
     def update(self, dt: float) -> bool:
         """Advance effect state.
