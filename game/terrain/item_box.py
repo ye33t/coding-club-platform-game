@@ -1,13 +1,14 @@
-"""Item box behavior that spawns configured rewards and tracks remaining spawns."""
+"""Item box behavior that spawns configured rewards, tracks spawns, and bounces."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
 from ..entities.mushroom import MushroomEntity
+from .bounce import BounceBehavior
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 
 
@@ -33,6 +34,7 @@ class ItemBoxBehavior(TerrainBehavior):
 
     spawn_type: ItemBoxSpawnType = ItemBoxSpawnType.COIN
     spawn_count: int = 1
+    bounce_behavior: BounceBehavior = field(default_factory=BounceBehavior)
 
     def __post_init__(self) -> None:
         if self.spawn_count < 1:
@@ -81,3 +83,6 @@ class ItemBoxBehavior(TerrainBehavior):
                     behavior_type="bounce",
                     behavior_params={"one_shot": True},
                 )
+
+        # Update bounce animation each frame to reuse shared behavior logic.
+        self.bounce_behavior.process(context)
