@@ -66,7 +66,21 @@ class BehaviorFactory:
                 raise BehaviorFactoryError(
                     "Item box spawn parameter must be a string if provided."
                 )
-            return ItemBoxBehavior(spawn_type=spawn_type)
+
+            spawn_count_param = params.get("spawns") if params else None
+            if spawn_count_param is None:
+                spawn_count = 1
+            elif isinstance(spawn_count_param, int):
+                if spawn_count_param < 1:
+                    raise BehaviorFactoryError(
+                        "Item box spawns parameter must be at least 1."
+                    )
+                spawn_count = spawn_count_param
+            else:
+                raise BehaviorFactoryError(
+                    "Item box spawns parameter must be an integer if provided."
+                )
+            return ItemBoxBehavior(spawn_type=spawn_type, spawn_count=spawn_count)
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "

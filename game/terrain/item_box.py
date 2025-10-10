@@ -1,4 +1,4 @@
-"""Item box behavior that spawns a configured reward and converts to used state."""
+"""Item box behavior that spawns configured rewards and tracks remaining spawns."""
 
 from __future__ import annotations
 
@@ -29,17 +29,27 @@ class ItemBoxSpawnType(Enum):
 
 @dataclass(slots=True)
 class ItemBoxBehavior(TerrainBehavior):
-    """Spawns the configured reward and turns into a used item box when hit."""
+    """Spawns rewards until depleted, then turns into a used item box."""
 
     spawn_type: ItemBoxSpawnType = ItemBoxSpawnType.COIN
+    spawn_count: int = 1
+
+    def __post_init__(self) -> None:
+        if self.spawn_count < 1:
+            raise ValueError("Item box spawn_count must be at least 1.")
 
     def process(self, context: BehaviorContext) -> None:
         state = context.state
-        used = state.data.get("used", False)
+        remaining_spawns = state.data.get("remaining_spawns")
 
-        if context.event == TileEvent.HIT_FROM_BELOW and not used:
+        if remaining_spawns is None:
+            remaining_spawns = self.spawn_count
+            state.data["remaining_spawns"] = remaining_spawns
 
-            state.data["used"] = True
+        if context.event == TileEvent.HIT_FROM_BELOW and remaining_spawns > 0:
+
+            remaining_spawns -= 1
+            state.data["remaining_spawns"] = remaining_spawns
 
             if self.spawn_type is ItemBoxSpawnType.COIN:
                 coin_x = context.tile_x * TILE_SIZE
@@ -62,11 +72,12 @@ class ItemBoxBehavior(TerrainBehavior):
                     )
                 )
 
-            context.queue_tile_change(
-                context.screen,
-                context.tile_x,
-                context.tile_y,
-                "item_box_used",
-                behavior_type="bounce",
-                behavior_params={"one_shot": True},
-            )
+            if remaining_spawns == 0:
+                context.queue_tile_change(
+                    context.screen,
+                    context.tile_x,
+                    context.tile_y,
+                    "item_box_used",
+                    behavior_type="bounce",
+                    behavior_params={"one_shot": True},
+                )

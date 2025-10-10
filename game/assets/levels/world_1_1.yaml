@@ -58,6 +58,7 @@ screens:
       C:
         type: item_box
         spawn: coin
+        spawns: 5
       M:
         type: item_box
         spawn: mushroom
