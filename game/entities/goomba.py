@@ -1,10 +1,10 @@
-"""Mushroom collectible entity."""
+"""Goomba enemy entity."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from pygame import Surface
+from pygame import Rect, Surface
 
 from ..camera import Camera
 from ..constants import TILE_SIZE
@@ -17,22 +17,20 @@ if TYPE_CHECKING:
     from ..mario import MarioState
 
 
-MUSHROOM_SPEED = 50.0
-MUSHROOM_GRAVITY = 400.0
-MUSHROOM_EMERGE_SPEED = 30.0
+GOOMBA_SPEED = 30.0
+GOOMBA_GRAVITY = 400.0
 GROUND_DETECTION_TOLERANCE = 2.0
+ANIMATION_SPEED = 4.0  # Frames per second
+STOMP_BOUNCE_VELOCITY = 200.0  # Mario bounce velocity when stomping
 
 
-class MushroomEntity(Entity):
-    """Mushroom power-up collectible.
-
-    Moves horizontally, bounces off walls, stays on platforms.
-    """
+class GoombaEntity(Entity):
+    """Goomba enemy that walks horizontally and can be stomped."""
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = 1
+        self, world_x: float, world_y: float, screen: int = 0, direction: int = -1
     ):
-        """Initialize mushroom.
+        """Initialize Goomba.
 
         Args:
             world_x: X position in world pixels
@@ -42,43 +40,49 @@ class MushroomEntity(Entity):
         """
         super().__init__(world_x, world_y, screen)
         self.state.direction = direction
-        self.state.vx = 0
+        self.state.vx = GOOMBA_SPEED * direction
         self.state.width = TILE_SIZE
         self.state.height = TILE_SIZE
 
-        self.emerging = True
-        self.emerge_target_y = world_y + TILE_SIZE
-        self.z_index = -10
-        self.final_direction = direction
+        # Animation state
+        self.animation_timer = 0.0
+        self.animation_frame = 0
+
+        # Death state
+        self.is_dead = False
+        self.death_timer = 0.0
+        self.DEATH_DURATION = 0.5  # Time to show squashed sprite before removal
 
     def update(self, dt: float, level: Level) -> bool:
-        """Update mushroom physics.
+        """Update Goomba physics.
 
         Args:
             dt: Delta time in seconds
             level: Level for collision detection
 
         Returns:
-            True to keep entity active
+            True to keep entity active, False to remove
         """
-        if self.emerging:
-            self.state.y += MUSHROOM_EMERGE_SPEED * dt
+        if self.is_dead:
+            self.death_timer += dt
+            return self.death_timer < self.DEATH_DURATION
 
-            if self.state.y >= self.emerge_target_y:
-                self.state.y = self.emerge_target_y
-                self.emerging = False
-                self.z_index = 10
-                self.state.vx = MUSHROOM_SPEED * self.final_direction
-        else:
-            self._apply_gravity(dt)
-            self._apply_horizontal_movement(dt)
-            self._check_wall_collision(level)
-            self._check_ground_collision(level)
+        # Update animation
+        self.animation_timer += dt
+        if self.animation_timer >= 1.0 / ANIMATION_SPEED:
+            self.animation_timer = 0.0
+            self.animation_frame = 1 - self.animation_frame
+
+        # Apply physics
+        self._apply_gravity(dt)
+        self._apply_horizontal_movement(dt)
+        self._check_wall_collision(level)
+        self._check_ground_collision(level)
 
         return True
 
     def draw(self, surface: Surface, camera: Camera) -> None:
-        """Render the mushroom.
+        """Render the Goomba.
 
         Args:
             surface: Surface to draw on
@@ -86,13 +90,27 @@ class MushroomEntity(Entity):
         """
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
 
-        sprites.draw_at_position(
-            surface,
-            "other",
-            "mushroom",
-            int(screen_x),
-            int(screen_y),
-        )
+        if self.is_dead:
+            # Draw squashed Goomba
+            sprites.draw_at_position(
+                surface,
+                "enemies",
+                "goomba_dead",
+                int(screen_x),
+                int(screen_y),
+            )
+        else:
+            # Draw walking animation
+            sprite_name = (
+                "goomba_walk1" if self.animation_frame == 0 else "goomba_walk2"
+            )
+            sprites.draw_at_position(
+                surface,
+                "enemies",
+                sprite_name,
+                int(screen_x),
+                int(screen_y),
+            )
 
     def on_collide_mario(self, mario_state: MarioState) -> Optional[CollisionResponse]:
         """Handle collision with Mario.
@@ -101,16 +119,57 @@ class MushroomEntity(Entity):
             mario_state: Mario's current state
 
         Returns:
-            CollisionResponse to remove mushroom and apply power-up
+            CollisionResponse describing what should happen
         """
-        return CollisionResponse(
-            remove=True,
-            power_up_type="mushroom",
+        if self.is_dead:
+            return None
+
+        # Check if Mario is falling onto the Goomba (stomping)
+        mario_bottom = mario_state.y
+        goomba_top = self.state.y + self.state.height
+
+        # Mario is stomping if falling and bottom is above top 1/3 of Goomba
+        # This is more forgiving - allows stomping when hitting top portion
+        stomp_threshold = goomba_top - (self.state.height * 0.33)  # Top third
+        if mario_state.vy < 0 and mario_bottom > stomp_threshold:
+            # Mario stomped the Goomba
+            self.is_dead = True
+            self.state.vx = 0  # Stop horizontal movement
+            # Return response with bounce velocity for Mario
+            return CollisionResponse(
+                remove=False,  # Keep entity for death animation
+                bounce_velocity=STOMP_BOUNCE_VELOCITY,
+            )
+        else:
+            # Mario ran into the Goomba - damage Mario
+            return CollisionResponse(damage=True)
+
+    @property
+    def is_stompable(self) -> bool:
+        """Goombas can be stomped when they're alive.
+
+        Returns:
+            True if Goomba can be stomped, False if already dead
+        """
+        return not self.is_dead
+
+    def get_collision_bounds(self) -> Rect:
+        """Get collision rectangle for Goomba.
+
+        Returns:
+            Pygame Rect for collision detection
+        """
+        # Goomba sprite fits the tile perfectly, no margins needed
+        return Rect(
+            int(self.state.x),
+            int(self.state.y),
+            int(self.state.width),
+            int(self.state.height),
         )
 
     def _apply_gravity(self, dt: float) -> None:
-        """Apply gravity to mushroom velocity."""
-        self.state.vy -= MUSHROOM_GRAVITY * dt
+        """Apply gravity to Goomba velocity."""
+        self.state.vy -= GOOMBA_GRAVITY * dt
 
     def _apply_horizontal_movement(self, dt: float) -> None:
         """Update position based on velocity."""
@@ -123,11 +182,13 @@ class MushroomEntity(Entity):
         Args:
             level: Level for collision detection
         """
+        # Determine which edge to check based on movement direction
         if self.state.vx > 0:
             edge_x = self.state.x + self.state.width - 1
         else:
             edge_x = self.state.x
 
+        # Sample at mid-height
         sample_y = self.state.y + self.state.height / 2
 
         tile_x = int(edge_x // TILE_SIZE)
@@ -146,9 +207,11 @@ class MushroomEntity(Entity):
         quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
 
         if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
+            # Bounce off wall
             self.state.direction *= -1
-            self.state.vx = MUSHROOM_SPEED * self.state.direction
+            self.state.vx = GOOMBA_SPEED * self.state.direction
 
+            # Snap to tile edge
             if self.state.direction > 0:
                 self.state.x = (tile_x + 1) * TILE_SIZE
             else:
@@ -163,6 +226,7 @@ class MushroomEntity(Entity):
         highest_ground = -1.0
         found_ground = False
 
+        # Sample points across the Goomba's width
         sample_points = [
             self.state.x,
             self.state.x + self.state.width / 2,

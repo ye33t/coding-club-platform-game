@@ -49,6 +49,14 @@ class ActionProcessor(PhysicsProcessor):
 
     def _determine_action(self, mario_state, mario_intent) -> str:
         """Determine Mario's action based on his physics state (velocity-based)."""
+        # If Mario is in stomp mode and not on ground, keep stomping action
+        if mario_state.is_stomping and not mario_state.on_ground:
+            return "stomping"
+
+        # Clear stomping state when Mario lands
+        if mario_state.is_stomping and mario_state.on_ground:
+            mario_state.is_stomping = False
+
         if not mario_state.on_ground:
             return "jumping"
         # Animation based on actual velocity, not input

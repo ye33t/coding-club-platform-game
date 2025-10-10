@@ -25,10 +25,10 @@ sprite_sheets:
       small_mario_die:
         offset: [116, 24]
         size: [2, 2]
-      small_mario_bounce1:
+      small_mario_stomp1:
         offset: [136, 24]
         size: [2, 2]
-      small_mario_bounce2:
+      small_mario_stomp2:
         offset: [154, 24]
         size: [2, 2]
       small_mario_swim1:
@@ -68,10 +68,10 @@ sprite_sheets:
       big_mario_crouch:
         offset: [116, 64]
         size: [2, 3]
-      big_mario_bounce1:
+      big_mario_stomp1:
         offset: [136, 63]
         size: [2, 4]
-      big_mario_bounce2:
+      big_mario_stomp2:
         offset: [154, 63]
         size: [2, 4]
       big_mario_bounce3:

@@ -28,6 +28,9 @@ class StartLevelState(State):
         game.world.effects.clear()
         game.world.entities.clear()
 
+        # Reset spawn triggers for the level
+        game.world.reset_spawn_triggers()
+
         # Reset camera to beginning (both position and ratchet)
         game.world.camera.state = CameraState(x=0, max_x=0)
 

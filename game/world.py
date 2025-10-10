@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 
 from .camera import Camera
 from .effects import EffectManager
-from .entities import EntityManager
+from .entities import EntityFactory, EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
@@ -22,6 +22,7 @@ class World:
         self.physics_pipeline = PhysicsPipeline()
         self.effects = EffectManager()
         self.entities = EntityManager()
+        self.entity_factory = EntityFactory()
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -86,6 +87,9 @@ class World:
         # Step 11: Update camera based on Mario's new position
         self.camera.update(self.mario.state.x, self.level.width_pixels)
 
+        # Step 12: Check spawn triggers based on camera position
+        self._check_spawn_triggers()
+
         return None
 
     def get_drawables(self) -> List[Any]:
@@ -98,3 +102,39 @@ class World:
         drawables.extend(self.effects._effects)
         drawables.extend(self.entities._entities)
         return drawables
+
+    def _check_spawn_triggers(self) -> None:
+        """Check and activate spawn triggers based on camera position."""
+        from .constants import TILE_SIZE
+
+        # Get triggered spawn triggers
+        triggered = self.level.spawn_manager.check_triggers(self.camera.x)
+
+        # Spawn entities for each triggered trigger
+        for trigger in triggered:
+            for entity_spec in trigger.entities:
+                # Spawn each entity at all its locations
+                for tile_x, tile_y, screen in entity_spec.locations:
+                    world_x = tile_x * TILE_SIZE
+                    world_y = tile_y * TILE_SIZE
+
+                    entity = self.entity_factory.create(
+                        entity_spec.entity_type,
+                        world_x,
+                        world_y,
+                        screen,
+                        entity_spec.params,
+                    )
+                    if entity:
+                        self.entities.spawn(entity)
+
+    def reset_spawn_triggers(self) -> None:
+        """Reset all spawn triggers and clear enemy entities.
+
+        Called when restarting after death, warp, or level reset.
+        """
+        # Reset all triggers to pending state
+        self.level.spawn_manager.reset_all_triggers()
+
+        # Clear all entities (enemies and collectibles)
+        self.entities.clear()

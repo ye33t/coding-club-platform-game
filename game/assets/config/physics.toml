@@ -141,3 +141,8 @@ duration = 1.5
 # Interval in seconds between visual toggles during transformation
 # Controls the flicker rate during size transitions
 interval = 0.05
+
+[stomp]
+# Scales Mario's downward velocity when stomping an enemy
+# Lower values = more velocity dampening
+velocity_y_scale = 0.85
