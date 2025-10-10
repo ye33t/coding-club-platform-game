@@ -1,12 +1,15 @@
 """Mario character management with intent-based architecture."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import pygame
 
 from game.constants import TILE_SIZE
+from game.physics.config import MARIO_TRANSITION_DURATION
 
 from .content import sprites
 
@@ -20,6 +23,34 @@ class MarioIntent:
     run: bool = False
     jump: bool = False
     duck: bool = False
+
+
+@dataclass
+class MarioTransition:
+    """Represents an in-progress transition (e.g., size change)."""
+    from_action: Callable[[MarioState], None]
+    to_action: Callable[[MarioState], None]
+    time_remaining: float = MARIO_TRANSITION_DURATION
+    toggle_counter: int = 0
+    show_target: bool = True
+    
+    def update(self, dt: float, mario_state: MarioState) -> None:
+        self.time_remaining -= dt
+        if self.time_remaining > 0:
+            self.toggle_counter += 1
+            
+            if self.toggle_counter >= 1:
+                self.toggle_counter = 0
+                self.show_target = not self.show_target
+                
+            if self.show_target:
+                self.to_action(mario_state)
+            else:
+                self.from_action(mario_state)
+        else:
+            self.show_target = True
+            self.to_action(mario_state)
+            mario_state.transition = None
 
 
 @dataclass
@@ -42,12 +73,7 @@ class MarioState:
     on_ground: bool = True
     is_jumping: bool = False  # True when in a player-initiated jump
     size: str = "small"  # small, big, fire
-    power_up_transition: Optional[str] = None
-    transition_from_size: Optional[str] = None
-    transition_to_size: Optional[str] = None
-    transition_time_remaining: float = 0.0
-    transition_toggle_counter: int = 0
-    transition_show_target: bool = True
+    transition: Optional[MarioTransition] = None
 
     # Animation state
     action: str = "idle"  # idle, walking, running, jumping, skidding, dying
@@ -65,15 +91,27 @@ class MarioState:
             return 1.0
         return self.frame / (self.animation_length - 1)
 
-    def set_size(self, size: str) -> None:
-        """Update Mario's size and adjust hitbox dimensions."""
-        self.size = size
-        if size == "big":
-            self.width = TILE_SIZE
-            self.height = TILE_SIZE * 2
-        else:
-            self.width = TILE_SIZE
-            self.height = TILE_SIZE
+    def grow(self) -> None:
+        """Trigger small-to-big transformation if Mario is small."""
+        if self.size == "big":
+            return
+
+        self.transition = MarioTransition(
+            from_action=self._small_action,
+            to_action=self._big_action
+        )
+        
+    @staticmethod
+    def _small_action(state: MarioState) -> None:
+        state.size = "small"
+        state.width = TILE_SIZE
+        state.height = TILE_SIZE
+        
+    @staticmethod
+    def _big_action(state: MarioState) -> None:
+        state.size = "big"
+        state.width = TILE_SIZE
+        state.height = TILE_SIZE * 2
 
 
 class Mario:

@@ -60,7 +60,7 @@ class World:
             self.level, self.effects, self.entities
         )
 
-        # Remove any entities flagged during physics processing (e.g., collected power-ups).
+        # Remove any entities flagged during physics processing
         self.entities.remove_entities(processed_context.entities_to_remove)
 
         # Step 5: Check if an event was raised (short-circuits normal processing)

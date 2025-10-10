@@ -3,7 +3,6 @@
 from pygame import Rect
 
 from .base import PhysicsContext, PhysicsProcessor
-from .config import SMALL_TO_BIG_TRANSITION_DURATION
 
 
 class EntityCollisionProcessor(PhysicsProcessor):
@@ -58,14 +57,4 @@ class EntityCollisionProcessor(PhysicsProcessor):
         """Handle mushroom collection: grow Mario to big size."""
         mario_state = context.mario_state
 
-        if mario_state.size == "big":
-            return
-
-        original_size = mario_state.size
-        mario_state.transition_from_size = original_size
-        mario_state.transition_to_size = "big"
-        mario_state.power_up_transition = "small_to_big"
-        mario_state.transition_time_remaining = SMALL_TO_BIG_TRANSITION_DURATION
-        mario_state.transition_toggle_counter = 0
-        mario_state.transition_show_target = True
-        mario_state.set_size("big")
+        mario_state.grow()

@@ -14,8 +14,8 @@ from .gravity import GravityProcessor
 from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
+from .power_up import MarioTransitionProcessor
 from .velocity import VelocityProcessor
-from .power_up import PowerUpTransitionProcessor
 from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
 
@@ -70,7 +70,7 @@ class PhysicsPipeline:
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
             ActionProcessor(),
-            PowerUpTransitionProcessor(),
+            MarioTransitionProcessor(),
             EntityCollisionProcessor(),
         ]
 

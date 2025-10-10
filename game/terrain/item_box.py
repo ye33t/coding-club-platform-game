@@ -8,8 +8,8 @@ from enum import Enum
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
 from ..entities.mushroom import MushroomEntity
-from .bounce import BounceBehavior
 from .base import BehaviorContext, TerrainBehavior, TileEvent
+from .bounce import BounceBehavior
 
 
 class ItemBoxSpawnType(Enum):
