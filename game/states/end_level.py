@@ -50,10 +50,6 @@ class EndLevelState(State):
             game.world.mario.x = self.flagpole_x
             mario.facing_right = False
 
-        # Update Mario's animation
-        mario.refresh_animation_state()
-        mario.update_animation()
-
         # Check if Mario has reached the base
         if mario.y <= self.flagpole_base_y:
             # Transition to start level with screen fade

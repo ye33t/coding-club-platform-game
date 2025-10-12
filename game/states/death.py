@@ -42,10 +42,6 @@ class DeathState(State):
         # Update position
         mario.y += mario.vy * dt
 
-        # Update animation
-        mario.refresh_animation_state()
-        mario.update_animation()
-
         # Check if Mario has fallen far enough to end animation
         if mario.y < RESET_THRESHOLD_Y:
             # Transition to start level with screen fade

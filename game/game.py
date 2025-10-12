@@ -180,26 +180,7 @@ class Game:
 
     def draw_mario(self, surface: pygame.Surface) -> None:
         """Draw Mario at his screen position."""
-        # Transform Mario's world position to screen position
-        screen_x, screen_y = self.world.camera.world_to_screen(
-            self.world.mario.x, self.world.mario.y
-        )
-
-        # Get sprite name
-        sprite_name = self.world.mario._get_sprite_name()
-        if sprite_name:
-            # Use reflection when facing left
-            reflected = not self.world.mario.facing_right
-
-            # Draw at screen position (not world position)
-            sprites.draw_at_position(
-                surface,
-                "characters",
-                sprite_name,
-                int(screen_x),
-                int(screen_y),
-                reflected,
-            )
+        self.world.mario.draw(surface, self.world.camera)
 
     def draw_world(self, surface: pygame.Surface) -> None:
         """Draw the entire world using z-index based rendering.

@@ -63,7 +63,7 @@ class ItemBoxBehavior(TerrainBehavior):
                     )
                 )
             elif self.spawn_type is ItemBoxSpawnType.MUSHROOM:
-                mushroom_x = context.tile_x * TILE_SIZE - (TILE_SIZE // 4)
+                mushroom_x = context.tile_x * TILE_SIZE
                 mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
                 context.spawn_entity(
                     MushroomEntity(

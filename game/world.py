@@ -62,9 +62,6 @@ class World:
         if event is not None:
             return event
 
-        self.mario.refresh_animation_state()
-        self.mario.update_animation()
-
         self.level.terrain_manager.update(dt)
 
         self.effects.update(dt)

@@ -227,19 +227,16 @@ class Mario:
         mario.width = TILE_SIZE
         mario.height = TILE_SIZE * 2
 
-    def refresh_animation_state(self) -> None:
-        """Update animation metadata when action/size/direction changes."""
+    def _update_animation(self) -> None:
+        """Update animation metadata and advance frames for the current state."""
         current_animations = self.animations.get(
             self.size, self.animations["small"]
         )
 
+        sprites = current_animations.get(self.action)
+
         if self.action != self._last_action or self.size != self._last_size:
-            if self.action in current_animations:
-                self.animation_length = len(
-                    current_animations[self.action]["sprites"]
-                )
-            else:
-                self.animation_length = 1
+            self.animation_length = len(sprites) if sprites else 1
             self.frame = 0
             self.animation_progress = 0.0
         elif (
@@ -250,6 +247,28 @@ class Mario:
         ):
             self.frame = 0
             self.animation_progress = 0.0
+
+        if not sprites:
+            self._last_action = self.action
+            self._last_size = self.size
+            self._last_vx = self.vx
+            return
+
+        if self.action in ["walking", "running"]:
+            from .physics.config import ANIMATION_SPEED_SCALE, WALK_SPEED
+
+            speed = abs(self.vx)
+            frame_advance = (speed / WALK_SPEED) * ANIMATION_SPEED_SCALE
+
+            self.animation_progress += frame_advance
+            self.frame = int(self.animation_progress) % len(sprites)
+        else:
+            self.frame += 1
+            if self.frame >= len(sprites):
+                if current_animations[self.action]["loop"]:
+                    self.frame = 0
+                else:
+                    self.frame = len(sprites) - 1
 
         self._last_action = self.action
         self._last_size = self.size
@@ -265,43 +284,6 @@ class Mario:
         intent.duck = keys[pygame.K_s]
         return intent
 
-    def update_animation(self):
-        """Update animation frame based on velocity for movement animations."""
-        current_animations = self.animations.get(
-            self.size, self.animations["small"]
-        )
-
-        if self.action not in current_animations:
-            return
-
-        anim = current_animations[self.action]
-        sprites = anim["sprites"]
-
-        # For movement animations, advance based on velocity
-        if self.action in ["walking", "running"]:
-            # Animation speed proportional to velocity
-            # Scale linearly with actual velocity
-            from .physics.config import ANIMATION_SPEED_SCALE, WALK_SPEED
-
-            speed = abs(self.vx)
-            frame_advance = (
-                speed / WALK_SPEED
-            ) * ANIMATION_SPEED_SCALE  # Normalized to walk speed
-
-            # Use floating point for smooth animation
-            self.animation_progress += frame_advance
-            self.frame = int(self.animation_progress) % len(sprites)
-        else:
-            # Non-movement animations advance at fixed rate
-            self.frame += 1
-
-            # Handle looping or stopping at end
-            if self.frame >= len(sprites):
-                if anim["loop"]:
-                    self.frame = 0
-                else:
-                    self.frame = len(sprites) - 1
-
     def draw(self, surface, camera):
         """Draw Mario at current state.
 
@@ -309,6 +291,8 @@ class Mario:
             surface: Surface to draw on
             camera: Camera for coordinate transformation
         """
+        self._update_animation()
+
         sprite_name = self._get_sprite_name()
         if sprite_name:
             # Transform Mario's world position to screen position
