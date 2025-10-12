@@ -1,6 +1,6 @@
 """World physics and game logic."""
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, cast
 
 from .camera import Camera
 from .effects import EffectManager
@@ -8,13 +8,7 @@ from .entities import EntityFactory, EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
-from .physics.events import (
-    PhysicsEvent,
-    RemoveEntityEvent,
-    SpawnEffectEvent,
-    SpawnEntityEvent,
-    TerrainTileChangeEvent,
-)
+from .physics.events import PhysicsEvent
 
 
 class World:
@@ -25,7 +19,7 @@ class World:
         # Load the default level
         self.level = loader.load("game/assets/levels/world_1_1.yaml")
         self.camera = Camera()
-        self.physics_pipeline = PhysicsPipeline()
+        self.physics = PhysicsPipeline()
         self.effects = EffectManager()
         self.entities = EntityManager()
         self.entity_factory = EntityFactory()
@@ -48,45 +42,18 @@ class World:
         self.entities.update(dt, self.level, self.mario.screen, self.camera.x)
 
         context = PhysicsContext(
+            dt=dt,
             mario=self.mario,
             camera=self.camera,
             level=self.level,
-            dt=dt,
-            entities=self.entities._entities,
+            entities=self.entities.items,
         )
 
-        processed_context = self.physics_pipeline.process(context)
+        processed_context = self.physics.process(context)
 
-        events = processed_context.events
-        idx = 0
-        short_circuit_event: Optional[PhysicsEvent] = None
-        terrain_updated = False
-
-        while True:
-            while idx < len(events):
-                event = events[idx]
-                if isinstance(event, RemoveEntityEvent):
-                    self.entities.remove_entities([event.entity])
-                elif isinstance(
-                    event,
-                    (TerrainTileChangeEvent, SpawnEffectEvent, SpawnEntityEvent),
-                ):
-                    self.level.terrain_manager.process_events(
-                        [event], self.level, self.effects, self.entities
-                    )
-
-                if event.short_circuit and short_circuit_event is None:
-                    short_circuit_event = event
-                idx += 1
-
-            if short_circuit_event is not None or terrain_updated:
-                break
-
-            self.level.terrain_manager.update(dt, processed_context)
-            terrain_updated = True
-
-        if short_circuit_event is not None:
-            return short_circuit_event
+        for event in processed_context.events:
+            if event.dispatch(self, processed_context):
+                return cast(PhysicsEvent, event)
 
         self.effects.update(dt)
 

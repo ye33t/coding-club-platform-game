@@ -1,19 +1,12 @@
 """Manager for terrain behaviors in a level."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
-from ..physics.events import (
-    PhysicsEvent,
-    SpawnEffectEvent,
-    SpawnEntityEvent,
-    TerrainTileChangeEvent,
-)
+from ..physics.events import TerrainTileChangeEvent
 from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState
 
 if TYPE_CHECKING:
-    from ..effects import EffectManager
-    from ..entities import EntityManager
     from ..level import Level
     from ..physics.base import PhysicsContext
 
@@ -73,8 +66,8 @@ class TerrainManager:
         )
         instance.behavior.process(context)
 
-    def update(self, dt: float, physics: "PhysicsContext") -> None:
-        """Update all tile behaviors."""
+    def process_behaviors(self, dt: float, physics: "PhysicsContext") -> None:
+        """Update all tile behaviors and allow them to emit events."""
 
         for instance in self.instances.values():
             if instance.behavior is None:
@@ -91,40 +84,22 @@ class TerrainManager:
             )
             instance.behavior.process(context)
 
-    def process_events(
-        self,
-        events: List[PhysicsEvent],
-        level: "Level",
-        effect_manager: Optional["EffectManager"] = None,
-        entity_manager: Optional["EntityManager"] = None,
-    ) -> None:
-        """Apply terrain-related physics events."""
+    def apply_tile_change(self, event: TerrainTileChangeEvent, level: "Level") -> None:
+        """Apply a tile change triggered by a physics event."""
 
         from .factory import BehaviorFactory
 
-        behavior_factory: Optional[BehaviorFactory] = None
+        level.set_terrain_tile(event.screen, event.x, event.y, event.slug)
+        self.instances.pop((event.screen, event.x, event.y), None)
 
-        for event in events:
-            if isinstance(event, TerrainTileChangeEvent):
-                level.set_terrain_tile(event.screen, event.x, event.y, event.slug)
-                self.instances.pop((event.screen, event.x, event.y), None)
+        if not event.behavior_type:
+            return
 
-                if event.behavior_type:
-                    try:
-                        if behavior_factory is None:
-                            behavior_factory = BehaviorFactory()
-                        behavior = behavior_factory.create(
-                            event.behavior_type, event.behavior_params
-                        )
-                        self.set_tile_behavior(event.screen, event.x, event.y, behavior)
-                    except Exception as exc:  # pragma: no cover - best-effort logging
-                        print(  # noqa: T201
-                            f"Warning: Failed to create behavior "
-                            f"'{event.behavior_type}': {exc}"
-                        )
-            elif isinstance(event, SpawnEffectEvent):
-                if effect_manager is not None:
-                    effect_manager.spawn(event.effect)
-            elif isinstance(event, SpawnEntityEvent):
-                if entity_manager is not None:
-                    entity_manager.spawn(event.entity)
+        try:
+            factory = BehaviorFactory()
+            behavior = factory.create(event.behavior_type, event.behavior_params)
+            self.set_tile_behavior(event.screen, event.x, event.y, behavior)
+        except Exception as exc:  # pragma: no cover - best-effort logging
+            print(  # noqa: T201
+                f"Warning: Failed to create behavior '{event.behavior_type}': {exc}"
+            )

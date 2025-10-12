@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterable, List
 
 if TYPE_CHECKING:
     from ..camera import Camera
@@ -27,7 +27,7 @@ class PhysicsContext:
     events: List["PhysicsEvent"] = field(
         default_factory=list
     )  # Events raised this frame
-    entities: List["Entity"] = field(default_factory=list)  # Active game entities
+    entities: Iterable["Entity"] = field(default_factory=list)  # Active game entities
 
     def add_event(self, event: "PhysicsEvent") -> None:
         """Record a physics event emitted by the pipeline."""

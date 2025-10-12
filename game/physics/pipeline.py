@@ -15,6 +15,7 @@ from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
 from .power_up import MarioTransitionProcessor
+from .terrain_behaviors import TerrainBehaviorProcessor
 from .velocity import VelocityProcessor
 from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
@@ -43,6 +44,7 @@ class PhysicsPipeline:
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
+            TerrainBehaviorProcessor(),
             ActionProcessor(),
             MarioTransitionProcessor(),
         ]

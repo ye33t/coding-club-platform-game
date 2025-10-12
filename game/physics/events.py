@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional
 
@@ -9,18 +10,27 @@ if TYPE_CHECKING:
     from ..effects.base import Effect, EffectFactory
     from ..entities.base import Entity
     from ..terrain.warp import WarpBehavior
+    from ..world import World
+    from .base import PhysicsContext
 
 
-class PhysicsEvent:
+class PhysicsEvent(ABC):
     """Base class for physics events emitted by the pipeline."""
 
     short_circuit: ClassVar[bool] = False
+
+    @abstractmethod
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        """Apply the event to the world and return True to short-circuit."""
 
 
 class DeathEvent(PhysicsEvent):
     """Mario fell off the screen."""
 
     short_circuit: ClassVar[bool] = True
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        return True
 
 
 @dataclass(slots=True)
@@ -29,6 +39,9 @@ class WarpEvent(PhysicsEvent):
 
     warp_behavior: "WarpBehavior"
     short_circuit: ClassVar[bool] = True
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        return True
 
 
 @dataclass(slots=True)
@@ -39,12 +52,19 @@ class EndLevelEvent(PhysicsEvent):
     flagpole_base_y: float  # Y pixel position of base block top
     short_circuit: ClassVar[bool] = True
 
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        return True
+
 
 @dataclass(slots=True)
 class RemoveEntityEvent(PhysicsEvent):
     """Mark an entity for removal after the pipeline completes."""
 
     entity: "Entity"
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.entities.remove(self.entity)
+        return False
 
 
 @dataclass(slots=True)
@@ -58,6 +78,10 @@ class TerrainTileChangeEvent(PhysicsEvent):
     behavior_type: Optional[str] = None
     behavior_params: Optional[Dict[str, Any]] = None
 
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.level.terrain_manager.apply_tile_change(self, world.level)
+        return False
+
 
 @dataclass(slots=True)
 class SpawnEffectEvent(PhysicsEvent):
@@ -65,9 +89,17 @@ class SpawnEffectEvent(PhysicsEvent):
 
     effect: "Effect | EffectFactory"
 
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.effects.spawn(self.effect)
+        return False
+
 
 @dataclass(slots=True)
 class SpawnEntityEvent(PhysicsEvent):
     """Spawn a game entity."""
 
     entity: "Entity"
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.entities.spawn(self.entity)
+        return False
