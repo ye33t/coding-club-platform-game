@@ -49,10 +49,14 @@ class SpawnTrigger:
 
 @dataclass(slots=True)
 class SpawnManager:
-    """Manages spawn triggers for a level."""
+    """Manages spawn triggers for a level.
 
-    triggers: Dict[str, SpawnTrigger] = field(default_factory=dict)
-    _pending_triggers: Set[str] = field(default_factory=set)
+    Triggers are keyed by (screen, trigger_id) to avoid clobbering entries that
+    reuse identifiers across different screens.
+    """
+
+    triggers: Dict[Tuple[int, str], SpawnTrigger] = field(default_factory=dict)
+    _pending_triggers: Set[Tuple[int, str]] = field(default_factory=set)
 
     def add_trigger(self, trigger: SpawnTrigger) -> None:
         """Add a spawn trigger.
@@ -60,8 +64,13 @@ class SpawnManager:
         Args:
             trigger: Spawn trigger to add
         """
-        self.triggers[trigger.trigger_id] = trigger
-        self._pending_triggers.add(trigger.trigger_id)
+        trigger_key = (trigger.screen, trigger.trigger_id)
+        if trigger_key in self.triggers:
+            raise ValueError(
+                f"Duplicate trigger '{trigger.trigger_id}' on screen {trigger.screen}"
+            )
+        self.triggers[trigger_key] = trigger
+        self._pending_triggers.add(trigger_key)
 
     def check_triggers(self, camera_x: float) -> List[SpawnTrigger]:
         """Check which triggers should activate based on camera position.
@@ -72,13 +81,13 @@ class SpawnManager:
         Returns:
             List of triggers that should activate
         """
-        activated = []
-        for trigger_id in list(self._pending_triggers):
-            trigger = self.triggers[trigger_id]
+        activated: List[SpawnTrigger] = []
+        for trigger_key in list(self._pending_triggers):
+            trigger = self.triggers[trigger_key]
             if trigger.should_trigger(camera_x):
                 activated.append(trigger)
                 trigger.spawned = True
-                self._pending_triggers.remove(trigger_id)
+                self._pending_triggers.remove(trigger_key)
         return activated
 
     def reset_all_triggers(self) -> None:

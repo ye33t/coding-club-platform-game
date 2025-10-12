@@ -11,8 +11,10 @@
         "goomba",
         "koopa",
         "NTSC",
+        "paratroopa",
         "powerups",
-        "stompable"
+        "stompable",
+        "troopa"
     ],
     "python.testing.pytestArgs": [
         "tests"
