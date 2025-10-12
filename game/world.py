@@ -8,7 +8,7 @@ from .entities import EntityFactory, EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
-from .physics.events import PhysicsEvent
+from .physics.events import PhysicsEvent, RemoveEntityEvent
 
 
 class World:
@@ -51,15 +51,24 @@ class World:
 
         processed_context = self.physics_pipeline.process(context)
 
-        self.entities.remove_entities(processed_context.entities_to_remove)
+        removal_entities = [
+            event.entity
+            for event in processed_context.events
+            if isinstance(event, RemoveEntityEvent)
+        ]
+        if removal_entities:
+            self.entities.remove_entities(removal_entities)
 
         self.level.terrain_manager.apply_pending_commands(
             self.level, self.effects, self.entities
         )
 
-        event: Optional[PhysicsEvent] = processed_context.event
-        if event is not None:
-            return event
+        short_circuit_event: Optional[PhysicsEvent] = next(
+            (event for event in processed_context.events if event.short_circuit),
+            None,
+        )
+        if short_circuit_event is not None:
+            return short_circuit_event
 
         self.level.terrain_manager.update(dt)
 

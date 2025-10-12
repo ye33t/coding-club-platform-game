@@ -6,7 +6,7 @@ from game.constants import TILE_SIZE
 
 from .base import PhysicsContext, PhysicsProcessor
 from .config import STOMP_VELOCITY_Y_SCALE
-from .events import DeathEvent
+from .events import DeathEvent, RemoveEntityEvent
 
 
 class EntityCollisionProcessor(PhysicsProcessor):
@@ -85,7 +85,7 @@ class EntityCollisionProcessor(PhysicsProcessor):
                 self._apply_damage(context)
 
             if response.remove:
-                context.entities_to_remove.add(entity)
+                context.add_event(RemoveEntityEvent(entity))
 
         return context
 
@@ -115,6 +115,6 @@ class EntityCollisionProcessor(PhysicsProcessor):
             return
 
         if mario.size == "small":
-            context.event = DeathEvent()
+            context.add_event(DeathEvent())
         elif mario.size == "big":
             mario.shrink()

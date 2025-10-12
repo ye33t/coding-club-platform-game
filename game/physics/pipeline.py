@@ -73,9 +73,12 @@ class PhysicsPipeline:
                     self._debug_state(context.mario, f"After {name}")
 
                 # Short-circuit if an event was raised
-                if context.event is not None:
+                if context.has_short_circuit_event():
                     if self.debug:
-                        print(f"Event raised: {context.event.__class__.__name__}")
+                        latest = next(
+                            evt for evt in reversed(context.events) if evt.short_circuit
+                        )
+                        print(f"Event raised: {latest.__class__.__name__}")
                     return context
 
         return context

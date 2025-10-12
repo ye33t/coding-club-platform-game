@@ -36,6 +36,6 @@ class WarpEventProcessor(PhysicsProcessor):
         if instance and instance.behavior:
             if isinstance(instance.behavior, WarpBehavior):
                 # Raise warp event with the behavior data
-                context.event = WarpEvent(warp_behavior=instance.behavior)
+                context.add_event(WarpEvent(warp_behavior=instance.behavior))
 
         return context

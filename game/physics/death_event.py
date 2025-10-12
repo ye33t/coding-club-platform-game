@@ -19,6 +19,6 @@ class DeathEventProcessor(PhysicsProcessor):
         # Check if Mario fell below the screen
         if mario.y < 0:
             # Raise death event
-            context.event = DeathEvent()
+            context.add_event(DeathEvent())
 
         return context

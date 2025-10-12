@@ -174,7 +174,7 @@ class Mario:
         self.on_ground = True
         self.is_jumping = False  # True when in a player-initiated jump
         self.size = "small"  # small, big, fire
-        self.transition = None
+        self.transition: Optional[MarioTransition] = None
 
         # Animation state
         self.action = (

@@ -44,8 +44,10 @@ class EndLevelEventProcessor(PhysicsProcessor):
             flagpole_base_y = min_y * TILE_SIZE
 
             # Raise end level event
-            context.event = EndLevelEvent(
-                flagpole_x=flagpole_center_x, flagpole_base_y=flagpole_base_y
+            context.add_event(
+                EndLevelEvent(
+                    flagpole_x=flagpole_center_x, flagpole_base_y=flagpole_base_y
+                )
             )
 
         return context
