@@ -57,44 +57,36 @@ class World:
 
         processed_context = self.physics_pipeline.process(context)
 
-        removal_entities: List[Any] = []
-        terrain_events: List[PhysicsEvent] = []
+        events = processed_context.events
+        idx = 0
         short_circuit_event: Optional[PhysicsEvent] = None
+        terrain_updated = False
 
-        for event in processed_context.events:
-            if isinstance(event, RemoveEntityEvent):
-                removal_entities.append(event.entity)
-            elif isinstance(
-                event, (TerrainTileChangeEvent, SpawnEffectEvent, SpawnEntityEvent)
-            ):
-                terrain_events.append(event)
+        while True:
+            while idx < len(events):
+                event = events[idx]
+                if isinstance(event, RemoveEntityEvent):
+                    self.entities.remove_entities([event.entity])
+                elif isinstance(
+                    event,
+                    (TerrainTileChangeEvent, SpawnEffectEvent, SpawnEntityEvent),
+                ):
+                    self.level.terrain_manager.process_events(
+                        [event], self.level, self.effects, self.entities
+                    )
 
-            if event.short_circuit and short_circuit_event is None:
-                short_circuit_event = event
+                if event.short_circuit and short_circuit_event is None:
+                    short_circuit_event = event
+                idx += 1
 
-        if removal_entities:
-            self.entities.remove_entities(removal_entities)
+            if short_circuit_event is not None or terrain_updated:
+                break
 
-        if terrain_events:
-            self.level.terrain_manager.process_events(
-                terrain_events, self.level, self.effects, self.entities
-            )
+            self.level.terrain_manager.update(dt, processed_context)
+            terrain_updated = True
 
         if short_circuit_event is not None:
             return short_circuit_event
-
-        terrain_update_events: List[PhysicsEvent] = []
-        self.level.terrain_manager.update(dt, terrain_update_events.append)
-        if terrain_update_events:
-            self.level.terrain_manager.process_events(
-                terrain_update_events, self.level, self.effects, self.entities
-            )
-
-        pending_events = self.level.terrain_manager.drain_pending_events()
-        if pending_events:
-            self.level.terrain_manager.process_events(
-                pending_events, self.level, self.effects, self.entities
-            )
 
         self.effects.update(dt)
 

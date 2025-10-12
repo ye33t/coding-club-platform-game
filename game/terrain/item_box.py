@@ -8,6 +8,7 @@ from enum import Enum
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
 from ..entities.mushroom import MushroomEntity
+from ..physics.events import SpawnEffectEvent, SpawnEntityEvent, TerrainTileChangeEvent
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 from .bounce import BounceBehavior
 
@@ -56,32 +57,38 @@ class ItemBoxBehavior(TerrainBehavior):
             if self.spawn_type is ItemBoxSpawnType.COIN:
                 coin_x = context.tile_x * TILE_SIZE
                 coin_y = (context.tile_y + 1) * TILE_SIZE
-                context.spawn_effect(
-                    CoinEffect(
-                        world_x=coin_x,
-                        world_y=coin_y,
+                context.physics.add_event(
+                    SpawnEffectEvent(
+                        effect=CoinEffect(
+                            world_x=coin_x,
+                            world_y=coin_y,
+                        )
                     )
                 )
             elif self.spawn_type is ItemBoxSpawnType.MUSHROOM:
                 mushroom_x = context.tile_x * TILE_SIZE
                 mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
-                context.spawn_entity(
-                    MushroomEntity(
-                        world_x=mushroom_x,
-                        world_y=mushroom_y,
-                        screen=context.screen,
-                        direction=1,
+                context.physics.add_event(
+                    SpawnEntityEvent(
+                        entity=MushroomEntity(
+                            world_x=mushroom_x,
+                            world_y=mushroom_y,
+                            screen=context.screen,
+                            direction=1,
+                        )
                     )
                 )
 
             if remaining_spawns == 0:
-                context.queue_tile_change(
-                    context.screen,
-                    context.tile_x,
-                    context.tile_y,
-                    "item_box_used",
-                    behavior_type="bounce",
-                    behavior_params={"one_shot": True},
+                context.physics.add_event(
+                    TerrainTileChangeEvent(
+                        screen=context.screen,
+                        x=context.tile_x,
+                        y=context.tile_y,
+                        slug="item_box_used",
+                        behavior_type="bounce",
+                        behavior_params={"one_shot": True},
+                    )
                 )
 
         # Update bounce animation each frame to reuse shared behavior logic.

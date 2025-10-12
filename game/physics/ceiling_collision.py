@@ -65,7 +65,7 @@ class CeilingCollisionProcessor(PhysicsProcessor):
                     tile_x,
                     tile_y,
                     TileEvent.HIT_FROM_BELOW,
-                    emit_event=context.add_event,
+                    physics=context,
                 )
                 break
 
