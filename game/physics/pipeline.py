@@ -30,10 +30,13 @@ class PhysicsPipeline:
     def __init__(self) -> None:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
+            # short-circuiting event processors first
             EndLevelEventProcessor(),
             WarpEventProcessor(),
             DeathEventProcessor(),
             EntityCollisionProcessor(),
+            
+            # core physics processors
             IntentProcessor(),
             MovementProcessor(),
             GravityProcessor(),
@@ -44,8 +47,10 @@ class PhysicsPipeline:
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
-            TerrainBehaviorProcessor(),
+            
+            # post-movement processors
             ActionProcessor(),
+            TerrainBehaviorProcessor(),
             MarioTransitionProcessor(),
         ]
 

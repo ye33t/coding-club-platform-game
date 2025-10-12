@@ -27,7 +27,7 @@ class PhysicsContext:
     events: List["PhysicsEvent"] = field(
         default_factory=list
     )  # Events raised this frame
-    entities: Iterable["Entity"] = field(default_factory=list)  # Active game entities
+    entities: List["Entity"] = field(default_factory=list)  # Active game entities
 
     def add_event(self, event: "PhysicsEvent") -> None:
         """Record a physics event emitted by the pipeline."""

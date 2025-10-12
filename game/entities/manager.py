@@ -69,6 +69,6 @@ class EntityManager:
         self._entities.clear()
 
     @property
-    def items(self) -> Iterable[Entity]:
+    def items(self) -> List[Entity]:
         """Get an iterable of all active entities."""
-        return iter(self._entities)
+        return self._entities
