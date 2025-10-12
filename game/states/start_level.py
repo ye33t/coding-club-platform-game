@@ -1,6 +1,5 @@
 """Start level state - positions Mario and initializes level."""
 
-from ..camera import CameraState
 from ..mario import MarioState
 from .base import State
 
@@ -32,7 +31,8 @@ class StartLevelState(State):
         game.world.reset_spawn_triggers()
 
         # Reset camera to beginning (both position and ratchet)
-        game.world.camera.state = CameraState(x=0, max_x=0)
+        game.world.camera.x = 0
+        game.world.camera.max_x = 0
 
     def handle_events(self, game) -> None:
         """No events during instant transition."""

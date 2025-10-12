@@ -46,8 +46,8 @@ class WarpExitState(State):
 
         screen_center = NATIVE_WIDTH // 2
         ideal_camera_x = max(0, pixel_x - screen_center)
-        game.world.camera.state.x = ideal_camera_x
-        game.world.camera.state.max_x = ideal_camera_x
+        game.world.camera.x = ideal_camera_x
+        game.world.camera.max_x = ideal_camera_x
 
         self.distance_moved = -game.world.mario.state.height
 

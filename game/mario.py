@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
@@ -86,10 +85,6 @@ class MarioState:
     frame: int = 0
     animation_length: int = 1  # Total frames in current animation
     animation_progress: float = 0.0  # Fractional progress for smooth cycling
-
-    def clone(self):
-        """Create a deep copy of this state."""
-        return deepcopy(self)
 
     def get_animation_progress(self) -> float:
         """Get the current animation progress as a percentage (0.0 to 1.0)."""
@@ -240,38 +235,48 @@ class Mario:
         intent.duck = keys[pygame.K_s]
         return intent
 
-    def apply_state(self, new_state: MarioState):
-        """Accept the authoritative state from the world."""
+    def post_physics_update(self, previous_state: MarioState) -> None:
+        """Handle animation bookkeeping after physics runs in place.
+
+        Args:
+            previous_state: Snapshot captured before the physics pipeline mutated
+                Mario's live state.
+        """
+        current_state = self.state
+
         # Check if action changed
         current_animations = self.animations.get(
-            new_state.size, self.animations["small"]
+            current_state.size, self.animations["small"]
         )
 
-        previous_size = self.state.size
-        if new_state.action != self.state.action or new_state.size != previous_size:
+        previous_size = previous_state.size
+        if (
+            current_state.action != previous_state.action
+            or current_state.size != previous_size
+        ):
             # Set animation length for the new action using current size palette.
-            if new_state.action in current_animations:
-                new_state.animation_length = len(
-                    current_animations[new_state.action]["sprites"]
+            if current_state.action in current_animations:
+                current_state.animation_length = len(
+                    current_animations[current_state.action]["sprites"]
                 )
             else:
-                new_state.animation_length = 1
-            new_state.frame = 0
+                current_state.animation_length = 1
+            current_state.frame = 0
             # Reset animation progress for velocity-based animations
-            new_state.animation_progress = 0.0
+            current_state.animation_progress = 0.0
 
         # Also reset walking/running animations when changing direction while moving
-        elif new_state.action in ["walking", "running"] and self.state.action in [
+        elif current_state.action in ["walking", "running"] and previous_state.action in [
             "walking",
             "running",
         ]:
             # Reset if direction changed
-            if (new_state.vx > 0) != (self.state.vx > 0) and abs(new_state.vx) > 1.0:
-                new_state.frame = 0
+            if (current_state.vx > 0) != (previous_state.vx > 0) and abs(
+                current_state.vx
+            ) > 1.0:
+                current_state.frame = 0
                 # Reset animation progress
-                new_state.animation_progress = 0.0
-
-        self.state = new_state
+                current_state.animation_progress = 0.0
 
     def update_animation(self):
         """Update animation frame based on velocity for movement animations."""

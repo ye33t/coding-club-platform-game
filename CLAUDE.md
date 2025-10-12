@@ -36,8 +36,8 @@ This is an NES-style platform game using an **intent-based physics pipeline arch
 ### Core Flow
 
 1. **Input** → `Mario.get_intent()` → `MarioIntent` (what player wants)
-2. **Physics** → `PhysicsPipeline.process()` → Transformed `MarioState` (reality)
-3. **Application** → `Mario.apply_state()` → State updated
+2. **Physics** → `PhysicsPipeline.process()` mutates live Mario/camera state
+3. **Post-Physics** → `Mario.post_physics_update()` adjusts animation metadata
 4. **Rendering** → `Mario.draw()` → Visual representation
 
 ### Physics Pipeline
@@ -68,7 +68,7 @@ Each processor:
 ### Key Design Patterns
 
 - **Pipeline Pattern**: Physics processors chained together
-- **Immutable State**: States are cloned before modification (`MarioState.clone()`)
+- **Live State Mutation**: Physics processors operate on Mario and camera directly; `World` snapshots state for event rollbacks
 - **Separation of Concerns**: Mario handles rendering, World handles physics, Level handles terrain
 - **Singleton Pattern**: `SpriteManager` for sprite sheet management
 - **State Machine**: Mario actions (idle, walking, running, jumping, skidding)

@@ -25,32 +25,6 @@ if TYPE_CHECKING:
 
 class PhysicsPipeline:
     """Orchestrates physics processors in a defined order.
-
-    The pipeline processes physics in this order:
-    1. Intent - Convert player input to target states
-    2. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
-    3. WarpEvent - Check if Mario is warping (short-circuits)
-    4. DeathEvent - Check if Mario fell below screen (short-circuits)
-    5. Movement - Apply friction/deceleration
-    6. Gravity - Apply gravity and handle jumping
-    7. Velocity - Update position from velocity
-    8. Boundaries - Enforce world boundaries
-    9. WallCollision (LEFT) - Detect and resolve left wall hits
-    10. WallCollision (RIGHT) - Detect and resolve right wall hits
-    11. CeilingCollision - Detect and resolve ceiling hits
-    12. GroundCollision - Detect and resolve ground/slopes
-    13. FlagpoleClamp - Prevent Mario from sliding past the flagpole
-    14. Action - Determine action from final state
-    15. EntityCollision - Check collisions between Mario and entities
-
-    This order ensures that:
-    - Input is processed first
-    - Game events are detected early and short-circuit the pipeline
-    - Forces are applied (gravity, friction)
-    - Position is updated
-    - Collisions are resolved separately
-    - Final action is determined
-    - Entity collisions checked after Mario's state is finalized
     """
 
     def __init__(self) -> None:
@@ -60,6 +34,7 @@ class PhysicsPipeline:
             EndLevelEventProcessor(),
             WarpEventProcessor(),
             DeathEventProcessor(),
+            EntityCollisionProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
@@ -71,7 +46,6 @@ class PhysicsPipeline:
             FlagpoleClampProcessor(),
             ActionProcessor(),
             MarioTransitionProcessor(),
-            EntityCollisionProcessor(),
         ]
 
         # Optional: Enable/disable debugging
