@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from ..camera import Camera

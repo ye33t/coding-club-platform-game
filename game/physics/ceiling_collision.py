@@ -7,6 +7,10 @@ from .base import PhysicsContext, PhysicsProcessor
 from .config import CEILING_BOUNCE_VELOCITY, CEILING_SAMPLE_EDGE_OFFSET
 
 
+# TODO: currently mario hits thw wrong tiles, should be the tile above his fist
+# that raises the event and pushes him down, but if there is a tile above him
+# and one that doesn't hit his head, then we'll trigger that one instead.
+# so fist first, then head.
 class CeilingCollisionProcessor(PhysicsProcessor):
     """Handles ceiling collision detection and resolution.
 

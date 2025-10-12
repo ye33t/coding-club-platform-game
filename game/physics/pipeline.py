@@ -35,7 +35,6 @@ class PhysicsPipeline:
             WarpEventProcessor(),
             DeathEventProcessor(),
             EntityCollisionProcessor(),
-            
             # core physics processors
             IntentProcessor(),
             MovementProcessor(),
@@ -47,7 +46,6 @@ class PhysicsPipeline:
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
-            
             # post-movement processors
             ActionProcessor(),
             TerrainBehaviorProcessor(),
