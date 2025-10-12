@@ -185,6 +185,7 @@ class Mario:
         self._last_action = self.action
         self._last_size = self.size
         self._last_vx = self.vx
+        self.intent = MarioIntent()
 
     def get_animation_progress(self) -> float:
         """Get the current animation progress as a percentage (0.0 to 1.0)."""
@@ -274,15 +275,13 @@ class Mario:
         self._last_size = self.size
         self._last_vx = self.vx
 
-    def get_intent(self, keys) -> MarioIntent:
-        """Process raw input into intent."""
-        intent = MarioIntent()
-        intent.move_left = keys[pygame.K_a]
-        intent.move_right = keys[pygame.K_d]
-        intent.run = keys[pygame.K_j]
-        intent.jump = keys[pygame.K_k]
-        intent.duck = keys[pygame.K_s]
-        return intent
+    def update_intent(self, keys) -> None:
+        """Process raw input and update the stored intent."""
+        self.intent.move_right = keys[pygame.K_d]
+        self.intent.move_left = not self.intent.move_right and keys[pygame.K_a]
+        self.intent.run = keys[pygame.K_j]
+        self.intent.jump = keys[pygame.K_k]
+        self.intent.duck = not self.intent.jump and keys[pygame.K_s]
 
     def draw(self, surface, camera):
         """Draw Mario at current state.

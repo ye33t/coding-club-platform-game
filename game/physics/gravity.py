@@ -22,7 +22,7 @@ class GravityProcessor(PhysicsProcessor):
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process gravity and jumping with variable height."""
         mario = context.mario
-        intent = context.mario_intent
+        intent = mario.intent
         dt = context.dt
 
         # Handle jump initiation

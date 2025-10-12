@@ -35,10 +35,9 @@ This is an NES-style platform game using an **intent-based physics pipeline arch
 
 ### Core Flow
 
-1. **Input** → `Mario.get_intent()` → `MarioIntent` (what player wants)
-2. **Physics** → `PhysicsPipeline.process()` mutates live Mario/camera state
-3. **Post-Physics** → `Mario.post_physics_update()` adjusts animation metadata
-4. **Rendering** → `Mario.draw()` → Visual representation
+1. **Input** → `Mario.update_intent()` stores `Mario.intent` (what player wants)
+2. **Physics** → `PhysicsPipeline.process()` mutates live Mario/camera state using that intent
+3. **Rendering** → `Mario.draw()` updates animation metadata and renders
 
 ### Physics Pipeline
 

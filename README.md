@@ -114,7 +114,7 @@ game/
 2. **Read `mario.py`**
    - Study the `MarioIntent` dataclass (user desires)
    - Inspect the `Mario` class to see how physics, animation, and rendering share one object
-   - Understand how intent feeds directly into the physics pipeline
+   - Note how `Mario.update_intent()` captures input each frame and the pipeline reads `Mario.intent`
 
 3. **Examine `world.py` and `physics/pipeline.py`**
    - See how the physics pipeline works

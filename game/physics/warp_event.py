@@ -18,7 +18,7 @@ class WarpEventProcessor(PhysicsProcessor):
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if Mario should warp."""
         mario = context.mario
-        intent = context.mario_intent
+        intent = mario.intent
 
         # Check if down key is pressed while on ground
         if not intent.duck or not mario.on_ground:

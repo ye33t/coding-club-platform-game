@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Optional, Set
 
-from ..mario import MarioIntent
-
 if TYPE_CHECKING:
     from ..camera import Camera
     from ..entities import Entity
@@ -24,7 +22,6 @@ class PhysicsContext:
 
     mario: "Mario"  # Live Mario instance (state mutated in place)
     camera: "Camera"  # Live camera instance mutated in place
-    mario_intent: MarioIntent  # What the player wants Mario to do
     level: "Level"  # Level data for collision detection
     dt: float  # Delta time for this frame
     event: Optional["PhysicsEvent"] = None  # Event that triggers state transition

@@ -24,6 +24,8 @@ class ActionProcessor(PhysicsProcessor):
         # Clear skidding if:
         # 1. Velocity is low (stopped or nearly stopped)
         # 2. Mario has changed direction (velocity crosses zero)
+        intent = mario.intent
+
         if mario.action == "skidding":
             velocity_is_low = abs(mario.vx) < SKID_CLEAR_VELOCITY
 
@@ -31,9 +33,9 @@ class ActionProcessor(PhysicsProcessor):
             # When this happens, update facing direction
             if abs(mario.vx) < STOP_VELOCITY:
                 # Mario has essentially stopped - update facing based on intent
-                if context.mario_intent.move_right:
+                if intent.move_right:
                     mario.facing_right = True
-                elif context.mario_intent.move_left:
+                elif intent.move_left:
                     mario.facing_right = False
                 mario.action = ""  # Clear action, will be re-determined
             elif velocity_is_low:
@@ -41,7 +43,7 @@ class ActionProcessor(PhysicsProcessor):
 
         # Only update action if not skidding
         if mario.action != "skidding":
-            mario.action = self._determine_action(mario, context.mario_intent)
+            mario.action = self._determine_action(mario, intent)
 
         return context
 

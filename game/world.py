@@ -37,14 +37,13 @@ class World:
         Returns:
             Physics event if one was raised (e.g., death, warp), None otherwise
         """
-        mario_intent = self.mario.get_intent(keys)
+        self.mario.update_intent(keys)
 
         self.entities.update(dt, self.level, self.mario.screen, self.camera.x)
 
         context = PhysicsContext(
             mario=self.mario,
             camera=self.camera,
-            mario_intent=mario_intent,
             level=self.level,
             dt=dt,
             entities=self.entities.get_entities(),

@@ -24,7 +24,7 @@ class IntentProcessor(PhysicsProcessor):
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process player intent."""
         mario = context.mario
-        intent = context.mario_intent
+        intent = mario.intent
 
         # Calculate target horizontal velocity based on intent
         target_vx = 0.0

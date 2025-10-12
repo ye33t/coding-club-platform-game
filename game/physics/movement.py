@@ -16,7 +16,7 @@ class MovementProcessor(PhysicsProcessor):
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process movement physics."""
         mario = context.mario
-        intent = context.mario_intent
+        intent = mario.intent
 
         # If no horizontal movement intent, apply friction
         if not intent.move_left and not intent.move_right:
