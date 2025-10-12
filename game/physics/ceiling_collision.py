@@ -61,7 +61,11 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
                 # Trigger bounce behavior on the tile
                 context.level.terrain_manager.trigger_event(
-                    mario.screen, tile_x, tile_y, TileEvent.HIT_FROM_BELOW
+                    mario.screen,
+                    tile_x,
+                    tile_y,
+                    TileEvent.HIT_FROM_BELOW,
+                    emit_event=context.add_event,
                 )
                 break
 

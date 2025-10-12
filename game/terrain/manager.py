@@ -1,24 +1,20 @@
 """Manager for terrain behaviors in a level."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
+from ..physics.events import (
+    PhysicsEvent,
+    SpawnEffectEvent,
+    SpawnEntityEvent,
+    TerrainTileChangeEvent,
+)
 from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState
 
 if TYPE_CHECKING:
     from ..effects import Effect, EffectFactory, EffectManager
     from ..entities import Entity, EntityManager
     from ..level import Level
-
-
-@dataclass
-class _TileChangeCommand:
-    screen: int
-    x: int
-    y: int
-    slug: str
-    behavior_type: Optional[str] = None
-    behavior_params: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -39,9 +35,8 @@ class TerrainManager:
         """Initialize the terrain manager."""
         # Only store tiles that have behaviors
         self.instances: Dict[Tuple[int, int, int], TileInstance] = {}
-        self._tile_change_commands: List[_TileChangeCommand] = []
-        self._effect_commands: List["Effect | EffectFactory"] = []
-        self._entity_commands: List["Entity"] = []
+        self._pending_events: List[PhysicsEvent] = []
+        self._event_emitter: Optional[Callable[[PhysicsEvent], None]] = None
 
     def set_tile_behavior(
         self, screen: int, x: int, y: int, behavior: TerrainBehavior
@@ -70,6 +65,12 @@ class TerrainManager:
         """
         return self.instances.get((screen, x, y))
 
+    def _emit_event(self, event: PhysicsEvent) -> None:
+        if self._event_emitter is not None:
+            self._event_emitter(event)
+        else:
+            self._pending_events.append(event)
+
     def queue_tile_change(
         self,
         screen: int,
@@ -90,21 +91,34 @@ class TerrainManager:
             behavior_params: Optional parameters for the behavior
         """
 
-        self._tile_change_commands.append(
-            _TileChangeCommand(screen, x, y, slug, behavior_type, behavior_params)
+        event = TerrainTileChangeEvent(
+            screen=screen,
+            x=x,
+            y=y,
+            slug=slug,
+            behavior_type=behavior_type,
+            behavior_params=behavior_params,
         )
+        self._emit_event(event)
 
     def queue_effect(self, effect: "Effect | EffectFactory") -> None:
         """Request that an effect be spawned after the physics step."""
 
-        self._effect_commands.append(effect)
+        self._emit_event(SpawnEffectEvent(effect=effect))
 
     def queue_entity(self, entity: "Entity") -> None:
         """Request that an entity be spawned after the physics step."""
 
-        self._entity_commands.append(entity)
+        self._emit_event(SpawnEntityEvent(entity=entity))
 
-    def trigger_event(self, screen: int, x: int, y: int, event: TileEvent) -> None:
+    def trigger_event(
+        self,
+        screen: int,
+        x: int,
+        y: int,
+        event: TileEvent,
+        emit_event: Optional[Callable[[PhysicsEvent], None]] = None,
+    ) -> None:
         """Trigger an event on a specific tile.
 
         Args:
@@ -112,7 +126,10 @@ class TerrainManager:
             x: Tile X coordinate
             y: Tile Y coordinate
             event: The event to trigger
+            emit_event: Optional callback to forward generated physics events
         """
+        previous_emitter = self._event_emitter
+        self._event_emitter = emit_event
         instance = self.get_instance(screen, x, y)
         if instance and instance.behavior:
             context = BehaviorContext(
@@ -127,13 +144,21 @@ class TerrainManager:
                 self.queue_entity,
             )
             instance.behavior.process(context)
+        self._event_emitter = previous_emitter
 
-    def update(self, dt: float) -> None:
+    def update(
+        self,
+        dt: float,
+        emit_event: Optional[Callable[[PhysicsEvent], None]] = None,
+    ) -> None:
         """Update all tile behaviors.
+
 
         Args:
             dt: Time delta since last update
         """
+        previous_emitter = self._event_emitter
+        self._event_emitter = emit_event
         for instance in self.instances.values():
             if instance.behavior:
                 context = BehaviorContext(
@@ -148,6 +173,51 @@ class TerrainManager:
                     self.queue_entity,
                 )
                 instance.behavior.process(context)
+        self._event_emitter = previous_emitter
+
+    def drain_pending_events(self) -> List[PhysicsEvent]:
+        """Retrieve and clear any pending terrain events."""
+        events = list(self._pending_events)
+        self._pending_events.clear()
+        return events
+
+    def process_events(
+        self,
+        events: List[PhysicsEvent],
+        level: "Level",
+        effect_manager: Optional["EffectManager"] = None,
+        entity_manager: Optional["EntityManager"] = None,
+    ) -> None:
+        """Apply terrain-related physics events."""
+
+        from .factory import BehaviorFactory
+
+        factory: Optional[BehaviorFactory] = None
+
+        for event in events:
+            if isinstance(event, TerrainTileChangeEvent):
+                level.set_terrain_tile(event.screen, event.x, event.y, event.slug)
+                self.instances.pop((event.screen, event.x, event.y), None)
+
+                if event.behavior_type:
+                    try:
+                        if factory is None:
+                            factory = BehaviorFactory()
+                        behavior = factory.create(
+                            event.behavior_type, event.behavior_params
+                        )
+                        self.set_tile_behavior(event.screen, event.x, event.y, behavior)
+                    except Exception as exc:
+                        print(
+                            f"Warning: Failed to create behavior "
+                            f"'{event.behavior_type}': {exc}"
+                        )
+            elif isinstance(event, SpawnEffectEvent):
+                if effect_manager is not None:
+                    effect_manager.spawn(event.effect)
+            elif isinstance(event, SpawnEntityEvent):
+                if entity_manager is not None:
+                    entity_manager.spawn(event.entity)
 
     def apply_pending_commands(
         self,
@@ -155,43 +225,7 @@ class TerrainManager:
         effect_manager: Optional["EffectManager"] = None,
         entity_manager: Optional["EntityManager"] = None,
     ) -> None:
-        """Apply queued tile changes and spawn requested effects and entities."""
-
-        from .factory import BehaviorFactory
-
-        factory = BehaviorFactory()
-
-        for command in self._tile_change_commands:
-            # Change the tile visual
-            level.set_terrain_tile(command.screen, command.x, command.y, command.slug)
-
-            # Remove old behavior instance
-            self.instances.pop((command.screen, command.x, command.y), None)
-
-            # Create and attach new behavior if specified
-            if command.behavior_type:
-                try:
-                    behavior = factory.create(
-                        command.behavior_type, command.behavior_params
-                    )
-                    self.set_tile_behavior(
-                        command.screen, command.x, command.y, behavior
-                    )
-                except Exception as e:
-                    # Log error but don't crash - tile change still happened
-                    print(
-                        f"Warning: Failed to create behavior "
-                        f"'{command.behavior_type}': {e}"
-                    )
-
-        self._tile_change_commands.clear()
-
-        if effect_manager is not None:
-            for effect in self._effect_commands:
-                effect_manager.spawn(effect)
-        self._effect_commands.clear()
-
-        if entity_manager is not None:
-            for entity in self._entity_commands:
-                entity_manager.spawn(entity)
-        self._entity_commands.clear()
+        """Apply any pending events that were queued without an emitter."""
+        events = self.drain_pending_events()
+        if events:
+            self.process_events(events, level, effect_manager, entity_manager)
