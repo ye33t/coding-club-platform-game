@@ -41,17 +41,10 @@ class World:
         Returns:
             Physics event if one was raised (e.g., death, warp), None otherwise
         """
-        # Step 1: Get Mario's intent from input
         mario_intent = self.mario.get_intent(keys)
 
-        # Step 2: Update entities physics (before Mario physics)
         self.entities.update(dt, self.level, self.mario.state.screen, self.camera.x)
 
-        # Capture pre-physics state for animation updates and event rollbacks
-        pre_mario_state = deepcopy(self.mario.state)
-        pre_camera_values = (self.camera.x, self.camera.max_x)
-
-        # Step 3: Create physics context that operates on live objects
         context = PhysicsContext(
             mario=self.mario,
             camera=self.camera,
@@ -61,39 +54,26 @@ class World:
             entities=self.entities.get_entities(),
         )
 
-        # Step 4: Process through physics pipeline
         processed_context = self.physics_pipeline.process(context)
+        
+        self.entities.remove_entities(processed_context.entities_to_remove)
 
-        # Apply any tile or effect commands queued during behavior processing.
         self.level.terrain_manager.apply_pending_commands(
             self.level, self.effects, self.entities
         )
 
-        # Remove any entities flagged during physics processing
-        self.entities.remove_entities(processed_context.entities_to_remove)
-
-        # Step 5: Check if an event was raised (short-circuits normal processing)
         event: Optional[PhysicsEvent] = processed_context.event
         if event is not None:
-            self._restore_pre_physics_state(pre_mario_state, pre_camera_values)
             return event
 
-        # Step 6: Update Mario's animation state with the pre-physics snapshot
-        self.mario.post_physics_update(pre_mario_state)
-
-        # Step 7: Update Mario's animation
         self.mario.update_animation()
 
-        # Step 8: Update terrain behaviors
         self.level.terrain_manager.update(dt)
 
-        # Step 9: Update transient effects
         self.effects.update(dt)
 
-        # Step 10: Update camera based on Mario's new position
         self.camera.update(self.mario.state.x, self.level.width_pixels)
 
-        # Step 11: Check spawn triggers based on camera position
         self._check_spawn_triggers()
 
         return None
@@ -144,15 +124,3 @@ class World:
 
         # Clear all entities (enemies and collectibles)
         self.entities.clear()
-
-    def _restore_pre_physics_state(
-        self, mario_state: "MarioState", camera_values: tuple[float, float]
-    ) -> None:
-        """Restore Mario and camera state when physics short-circuits.
-
-        Args:
-            mario_state: Snapshot of Mario's state captured pre-physics
-            camera_values: Snapshot of the camera's state captured pre-physics
-        """
-        self.mario.state = mario_state
-        self.camera.x, self.camera.max_x = camera_values

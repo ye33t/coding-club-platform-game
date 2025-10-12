@@ -235,49 +235,6 @@ class Mario:
         intent.duck = keys[pygame.K_s]
         return intent
 
-    def post_physics_update(self, previous_state: MarioState) -> None:
-        """Handle animation bookkeeping after physics runs in place.
-
-        Args:
-            previous_state: Snapshot captured before the physics pipeline mutated
-                Mario's live state.
-        """
-        current_state = self.state
-
-        # Check if action changed
-        current_animations = self.animations.get(
-            current_state.size, self.animations["small"]
-        )
-
-        previous_size = previous_state.size
-        if (
-            current_state.action != previous_state.action
-            or current_state.size != previous_size
-        ):
-            # Set animation length for the new action using current size palette.
-            if current_state.action in current_animations:
-                current_state.animation_length = len(
-                    current_animations[current_state.action]["sprites"]
-                )
-            else:
-                current_state.animation_length = 1
-            current_state.frame = 0
-            # Reset animation progress for velocity-based animations
-            current_state.animation_progress = 0.0
-
-        # Also reset walking/running animations when changing direction while moving
-        elif current_state.action in ["walking", "running"] and previous_state.action in [
-            "walking",
-            "running",
-        ]:
-            # Reset if direction changed
-            if (current_state.vx > 0) != (previous_state.vx > 0) and abs(
-                current_state.vx
-            ) > 1.0:
-                current_state.frame = 0
-                # Reset animation progress
-                current_state.animation_progress = 0.0
-
     def update_animation(self):
         """Update animation frame based on velocity for movement animations."""
         current_animations = self.animations.get(
