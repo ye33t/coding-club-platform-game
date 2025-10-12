@@ -18,13 +18,13 @@ class EndLevelEventProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if Mario should trigger end level."""
-        mario_state = context.mario_state
+        mario = context.mario
 
         # Find all flagpole behavior instances on Mario's screen
         flagpole_instances = [
             instance
             for instance in context.level.terrain_manager.instances.values()
-            if instance.screen == mario_state.screen
+            if instance.screen == mario.screen
             and isinstance(instance.behavior, FlagpoleBehavior)
         ]
 
@@ -35,7 +35,7 @@ class EndLevelEventProcessor(PhysicsProcessor):
         flagpole_x = flagpole_instances[0].x
         flagpole_center_x = flagpole_x * TILE_SIZE + (TILE_SIZE / 2)
 
-        mario_right = mario_state.x + mario_state.width
+        mario_right = mario.x + mario.width
 
         # Check if Mario is within trigger distance using his right edge
         if mario_right >= (flagpole_center_x - FLAGPOLE_TRIGGER_DISTANCE):

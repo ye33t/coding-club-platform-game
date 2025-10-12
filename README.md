@@ -100,9 +100,9 @@ game/
 
 ### Safe State Changes
 
-- We always copy Mario's state before changing it
-- Like making a rough draft before the final version
-- Prevents weird bugs from accidental changes
+- Physics processors mutate Mario directly each frame
+- Early short-circuit processors (death, warp, end-level) run before mutations
+- This keeps behaviour predictable without clone/apply overhead
 
 ## Study Order
 
@@ -113,8 +113,8 @@ game/
 
 2. **Read `mario.py`**
    - Study the `MarioIntent` dataclass (user desires)
-   - Study the `MarioState` dataclass (actual state)
-   - Understand the separation between intent and state
+   - Inspect the `Mario` class to see how physics, animation, and rendering share one object
+   - Understand how intent feeds directly into the physics pipeline
 
 3. **Examine `world.py` and `physics/pipeline.py`**
    - See how the physics pipeline works
@@ -142,7 +142,7 @@ game/
 
 ### Adding Features
 
-1. **Double Jump**: Add a jump counter to `MarioState`, allow jumping in air once
+1. **Double Jump**: Add a jump counter to `Mario`, allow jumping in air once
 2. **Sprint**: Make shift key increase `RUN_SPEED` to 160.0
 3. **Crouch**: Add new state when down key pressed, reduce height
 

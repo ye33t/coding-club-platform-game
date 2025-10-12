@@ -21,27 +21,27 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check for collisions between Mario and entities."""
-        mario_state = context.mario_state
+        mario = context.mario
 
         # Shrink Mario's collision box horizontally for more accurate collision
         MARIO_HORIZONTAL_MARGIN = 2  # Pixels to shrink on each side
 
         mario_rect = Rect(
-            int(mario_state.x + MARIO_HORIZONTAL_MARGIN),
-            int(mario_state.y),
-            int(mario_state.width - (MARIO_HORIZONTAL_MARGIN * 2)),
-            int(mario_state.height),
+            int(mario.x + MARIO_HORIZONTAL_MARGIN),
+            int(mario.y),
+            int(mario.width - (MARIO_HORIZONTAL_MARGIN * 2)),
+            int(mario.height),
         )
 
         # First pass: Check if Mario is about to stomp an enemy
-        if mario_state.vy < 0 and not mario_state.on_ground:
+        if mario.vy < 0 and not mario.on_ground:
             # Mario is falling - check if there's an enemy below
 
             # Create a rect below Mario to check for potential stomps
             stomp_check_rect = Rect(
-                int(mario_state.x + MARIO_HORIZONTAL_MARGIN),
-                int(mario_state.y - TILE_SIZE),
-                int(mario_state.width - (MARIO_HORIZONTAL_MARGIN * 2)),
+                int(mario.x + MARIO_HORIZONTAL_MARGIN),
+                int(mario.y - TILE_SIZE),
+                int(mario.width - (MARIO_HORIZONTAL_MARGIN * 2)),
                 TILE_SIZE,
             )
 
@@ -56,9 +56,9 @@ class EntityCollisionProcessor(PhysicsProcessor):
                         entity_top = entity_rect.y + entity_rect.height
                         stomp_threshold = entity_top - (entity_rect.height * 0.33)
 
-                        if mario_state.y > stomp_threshold:
+                        if mario.y > stomp_threshold:
                             # Mario is about to stomp - activate stomp mode
-                            mario_state.is_stomping = True
+                            mario.is_stomping = True
                             break
 
         # Second pass: Handle actual collisions
@@ -68,7 +68,7 @@ class EntityCollisionProcessor(PhysicsProcessor):
             if not mario_rect.colliderect(entity_rect):
                 continue
 
-            response = entity.on_collide_mario(mario_state)
+            response = entity.on_collide_mario(mario)
             if not response:
                 continue
 
@@ -76,7 +76,7 @@ class EntityCollisionProcessor(PhysicsProcessor):
             if response.bounce_velocity is not None:
                 # Apply bounce but scale it down for more controlled stomping
                 # This prevents excessive bouncing and gives players better control
-                mario_state.vy = response.bounce_velocity * STOMP_VELOCITY_Y_SCALE
+                mario.vy = response.bounce_velocity * STOMP_VELOCITY_Y_SCALE
 
             if response.power_up_type is not None:
                 self._apply_power_up(context, response.power_up_type)
@@ -98,9 +98,9 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
     def _apply_mushroom(self, context: PhysicsContext) -> None:
         """Handle mushroom collection: grow Mario to big size."""
-        mario_state = context.mario_state
+        mario = context.mario
 
-        mario_state.grow()
+        mario.grow()
 
     def _apply_damage(self, context: PhysicsContext) -> None:
         """Apply damage to Mario based on his current state.
@@ -109,12 +109,12 @@ class EntityCollisionProcessor(PhysicsProcessor):
         - Big Mario: Shrinks to small
         - Invincible: No effect
         """
-        mario_state = context.mario_state
+        mario = context.mario
 
-        if mario_state.is_invincible:
+        if mario.is_invincible:
             return
 
-        if mario_state.size == "small":
+        if mario.size == "small":
             context.event = DeathEvent()
-        elif mario_state.size == "big":
-            mario_state.shrink()
+        elif mario.size == "big":
+            mario.shrink()

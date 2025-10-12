@@ -13,7 +13,7 @@ from ..constants import TILE_SIZE
 
 if TYPE_CHECKING:
     from ..level import Level
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 @dataclass(slots=True)
@@ -104,7 +104,7 @@ class Entity(ABC):
             int(self.state.height),
         )
 
-    def on_collide_mario(self, mario_state: MarioState) -> Optional[CollisionResponse]:
+    def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle collision with Mario.
 
         Args:

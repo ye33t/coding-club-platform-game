@@ -11,8 +11,8 @@ class MarioTransitionProcessor(PhysicsProcessor):
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Update Mario's transition if one is in progress."""
 
-        transition = context.mario_state.transition
+        transition = context.mario.transition
         if transition is not None:
-            transition.update(context.dt, context.mario_state)
+            transition.update(context.dt, context.mario)
 
         return context

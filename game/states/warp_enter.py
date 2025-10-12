@@ -38,9 +38,9 @@ class WarpEnterState(State):
         """Move mario down into pipe."""
         from ..physics.config import WARP_SPEED
 
-        warp_distance = game.world.mario.state.height
+        warp_distance = game.world.mario.height
         move_amount = WARP_SPEED * dt
-        game.world.mario.state.y -= move_amount
+        game.world.mario.y -= move_amount
         self.distance_moved += move_amount
 
         # When fully inside pipe, transition to exit

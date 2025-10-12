@@ -1,7 +1,6 @@
 """World physics and game logic."""
 
-from copy import deepcopy
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import Any, List, Optional
 
 from .camera import Camera
 from .effects import EffectManager
@@ -10,9 +9,6 @@ from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
-
-if TYPE_CHECKING:
-    from .mario import MarioState
 
 
 class World:
@@ -43,7 +39,7 @@ class World:
         """
         mario_intent = self.mario.get_intent(keys)
 
-        self.entities.update(dt, self.level, self.mario.state.screen, self.camera.x)
+        self.entities.update(dt, self.level, self.mario.screen, self.camera.x)
 
         context = PhysicsContext(
             mario=self.mario,
@@ -55,7 +51,7 @@ class World:
         )
 
         processed_context = self.physics_pipeline.process(context)
-        
+
         self.entities.remove_entities(processed_context.entities_to_remove)
 
         self.level.terrain_manager.apply_pending_commands(
@@ -66,13 +62,14 @@ class World:
         if event is not None:
             return event
 
+        self.mario.refresh_animation_state()
         self.mario.update_animation()
 
         self.level.terrain_manager.update(dt)
 
         self.effects.update(dt)
 
-        self.camera.update(self.mario.state.x, self.level.width_pixels)
+        self.camera.update(self.mario.x, self.level.width_pixels)
 
         self._check_spawn_triggers()
 

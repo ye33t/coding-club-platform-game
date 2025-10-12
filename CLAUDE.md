@@ -68,7 +68,7 @@ Each processor:
 ### Key Design Patterns
 
 - **Pipeline Pattern**: Physics processors chained together
-- **Live State Mutation**: Physics processors operate on Mario and camera directly; `World` snapshots state for event rollbacks
+- **Live State Mutation**: Physics processors operate on Mario and camera directly, with short-circuit processors running before state changes
 - **Separation of Concerns**: Mario handles rendering, World handles physics, Level handles terrain
 - **Singleton Pattern**: `SpriteManager` for sprite sheet management
 - **State Machine**: Mario actions (idle, walking, running, jumping, skidding)
@@ -86,7 +86,7 @@ Tests are located in `tests/` directory with pytest fixtures in `conftest.py`. K
 
 - Unit tests for individual physics processors
 - Integration tests for physics pipeline
-- Use `MarioStateBuilder` and `MarioIntentBuilder` for test data
+- Reuse existing builders/fixtures for intents and entities where available
 - Test both normal and edge cases (death, boundaries, collisions)
 
 ## Code Standards

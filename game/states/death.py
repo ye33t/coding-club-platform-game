@@ -21,11 +21,12 @@ class DeathState(State):
     def on_enter(self, game: "Game") -> None:
         """Initialize death animation."""
         # Give Mario the death leap velocity
-        game.world.mario.state.vy = DEATH_LEAP_VELOCITY
-        game.world.mario.state.vx = 0
+        game.world.mario.vy = DEATH_LEAP_VELOCITY
+        game.world.mario.vx = 0
 
         # Tells the renderer what animation to use for Mario
-        game.world.mario.state.action = "dying"
+        game.world.mario.size = "small"
+        game.world.mario.action = "dying"
 
     def handle_events(self, game: "Game") -> None:
         """No input during death."""
@@ -36,16 +37,17 @@ class DeathState(State):
         mario = game.world.mario
 
         # Apply gravity
-        mario.state.vy -= GRAVITY * dt
+        mario.vy -= GRAVITY * dt
 
         # Update position
-        mario.state.y += mario.state.vy * dt
+        mario.y += mario.vy * dt
 
         # Update animation
+        mario.refresh_animation_state()
         mario.update_animation()
 
         # Check if Mario has fallen far enough to end animation
-        if mario.state.y < RESET_THRESHOLD_Y:
+        if mario.y < RESET_THRESHOLD_Y:
             # Transition to start level with screen fade
             from .screen_transition import ScreenTransitionState
             from .start_level import StartLevelState

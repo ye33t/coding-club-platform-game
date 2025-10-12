@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ..camera import Camera
     from ..entities import Entity
     from ..level import Level
-    from ..mario import Mario, MarioState
+    from ..mario import Mario
     from .events import PhysicsEvent
 
 
@@ -32,11 +32,6 @@ class PhysicsContext:
     entities_to_remove: Set["Entity"] = field(
         default_factory=set
     )  # Entities flagged for removal during processing
-
-    @property
-    def mario_state(self) -> "MarioState":
-        """Convenience accessor for Mario's mutable state."""
-        return self.mario.state
 
 class PhysicsProcessor(ABC):
     """Abstract base class for physics processors.

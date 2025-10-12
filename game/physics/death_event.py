@@ -14,10 +14,10 @@ class DeathEventProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if Mario should die."""
-        mario_state = context.mario_state
+        mario = context.mario
 
         # Check if Mario fell below the screen
-        if mario_state.y < 0:
+        if mario.y < 0:
             # Raise death event
             context.event = DeathEvent()
 

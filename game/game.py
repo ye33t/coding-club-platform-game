@@ -112,7 +112,7 @@ class Game:
     def draw_background(self, surface: pygame.Surface) -> None:
         """Draw the visible background tiles."""
         visible_tiles = self.world.level.get_visible_background_tiles(
-            self.world.mario.state.screen, self.world.camera.x
+            self.world.mario.screen, self.world.camera.x
         )
 
         for tile_x, tile_y, tile_type in visible_tiles:
@@ -137,7 +137,7 @@ class Game:
         """Draw the visible terrain tiles."""
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_terrain_tiles(
-            self.world.mario.state.screen, self.world.camera.x
+            self.world.mario.screen, self.world.camera.x
         )
 
         for tile_x, tile_y, tile_type in visible_tiles:
@@ -152,7 +152,7 @@ class Game:
 
             # Apply visual state from behaviors
             visual = self.world.level.get_terrain_tile_visual_state(
-                self.world.mario.state.screen, tile_x, tile_y
+                self.world.mario.screen, tile_x, tile_y
             )
             if visual:
                 world_y += visual.offset_y
@@ -182,14 +182,14 @@ class Game:
         """Draw Mario at his screen position."""
         # Transform Mario's world position to screen position
         screen_x, screen_y = self.world.camera.world_to_screen(
-            self.world.mario.state.x, self.world.mario.state.y
+            self.world.mario.x, self.world.mario.y
         )
 
         # Get sprite name
         sprite_name = self.world.mario._get_sprite_name()
         if sprite_name:
             # Use reflection when facing left
-            reflected = not self.world.mario.state.facing_right
+            reflected = not self.world.mario.facing_right
 
             # Draw at screen position (not world position)
             sprites.draw_at_position(
@@ -257,7 +257,7 @@ class Game:
     def _draw_debug_info(self, surface: pygame.Surface) -> None:
         """Draw debug information."""
         fps = self.clock.get_fps()
-        mario = self.world.mario.state
+        mario = self.world.mario
         debug_texts = [
             f"FPS: {fps:.1f}",
             f"Resolution: {surface.get_width()}x{surface.get_height()}",

@@ -17,20 +17,20 @@ class WarpEventProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check if Mario should warp."""
-        mario_state = context.mario_state
+        mario = context.mario
         intent = context.mario_intent
 
         # Check if down key is pressed while on ground
-        if not intent.duck or not mario_state.on_ground:
+        if not intent.duck or not mario.on_ground:
             return context
 
         # Get tile below Mario (the one he's standing on)
-        tile_x = int(mario_state.x // TILE_SIZE)
-        tile_y = int(mario_state.y // TILE_SIZE) - 1
+        tile_x = int(mario.x // TILE_SIZE)
+        tile_y = int(mario.y // TILE_SIZE) - 1
 
         # Check for warp behavior
         instance = context.level.terrain_manager.get_instance(
-            mario_state.screen, tile_x, tile_y
+            mario.screen, tile_x, tile_y
         )
 
         if instance and instance.behavior:

@@ -21,33 +21,33 @@ class GravityProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process gravity and jumping with variable height."""
-        mario_state = context.mario_state
+        mario = context.mario
         intent = context.mario_intent
         dt = context.dt
 
         # Handle jump initiation
-        if intent.jump and mario_state.on_ground:
+        if intent.jump and mario.on_ground:
             # Determine jump velocity based on horizontal speed
-            is_running = abs(mario_state.vx) > RUN_SPEED_THRESHOLD
+            is_running = abs(mario.vx) > RUN_SPEED_THRESHOLD
 
             if is_running:
-                mario_state.vy = RUN_JUMP_VELOCITY
+                mario.vy = RUN_JUMP_VELOCITY
             else:
-                mario_state.vy = WALK_JUMP_VELOCITY
+                mario.vy = WALK_JUMP_VELOCITY
 
-            mario_state.on_ground = False
-            mario_state.is_jumping = True
+            mario.on_ground = False
+            mario.is_jumping = True
 
         # Clear jumping flag when landing
-        if mario_state.on_ground:
-            mario_state.is_jumping = False
+        if mario.on_ground:
+            mario.is_jumping = False
 
         # Apply gravity when not on ground
-        if not mario_state.on_ground:
+        if not mario.on_ground:
             # Jump cut: release jump early while rising to apply stronger gravity
-            if mario_state.is_jumping and not intent.jump and mario_state.vy > 0:
-                mario_state.vy -= GRAVITY * JUMP_CUT_MULTIPLIER * dt
+            if mario.is_jumping and not intent.jump and mario.vy > 0:
+                mario.vy -= GRAVITY * JUMP_CUT_MULTIPLIER * dt
             else:
-                mario_state.vy -= GRAVITY * dt
+                mario.vy -= GRAVITY * dt
 
         return context

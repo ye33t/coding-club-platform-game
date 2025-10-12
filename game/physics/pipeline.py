@@ -20,7 +20,7 @@ from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
 
 if TYPE_CHECKING:
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 class PhysicsPipeline:
@@ -65,13 +65,13 @@ class PhysicsPipeline:
                 if self.debug:
                     processor_name = processor.__class__.__name__
                     print(f"Processing: {processor_name}")
-                    self._debug_state(context.mario_state, f"Before {processor_name}")
+                    self._debug_state(context.mario, f"Before {processor_name}")
 
                 context = processor.process(context)
 
                 if self.debug:
                     name = processor.__class__.__name__
-                    self._debug_state(context.mario_state, f"After {name}")
+                    self._debug_state(context.mario, f"After {name}")
 
                 # Short-circuit if an event was raised
                 if context.event is not None:
@@ -105,10 +105,10 @@ class PhysicsPipeline:
             p for p in self.processors if not isinstance(p, processor_type)
         ]
 
-    def _debug_state(self, mario_state: "MarioState", label: str) -> None:
+    def _debug_state(self, mario: "Mario", label: str) -> None:
         """Debug helper to print state."""
         print(
-            f"  {label}: pos=({mario_state.x:.1f}, {mario_state.y:.1f}), "
-            f"vel=({mario_state.vx:.1f}, {mario_state.vy:.1f}), "
-            f"on_ground={mario_state.on_ground}, action={mario_state.action}"
+            f"  {label}: pos=({mario.x:.1f}, {mario.y:.1f}), "
+            f"vel=({mario.vx:.1f}, {mario.vy:.1f}), "
+            f"on_ground={mario.on_ground}, action={mario.action}"
         )

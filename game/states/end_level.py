@@ -28,10 +28,10 @@ class EndLevelState(State):
     def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
         # Lock Mario's X position to left of flagpole (offset by TILE_SIZE pixels)
-        game.world.mario.state.x = self.flagpole_x - TILE_SIZE
+        game.world.mario.x = self.flagpole_x - TILE_SIZE
         # Stop horizontal movement
-        game.world.mario.state.vx = 0
-        game.world.mario.state.facing_right = True
+        game.world.mario.vx = 0
+        game.world.mario.facing_right = True
 
     def handle_events(self, game) -> None:
         """No input during flagpole descent."""
@@ -42,19 +42,20 @@ class EndLevelState(State):
         mario = game.world.mario
 
         # Move Mario down at constant speed
-        mario.state.y -= FLAGPOLE_DESCENT_SPEED * dt
+        mario.y -= FLAGPOLE_DESCENT_SPEED * dt
 
         # Clamp Mario's position at the base and flip him to the other side of the pole
-        if mario.state.y <= self.flagpole_base_y:
-            mario.state.y = self.flagpole_base_y
-            game.world.mario.state.x = self.flagpole_x
-            mario.state.facing_right = False
+        if mario.y <= self.flagpole_base_y:
+            mario.y = self.flagpole_base_y
+            game.world.mario.x = self.flagpole_x
+            mario.facing_right = False
 
         # Update Mario's animation
+        mario.refresh_animation_state()
         mario.update_animation()
 
         # Check if Mario has reached the base
-        if mario.state.y <= self.flagpole_base_y:
+        if mario.y <= self.flagpole_base_y:
             # Transition to start level with screen fade
             from .screen_transition import ScreenTransitionState, TransitionMode
             from .start_level import StartLevelState

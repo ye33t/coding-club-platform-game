@@ -16,7 +16,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve ground collisions using quadrant masks."""
-        mario_state = context.mario_state
+        mario = context.mario
         level = context.level
 
         highest_ground = -1.0  # Start with invalid value
@@ -24,22 +24,22 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
         # Sample at left edge, center, and right edge of Mario's feet
         sample_points = [
-            mario_state.x,
-            mario_state.x + mario_state.width / 2,
-            mario_state.x + mario_state.width - 1,
+            mario.x,
+            mario.x + mario.width / 2,
+            mario.x + mario.width - 1,
         ]
 
         for sample_x in sample_points:
             # Get tile coordinates (each tile is 16x16 pixels)
             tile_x = int(sample_x // TILE_SIZE)
-            base_tile_y = int(mario_state.y // TILE_SIZE)
+            base_tile_y = int(mario.y // TILE_SIZE)
 
             # Check the tile Mario is in and one below
             for check_y in [base_tile_y, base_tile_y - 1]:
                 if check_y < 0 or check_y >= level.height_tiles:
                     continue
 
-                tile_type = level.get_terrain_tile(mario_state.screen, tile_x, check_y)
+                tile_type = level.get_terrain_tile(mario.screen, tile_x, check_y)
                 tile_def = level.get_tile_definition(tile_type)
 
                 if not tile_def or tile_def.collision_mask == 0:
@@ -62,20 +62,20 @@ class GroundCollisionProcessor(PhysicsProcessor):
 
                     # Check if Mario's feet are within collision range
                     if (
-                        abs(mario_state.y - quadrant_top_y) <= 2.0
-                        or mario_state.y < quadrant_top_y
+                        abs(mario.y - quadrant_top_y) <= 2.0
+                        or mario.y < quadrant_top_y
                     ):
-                        if mario_state.y <= quadrant_top_y + 1:
+                        if mario.y <= quadrant_top_y + 1:
                             found_ground = True
                             if highest_ground < 0 or quadrant_top_y > highest_ground:
                                 highest_ground = quadrant_top_y
 
         # Apply ground collision
-        if found_ground and mario_state.vy <= 0:
-            mario_state.y = highest_ground
-            mario_state.vy = 0
-            mario_state.on_ground = True
+        if found_ground and mario.vy <= 0:
+            mario.y = highest_ground
+            mario.vy = 0
+            mario.on_ground = True
         else:
-            mario_state.on_ground = False
+            mario.on_ground = False
 
         return context

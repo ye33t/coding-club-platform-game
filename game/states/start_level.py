@@ -1,6 +1,5 @@
 """Start level state - positions Mario and initializes level."""
 
-from ..mario import MarioState
 from .base import State
 
 
@@ -16,7 +15,7 @@ class StartLevelState(State):
     def on_enter(self, game) -> None:
         """Initialize level start."""
         # Reset Mario to spawn point
-        game.world.mario.state = MarioState(
+        game.world.mario.reset(
             x=game.world.level.spawn_x,
             y=game.world.level.spawn_y,
             screen=game.world.level.spawn_screen,
