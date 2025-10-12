@@ -5,5 +5,29 @@ sprite_sheets:
     colorkey: [146, 144, 255]
     sprites:
       goomba_walk1:
-        offset: [0, 16]
+        offset: [0, 32]
+        size: [2, 2]
+      goomba_walk2:
+        offset: [18, 32]
+        size: [2, 2]
+      goomba_dead:
+        offset: [36, 32]
+        size: [2, 1]
+      koopa_troopa_walk1:
+        offset: [0, 132]
+        size: [2, 3]
+      koopa_troopa_walk2:
+        offset: [18, 132]
+        size: [2, 3]
+      koopa_paratroopa_fly1:
+        offset: [36, 132]
+        size: [2, 3]
+      koopa_paratroopa_fly2:
+        offset: [54, 132]
+        size: [2, 3]
+      koopa_troopa_shell:
+        offset: [72, 132]
+        size: [2, 2]
+      koopa_troopa_shell_emerge:
+        offset: [90, 132]
         size: [2, 2]

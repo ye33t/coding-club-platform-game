@@ -81,7 +81,8 @@ class MarioState:
     transition: Optional[MarioTransition] = None
 
     # Animation state
-    action: str = "idle"  # idle, walking, running, jumping, skidding, dying
+    action: str = "idle"  # idle, walking, running, jumping, skidding, dying, stomping
+    is_stomping: bool = False  # True when falling toward an enemy
     frame: int = 0
     animation_length: int = 1  # Total frames in current animation
     animation_progress: float = 0.0  # Fractional progress for smooth cycling
@@ -104,6 +105,20 @@ class MarioState:
         self.transition = MarioTransition(
             from_action=self._small_action, to_action=self._big_action
         )
+
+    def shrink(self) -> None:
+        """Trigger big-to-small transformation if Mario is big."""
+        if self.size == "small":
+            return
+
+        self.transition = MarioTransition(
+            from_action=self._big_action, to_action=self._small_action
+        )
+
+    @property
+    def is_invincible(self) -> bool:
+        """Check if Mario is invincible (during transition)."""
+        return self.transition is not None or self.action == "stomping"
 
     @staticmethod
     def _small_action(state: MarioState) -> None:
@@ -162,6 +177,10 @@ class Mario:
                     "sprites": ["small_mario_jump"],  # Hold entire jump
                     "loop": True,
                 },
+                "stomping": {
+                    "sprites": ["small_mario_stomp1"],
+                    "loop": True,
+                },
                 "skidding": {
                     "sprites": ["small_mario_skid"],  # Hold for 0.2 seconds
                     "loop": True,
@@ -196,12 +215,16 @@ class Mario:
                     "sprites": ["big_mario_jump"],
                     "loop": True,
                 },
+                "stomping": {
+                    "sprites": ["big_mario_stomp1"],
+                    "loop": True,
+                },
                 "skidding": {
                     "sprites": ["big_mario_skid"],
                     "loop": True,
                 },
-                "dying": {
-                    "sprites": ["small_mario_die"],
+                "crouching": {
+                    "sprites": ["big_mario_crouch"],
                     "loop": True,
                 },
             },

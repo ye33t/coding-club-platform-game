@@ -8,6 +8,7 @@ from .content.tile_definitions import (
     empty_tile_slug,
     get_tile_definition,
 )
+from .spawn import SpawnManager
 from .terrain import TerrainManager, VisualState
 
 
@@ -54,6 +55,9 @@ class Level:
 
         # Initialize terrain manager for tile behaviors
         self.terrain_manager = TerrainManager()
+
+        # Initialize spawn manager for entity spawning
+        self.spawn_manager = SpawnManager()
 
     @property
     def spawn_x(self) -> float:
