@@ -24,17 +24,16 @@ if TYPE_CHECKING:
 
 
 class PhysicsPipeline:
-    """Orchestrates physics processors in a defined order.
-    """
+    """Orchestrates physics processors in a defined order."""
 
     def __init__(self) -> None:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
-            IntentProcessor(),
             EndLevelEventProcessor(),
             WarpEventProcessor(),
             DeathEventProcessor(),
             EntityCollisionProcessor(),
+            IntentProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),

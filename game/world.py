@@ -46,7 +46,7 @@ class World:
             camera=self.camera,
             level=self.level,
             dt=dt,
-            entities=self.entities.get_entities(),
+            entities=self.entities._entities,
         )
 
         processed_context = self.physics_pipeline.process(context)

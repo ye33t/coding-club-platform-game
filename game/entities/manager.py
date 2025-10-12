@@ -56,14 +56,6 @@ class EntityManager:
         for entity in self._entities:
             entity.draw(surface, camera)
 
-    def get_entities(self) -> List[Entity]:
-        """Get list of active entities.
-
-        Returns:
-            List of all active entities
-        """
-        return self._entities.copy()
-
     def clear(self) -> None:
         """Remove all active entities."""
         self._entities.clear()

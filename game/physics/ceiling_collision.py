@@ -30,8 +30,7 @@ class CeilingCollisionProcessor(PhysicsProcessor):
 
         # Sample points across Mario's width for ceiling
         ceiling_sample_points = [
-            mario.x
-            + CEILING_SAMPLE_EDGE_OFFSET,  # Slightly inset to avoid edge issues
+            mario.x + CEILING_SAMPLE_EDGE_OFFSET,  # Slightly inset to avoid edge issues
             mario.x + mario.width / 2,
             mario.x + mario.width - CEILING_SAMPLE_EDGE_OFFSET - 1,
         ]

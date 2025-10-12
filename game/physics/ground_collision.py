@@ -61,10 +61,7 @@ class GroundCollisionProcessor(PhysicsProcessor):
                     )
 
                     # Check if Mario's feet are within collision range
-                    if (
-                        abs(mario.y - quadrant_top_y) <= 2.0
-                        or mario.y < quadrant_top_y
-                    ):
+                    if abs(mario.y - quadrant_top_y) <= 2.0 or mario.y < quadrant_top_y:
                         if mario.y <= quadrant_top_y + 1:
                             found_ground = True
                             if highest_ground < 0 or quadrant_top_y > highest_ground:

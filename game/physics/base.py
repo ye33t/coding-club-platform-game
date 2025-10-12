@@ -30,6 +30,7 @@ class PhysicsContext:
         default_factory=set
     )  # Entities flagged for removal during processing
 
+
 class PhysicsProcessor(ABC):
     """Abstract base class for physics processors.
 

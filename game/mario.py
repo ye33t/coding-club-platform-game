@@ -177,7 +177,9 @@ class Mario:
         self.transition = None
 
         # Animation state
-        self.action = "idle"  # idle, walking, running, jumping, skidding, dying, stomping
+        self.action = (
+            "idle"  # idle, walking, running, jumping, skidding, dying, stomping
+        )
         self.is_stomping = False  # True when falling toward an enemy
         self.frame = 0
         self.animation_length = 1  # Total frames in current animation
@@ -230,9 +232,7 @@ class Mario:
 
     def _update_animation(self) -> None:
         """Update animation metadata and advance frames for the current state."""
-        current_animations = self.animations.get(
-            self.size, self.animations["small"]
-        )
+        current_animations = self.animations.get(self.size, self.animations["small"])
 
         sprites = current_animations.get(self.action)
 
@@ -311,9 +311,7 @@ class Mario:
 
     def _get_sprite_name(self) -> str:
         """Get the current sprite name based on state."""
-        current_animations = self.animations.get(
-            self.size, self.animations["small"]
-        )
+        current_animations = self.animations.get(self.size, self.animations["small"])
 
         if self.action not in current_animations:
             return f"{self.size}_mario_stand"
