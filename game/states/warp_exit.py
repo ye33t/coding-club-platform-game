@@ -18,7 +18,6 @@ class WarpExitState(State):
             warp_behavior: The warp behavior containing destination info
         """
         self.warp_behavior = warp_behavior
-        self.distance_moved = 0.0
 
     def on_enter(self, game) -> None:
         """Setup exit: change screen, position mario at destination."""
@@ -48,14 +47,7 @@ class WarpExitState(State):
         ideal_camera_x = max(0, pixel_x - screen_center)
         game.world.camera.x = ideal_camera_x
         game.world.camera.max_x = ideal_camera_x
-
         self.distance_moved = -game.world.mario.height
-
-        # Optional: Flash screen black here
-
-    def handle_events(self, game) -> None:
-        """No input during warp."""
-        pass
 
     def on_exit(self, game) -> None:
         """Reset Mario's z_index when exiting warp."""
@@ -74,7 +66,3 @@ class WarpExitState(State):
             from .playing import PlayingState
 
             game.transition_to(PlayingState())
-
-    def draw(self, game, surface) -> None:
-        """Draw with mario behind tiles."""
-        game.draw_world(surface)

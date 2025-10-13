@@ -2,13 +2,20 @@
 
 import os
 import sys
-from itertools import tee
 
 import pygame
 
-from .constants import BACKGROUND_COLOR, FPS, SUB_TILE_SIZE, TILE_SIZE, WHITE
+from .constants import BACKGROUND_COLOR, FPS
 from .content import sprites
 from .display import Display
+from .rendering import (
+    DebugOverlayEffect,
+    PipelineRenderer,
+    TransitionCallbacks,
+    TransitionEffect,
+    TransitionMode,
+    WorldRenderer,
+)
 from .states import InitialState, State
 from .world import World
 
@@ -23,6 +30,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.show_debug = False
+        self._debug_effect: DebugOverlayEffect | None = None
+        self._active_transition: TransitionEffect | None = None
 
         # Initialize font for debug info
         self.font = pygame.font.Font(None, 16)
@@ -33,6 +42,8 @@ class Game:
 
         # Create World (owns level, mario, camera, physics)
         self.world = World()
+        self.world_renderer = WorldRenderer(self.world)
+        self.renderer = PipelineRenderer(self.world_renderer)
 
         # Initialize state machine with initial black screen
         self.state: State = InitialState()
@@ -53,26 +64,19 @@ class Game:
             # Calculate delta time
             dt = self.clock.tick(FPS) / 1000.0
 
-            # Global event handling
+            # Handle global events
             self._handle_events()
-
-            # State-specific event handling
-            self.state.handle_events(self)
 
             # Update game state
             self.state.update(self, dt)
-
-            # Clear screen and get surface
+            
+            # Render frame
+            self.renderer.update(dt, self)
             self.display.clear(BACKGROUND_COLOR)
             surface = self.display.get_native_surface()
 
             # State-specific drawing
             self.state.draw(self, surface)
-
-            # Global debug overlay
-            if self.show_debug:
-                self._draw_tile_grid(surface)
-                self._draw_debug_info(surface)
 
             # Present the frame
             self.display.present()
@@ -93,6 +97,53 @@ class Game:
         self.state = new_state
         self.state.on_enter(self)
 
+    def render(self, surface: pygame.Surface) -> None:
+        """Render the current frame via the renderer pipeline."""
+        self.renderer.draw(surface, self)
+
+    def start_transition(
+        self,
+        to_state: State,
+        mode: TransitionMode = TransitionMode.BOTH,
+        duration: float = 2.0,
+    ) -> None:
+        """Begin a screen transition effect while switching states."""
+        if self._active_transition is not None:
+            return
+
+        def _clear(_: "Game") -> None:
+            self._active_transition = None
+
+        callbacks = TransitionCallbacks(on_complete=_clear)
+
+        if mode == TransitionMode.FADE_OUT:
+
+            def on_complete(game: "Game") -> None:
+                self.transition_to(to_state)
+                _clear(game)
+
+            callbacks.on_complete = on_complete
+        else:
+
+            def on_midpoint(game: "Game") -> None:
+                self.transition_to(to_state)
+
+            callbacks.on_midpoint = on_midpoint
+
+        effect = TransitionEffect(duration, mode, callbacks)
+        self._active_transition = effect
+        self.renderer.add_effect(effect, self)
+
+    def _attach_debug_overlay(self) -> None:
+        if self._debug_effect is None:
+            self._debug_effect = DebugOverlayEffect()
+            self.renderer.add_effect(self._debug_effect, self)
+
+    def _detach_debug_overlay(self) -> None:
+        if self._debug_effect is not None:
+            self.renderer.remove_effect(self._debug_effect, self)
+            self._debug_effect = None
+            
     def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""
         for event in pygame.event.get():
@@ -109,142 +160,7 @@ class Game:
                     self.display.change_scale(1)
                 elif event.key == pygame.K_F3:
                     self.show_debug = not self.show_debug
-
-    def draw_world(self, surface: pygame.Surface) -> None:
-        """Draw the entire world using z-index based rendering.
-
-        Render order:
-        1. Background (fixed)
-        2. Drawables with negative z-index (sorted, behind terrain)
-        3. Terrain (fixed)
-        4. Drawables with zero/positive z-index (sorted, in front of terrain)
-        """
-        # Get all drawables lazily and split into behind/front tiers
-        drawables_iter = self.world.drawables
-        behind_iter, front_iter = tee(drawables_iter, 2)
-
-        behind = sorted(
-            (d for d in behind_iter if d.z_index < 0), key=lambda d: d.z_index
-        )
-        front = sorted(
-            (d for d in front_iter if d.z_index >= 0), key=lambda d: d.z_index
-        )
-
-        # Render in order
-        self._draw_background(surface)
-
-        for drawable in behind:
-            drawable.draw(surface, self.world.camera)
-
-        self._draw_terrain(surface)
-
-        for drawable in front:
-            drawable.draw(surface, self.world.camera)
-            
-    def _draw_background(self, surface: pygame.Surface) -> None:
-        """Draw the visible background tiles."""
-        visible_tiles = self.world.level.get_visible_background_tiles(
-            self.world.mario.screen, self.world.camera.x
-        )
-
-        for tile_x, tile_y, tile_type in visible_tiles:
-            tile_def = self.world.level.get_tile_definition(tile_type)
-            if not tile_def or not tile_def.sprite_name:
-                continue
-
-            world_x = tile_x * TILE_SIZE
-            world_y = tile_y * TILE_SIZE
-
-            screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
-
-            sprites.draw_at_position(
-                surface,
-                tile_def.sprite_sheet,
-                tile_def.sprite_name,
-                int(screen_x),
-                int(screen_y),
-            )
-
-    def _draw_terrain(self, surface: pygame.Surface) -> None:
-        """Draw the visible terrain tiles."""
-        # Get visible tiles from level
-        visible_tiles = self.world.level.get_visible_terrain_tiles(
-            self.world.mario.screen, self.world.camera.x
-        )
-
-        for tile_x, tile_y, tile_type in visible_tiles:
-            # Get tile definition
-            tile_def = self.world.level.get_tile_definition(tile_type)
-            if not tile_def or not tile_def.sprite_name:
-                continue  # Skip empty tiles or tiles without sprites
-
-            # Convert tile position to world pixels (each tile is 16x16 pixels)
-            world_x = tile_x * TILE_SIZE
-            world_y = tile_y * TILE_SIZE
-
-            # Apply visual state from behaviors
-            visual = self.world.level.get_terrain_tile_visual_state(
-                self.world.mario.screen, tile_x, tile_y
-            )
-            if visual:
-                world_y += visual.offset_y
-                # Future: could add offset_x, rotation, scale, etc.
-
-            # Transform to screen coordinates
-            screen_x, screen_y = self.world.camera.world_to_screen(world_x, world_y)
-
-            # Draw the tile sprite
-            sprites.draw_at_position(
-                surface,
-                tile_def.sprite_sheet,
-                tile_def.sprite_name,
-                int(screen_x),
-                int(screen_y),
-            )
-
-    def _draw_tile_grid(self, surface: pygame.Surface) -> None:
-        """Draw the 8x8 tile grid for debugging."""
-        width = surface.get_width()
-        height = surface.get_height()
-        camera_x = self.world.camera.x
-
-        # Draw vertical lines aligned to world grid
-        offset_x = -(camera_x % SUB_TILE_SIZE)
-        x = offset_x
-        while x <= width:
-            if x >= 0:
-                pygame.draw.line(
-                    surface, (100, 100, 100), (int(x), 0), (int(x), height)
-                )
-            x += SUB_TILE_SIZE
-
-        # Draw horizontal lines (camera does not scroll vertically yet)
-        y = 0
-        while y <= height:
-            pygame.draw.line(surface, (100, 100, 100), (0, int(y)), (width, int(y)))
-            y += SUB_TILE_SIZE
-
-    def _draw_debug_info(self, surface: pygame.Surface) -> None:
-        """Draw debug information."""
-        fps = self.clock.get_fps()
-        mario = self.world.mario
-        debug_texts = [
-            f"FPS: {fps:.1f}",
-            f"Resolution: {surface.get_width()}x{surface.get_height()}",
-            f"Scale: {self.display.scale}x",
-            f"Camera X: {self.world.camera.x:.1f}",
-            f"Mario World: ({mario.x:.1f}, {mario.y:.1f})",
-            f"Velocity: ({mario.vx:.1f}, {mario.vy:.1f})",
-            f"Action: {mario.action}",
-            f"On Ground: {mario.on_ground}",
-        ]
-
-        y = 4
-        for text in debug_texts:
-            text_surface = self.font.render(text, True, WHITE)
-            surface.blit(text_surface, (4, y))
-            y += 12
-
-    def quit(self) -> None:
-        """Quit the game."""
-        self.running = False
+                    if self.show_debug:
+                        self._attach_debug_overlay()
+                    else:
+                        self._detach_debug_overlay()

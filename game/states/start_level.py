@@ -16,16 +16,8 @@ class StartLevelState(State):
         """Initialize level start."""
         game.world.reset()
 
-    def handle_events(self, game) -> None:
-        """No events during instant transition."""
-        pass
-
     def update(self, game, dt: float) -> None:
         # Immediately transition to playing
         from .playing import PlayingState
 
         game.transition_to(PlayingState())
-
-    def draw(self, game, surface) -> None:
-        """Draw the initial state."""
-        game.draw_world(surface)

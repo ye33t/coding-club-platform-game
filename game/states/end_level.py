@@ -24,6 +24,7 @@ class EndLevelState(State):
         """
         self.flagpole_x = flagpole_x
         self.flagpole_base_y = flagpole_base_y
+        self._transition_started = False
 
     def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
@@ -32,10 +33,6 @@ class EndLevelState(State):
         # Stop horizontal movement
         game.world.mario.vx = 0
         game.world.mario.facing_right = True
-
-    def handle_events(self, game) -> None:
-        """No input during flagpole descent."""
-        pass
 
     def update(self, game, dt: float) -> None:
         """Descend Mario down the flagpole."""
@@ -51,15 +48,10 @@ class EndLevelState(State):
             mario.facing_right = False
 
         # Check if Mario has reached the base
-        if mario.y <= self.flagpole_base_y:
+        if mario.y <= self.flagpole_base_y and not self._transition_started:
             # Transition to start level with screen fade
-            from .screen_transition import ScreenTransitionState, TransitionMode
+            from ..rendering import TransitionMode
             from .start_level import StartLevelState
 
-            game.transition_to(
-                ScreenTransitionState(self, StartLevelState(), TransitionMode.BOTH)
-            )
-
-    def draw(self, game, surface) -> None:
-        """Draw Mario descending flagpole."""
-        game.draw_world(surface)
+            self._transition_started = True
+            game.start_transition(StartLevelState(), TransitionMode.BOTH)

@@ -35,15 +35,6 @@ class State(ABC):
         pass
 
     @abstractmethod
-    def handle_events(self, game: "Game") -> None:
-        """Process pygame events.
-
-        Args:
-            game: The game context
-        """
-        pass
-
-    @abstractmethod
     def update(self, game: "Game", dt: float) -> None:
         """Update game logic.
 
@@ -53,7 +44,6 @@ class State(ABC):
         """
         pass
 
-    @abstractmethod
     def draw(self, game: "Game", surface) -> None:
         """Render the current state.
 
@@ -64,4 +54,4 @@ class State(ABC):
             game: The game context
             surface: The pygame surface to draw on
         """
-        pass
+        game.render(surface)
