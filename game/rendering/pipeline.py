@@ -1,54 +1,45 @@
-"""Composable renderer pipeline with post-processing effects."""
+"""Layered renderer that draws ordered render layers."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, List
 
-from .base import RenderEffect, Renderer
+from pygame import Surface
+
+from .base import RenderContext, RenderLayer
 
 if TYPE_CHECKING:
-    from pygame import Surface
-
     from ..game import Game
 
 
-class PipelineRenderer(Renderer):
-    """Renderer that delegates to a base renderer and applies effects."""
+class RenderPipeline:
+    """Renderer that processes ordered render layers each frame."""
 
-    def __init__(self, base: Renderer):
-        self._base = base
-        self._effects: List[RenderEffect] = []
+    def __init__(self) -> None:
+        self._layers: List[RenderLayer] = []
 
-    @property
-    def effects(self) -> List[RenderEffect]:
-        """Get the mutable list of effects."""
-        return self._effects
+    def add_layer(self, layer: RenderLayer, game: "Game") -> None:
+        """Append a new layer to the stack."""
+        if layer in self._layers:
+            return
+        self._layers.append(layer)
+        layer.on_added(game)
 
-    def add_effect(self, effect: RenderEffect, game: "Game") -> None:
-        """Add a new effect to the pipeline."""
-        self._effects.append(effect)
-        effect.on_add(game)
-
-    def remove_effect(self, effect: RenderEffect, game: "Game") -> None:
-        """Remove an existing effect."""
-        if effect in self._effects:
-            self._effects.remove(effect)
-            effect.on_remove(game)
-
-    def clear_effects(self, game: "Game") -> None:
-        """Remove all effects from the pipeline."""
-        for effect in self._effects:
-            effect.on_remove(game)
-        self._effects.clear()
+    def remove_layer(self, layer: RenderLayer, game: "Game") -> None:
+        """Remove a layer from the stack."""
+        if layer not in self._layers:
+            return
+        self._layers.remove(layer)
+        layer.on_removed(game)
 
     def update(self, dt: float, game: "Game") -> None:
-        """Update active effects."""
-        for effect in list(self._effects):
-            if not effect.update(dt, game):
-                self.remove_effect(effect, game)
+        """Update each layer and drop completed ones."""
+        for layer in list(self._layers):
+            if not layer.update(dt, game):
+                self.remove_layer(layer, game)
 
-    def draw(self, surface: "Surface", game: "Game") -> None:
-        """Draw base renderer and apply active effects."""
-        self._base.draw(surface, game)
-        for effect in self._effects:
-            effect.apply(surface, game)
+    def draw(self, surface: Surface, game: "Game") -> None:
+        """Draw each layer in order."""
+        context = RenderContext(game)
+        for layer in self._layers:
+            layer.draw(surface, game, context)

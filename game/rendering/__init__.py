@@ -1,22 +1,21 @@
-"""Rendering helpers and pipeline composition utilities."""
+"""Rendering helpers and layered pipeline utilities."""
 
-from .base import RenderEffect, Renderer
-from .effects import (
-    DebugOverlayEffect,
-    TransitionCallbacks,
-    TransitionEffect,
-    TransitionMode,
+from .effects import DebugOverlayLayer, TransitionLayer, TransitionMode
+from .pipeline import RenderPipeline
+from .world_renderer import (
+    BackgroundDrawablesLayer,
+    BackgroundLayer,
+    ForegroundDrawablesLayer,
+    TerrainLayer,
 )
-from .pipeline import PipelineRenderer
-from .world_renderer import WorldRenderer
 
 __all__ = [
-    "RenderEffect",
-    "Renderer",
-    "DebugOverlayEffect",
-    "TransitionCallbacks",
-    "TransitionEffect",
+    "RenderPipeline",
+    "BackgroundLayer",
+    "BackgroundDrawablesLayer",
+    "TerrainLayer",
+    "ForegroundDrawablesLayer",
+    "DebugOverlayLayer",
+    "TransitionLayer",
     "TransitionMode",
-    "PipelineRenderer",
-    "WorldRenderer",
 ]

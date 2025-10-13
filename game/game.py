@@ -9,12 +9,14 @@ from .constants import BACKGROUND_COLOR, FPS
 from .content import sprites
 from .display import Display
 from .rendering import (
-    DebugOverlayEffect,
-    PipelineRenderer,
-    TransitionCallbacks,
-    TransitionEffect,
+    BackgroundDrawablesLayer,
+    BackgroundLayer,
+    DebugOverlayLayer,
+    ForegroundDrawablesLayer,
+    RenderPipeline,
+    TerrainLayer,
+    TransitionLayer,
     TransitionMode,
-    WorldRenderer,
 )
 from .states import InitialState, State
 from .world import World
@@ -30,8 +32,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.show_debug = False
-        self._debug_effect: DebugOverlayEffect | None = None
-        self._active_transition: TransitionEffect | None = None
 
         # Initialize font for debug info
         self.font = pygame.font.Font(None, 16)
@@ -40,10 +40,14 @@ class Game:
         assets_path = os.path.join(os.path.dirname(__file__), "assets", "images")
         sprites.load_sheets(assets_path)
 
-        # Create World (owns level, mario, camera, physics)
         self.world = World()
-        self.world_renderer = WorldRenderer(self.world)
-        self.renderer = PipelineRenderer(self.world_renderer)
+        
+        self.render_pipeline = RenderPipeline()
+        self.render_pipeline.add_layer(BackgroundLayer(self.world), self)
+        self.render_pipeline.add_layer(BackgroundDrawablesLayer(self.world), self)
+        self.render_pipeline.add_layer(TerrainLayer(self.world), self)
+        self.render_pipeline.add_layer(ForegroundDrawablesLayer(self.world), self)
+        self._debug_layer = DebugOverlayLayer()
 
         # Initialize state machine with initial black screen
         self.state: State = InitialState()
@@ -69,9 +73,9 @@ class Game:
 
             # Update game state
             self.state.update(self, dt)
-            
+
             # Render frame
-            self.renderer.update(dt, self)
+            self.render_pipeline.update(dt, self)
             self.display.clear(BACKGROUND_COLOR)
             surface = self.display.get_native_surface()
 
@@ -87,7 +91,7 @@ class Game:
 
     def render(self, surface: pygame.Surface) -> None:
         """Render the current frame via the renderer pipeline."""
-        self.renderer.draw(surface, self)
+        self.render_pipeline.draw(surface, self)
 
     def transition(
         self,
@@ -103,12 +107,13 @@ class Game:
             apply_to_state()
             return
 
-        effect = TransitionEffect(duration, mode, TransitionCallbacks(
-            on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
-            on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
-        ))
-        self.renderer.add_effect(effect, self)
-        
+        layer = TransitionLayer(
+            duration,
+            mode, 
+            on_midpoint = apply_to_state if mode != TransitionMode.FADE_OUT else None, 
+            on_complete = apply_to_state if mode == TransitionMode.FADE_OUT else None)
+        self.render_pipeline.add_layer(layer, self)
+
     def _apply_state_change(self, new_state: State) -> None:
         """Switch to a new game state immediately."""
         self.state.on_exit(self)
@@ -116,14 +121,12 @@ class Game:
         self.state.on_enter(self)
 
     def _attach_debug_overlay(self) -> None:
-        if self._debug_effect is None:
-            self._debug_effect = DebugOverlayEffect()
-            self.renderer.add_effect(self._debug_effect, self)
+
+        self.render_pipeline.add_layer(self._debug_layer, self)
 
     def _detach_debug_overlay(self) -> None:
-        if self._debug_effect is not None:
-            self.renderer.remove_effect(self._debug_effect, self)
-            self._debug_effect = None
+        if self._debug_layer is not None:
+            self.render_pipeline.remove_layer(self._debug_layer, self)
 
     def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""

@@ -1,9 +1,8 @@
-"""Rendering effects applied on top of the base renderer."""
+"""Overlay layers such as transitions and debug visualization."""
 
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Optional, TYPE_CHECKING
 
@@ -17,7 +16,7 @@ from ..constants import (
     SUB_TILE_SIZE,
     WHITE,
 )
-from .base import RenderEffect
+from .base import RenderContext, RenderLayer
 
 if TYPE_CHECKING:
     from pygame import Surface
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
 
 
 class TransitionMode(Enum):
-    """Transition animation mode."""
+    """Transition animation mode for scene changes."""
 
     INSTANT = "instant"
     FADE_IN = "fade_in"
@@ -34,59 +33,67 @@ class TransitionMode(Enum):
     BOTH = "both"
 
 
-@dataclass
-class TransitionCallbacks:
-    """Callbacks fired during transition lifecycle."""
-
-    on_midpoint: Optional[Callable[[], None]] = None
-    on_complete: Optional[Callable[[], None]] = None
-
-
-class TransitionEffect(RenderEffect):
-    """Circular iris transition effect with optional callbacks."""
+class TransitionLayer(RenderLayer):
+    """Circular iris transition overlay."""
 
     def __init__(
         self,
         duration: float,
         mode: TransitionMode,
-        callbacks: Optional[TransitionCallbacks] = None,
-    ):
+        on_midpoint: Optional[Callable[[], None]] = None,
+        on_complete: Optional[Callable[[], None]] = None,
+    ) -> None:
         self._duration = duration
         self._mode = mode
-        self._callbacks = callbacks or TransitionCallbacks()
+        self._on_midpoint = on_midpoint
+        self._on_complete = on_complete
         self._elapsed = 0.0
         self._midpoint_triggered = False
+        self._completed = False
 
-    def on_add(self, game: "Game") -> None:
-        if self._mode == TransitionMode.FADE_IN and self._callbacks.on_midpoint:
-            # For pure fade-in we treat midpoint callback as immediate.
-            self._callbacks.on_midpoint()
+    def on_added(self, game: "Game") -> None:
+        if self._mode == TransitionMode.FADE_IN and self._on_midpoint:
+            self._on_midpoint()
             self._midpoint_triggered = True
 
     def update(self, dt: float, game: "Game") -> bool:
+        if self._completed:
+            return False
+
         self._elapsed += dt
 
-        if not self._midpoint_triggered and self._callbacks.on_midpoint:
+        if not self._midpoint_triggered and self._on_midpoint:
             trigger = False
-            if self._mode == TransitionMode.FADE_OUT:
-                trigger = self._elapsed >= self._duration
-            elif self._mode == TransitionMode.BOTH:
+            if self._mode == TransitionMode.BOTH:
                 trigger = self._elapsed >= self._duration / 2
+            elif self._mode == TransitionMode.FADE_OUT:
+                trigger = False
 
             if trigger:
-                self._callbacks.on_midpoint()
+                self._on_midpoint()
                 self._midpoint_triggered = True
 
         if self._elapsed >= self._duration:
-            if self._callbacks.on_complete:
-                self._callbacks.on_complete()
+            if not self._midpoint_triggered and self._on_midpoint:
+                # For FADE_OUT we do the state change at completion.
+                self._on_midpoint()
+                self._midpoint_triggered = True
+            if self._on_complete:
+                self._on_complete()
+            self._completed = True
             return False
 
         return True
 
-    def apply(self, surface: "Surface", game: "Game") -> None:
-        progress = min(1.0, self._elapsed / self._duration)
-
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
+        progress = (
+            1.0 if self._duration <= 0 else min(1.0, self._elapsed / self._duration)
+        )
         max_radius = math.hypot(NATIVE_WIDTH / 2, NATIVE_HEIGHT / 2)
 
         if self._mode == TransitionMode.FADE_OUT:
@@ -116,10 +123,18 @@ class TransitionEffect(RenderEffect):
         surface.blit(mask, (0, 0))
 
 
-class DebugOverlayEffect(RenderEffect):
-    """Renders the optional debug overlays (tile grid and text)."""
+class DebugOverlayLayer(RenderLayer):
+    """Draws debug tile grid and textual diagnostics."""
 
-    def apply(self, surface: "Surface", game: "Game") -> None:
+    def update(self, dt: float, game: "Game") -> bool:
+        return True
+
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
         self._draw_tile_grid(surface, game)
         self._draw_debug_info(surface, game)
 

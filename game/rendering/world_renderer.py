@@ -1,13 +1,12 @@
-"""Renderer responsible for drawing the world layers."""
+"""Rendering layers for world background, terrain, and entities."""
 
 from __future__ import annotations
 
-from itertools import tee
 from typing import TYPE_CHECKING
 
 from ..constants import TILE_SIZE
 from ..content import sprites
-from .base import Renderer
+from .base import RenderContext, RenderLayer
 
 if TYPE_CHECKING:
     from pygame import Surface
@@ -16,39 +15,21 @@ if TYPE_CHECKING:
     from ..world import World
 
 
-class WorldRenderer(Renderer):
-    """Draws world terrain, entities, and Mario in z-index order."""
+class BackgroundLayer(RenderLayer):
+    """Draws static background tiles."""
 
-    def __init__(self, world: "World"):
+    def __init__(self, world: "World") -> None:
         self._world = world
 
-    def draw(self, surface: "Surface", game: "Game") -> None:
-        """Render background, dynamic entities, and terrain."""
-        self._draw_background(surface)
-
-        # Split drawables into behind/in front buckets lazily
-        drawables_iter = self._world.drawables
-        behind_iter, front_iter = tee(drawables_iter, 2)
-
-        behind = sorted(
-            (d for d in behind_iter if d.z_index < 0), key=lambda d: d.z_index
-        )
-        front = sorted(
-            (d for d in front_iter if d.z_index >= 0), key=lambda d: d.z_index
-        )
-
-        for drawable in behind:
-            drawable.draw(surface, self._world.camera)
-
-        self._draw_terrain(surface)
-
-        for drawable in front:
-            drawable.draw(surface, self._world.camera)
-
-    def _draw_background(self, surface: "Surface") -> None:
-        """Draw the visible background tiles."""
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
         visible_tiles = self._world.level.get_visible_background_tiles(
-            self._world.mario.screen, self._world.camera.x
+            self._world.mario.screen,
+            self._world.camera.x,
         )
 
         for tile_x, tile_y, tile_type in visible_tiles:
@@ -60,7 +41,8 @@ class WorldRenderer(Renderer):
             world_y = tile_y * TILE_SIZE
 
             screen_x, screen_y = self._world.camera.world_to_screen(
-                world_x, world_y
+                world_x,
+                world_y,
             )
 
             sprites.draw_at_position(
@@ -71,10 +53,38 @@ class WorldRenderer(Renderer):
                 int(screen_y),
             )
 
-    def _draw_terrain(self, surface: "Surface") -> None:
-        """Draw the visible terrain tiles."""
+
+class BackgroundDrawablesLayer(RenderLayer):
+    """Draws drawables positioned behind terrain."""
+
+    def __init__(self, world: "World") -> None:
+        self._world = world
+
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
+        for drawable in context.behind_drawables:
+            drawable.draw(surface, self._world.camera)
+
+
+class TerrainLayer(RenderLayer):
+    """Draws terrain tiles with any behavior-driven offsets."""
+
+    def __init__(self, world: "World") -> None:
+        self._world = world
+
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
         visible_tiles = self._world.level.get_visible_terrain_tiles(
-            self._world.mario.screen, self._world.camera.x
+            self._world.mario.screen,
+            self._world.camera.x,
         )
 
         for tile_x, tile_y, tile_type in visible_tiles:
@@ -86,13 +96,16 @@ class WorldRenderer(Renderer):
             world_y = tile_y * TILE_SIZE
 
             visual = self._world.level.get_terrain_tile_visual_state(
-                self._world.mario.screen, tile_x, tile_y
+                self._world.mario.screen,
+                tile_x,
+                tile_y,
             )
             if visual:
                 world_y += visual.offset_y
 
             screen_x, screen_y = self._world.camera.world_to_screen(
-                world_x, world_y
+                world_x,
+                world_y,
             )
 
             sprites.draw_at_position(
@@ -102,3 +115,19 @@ class WorldRenderer(Renderer):
                 int(screen_x),
                 int(screen_y),
             )
+
+
+class ForegroundDrawablesLayer(RenderLayer):
+    """Draws drawables positioned at or above terrain."""
+
+    def __init__(self, world: "World") -> None:
+        self._world = world
+
+    def draw(
+        self,
+        surface: "Surface",
+        game: "Game",
+        context: RenderContext,
+    ) -> None:
+        for drawable in context.front_drawables:
+            drawable.draw(surface, self._world.camera)
