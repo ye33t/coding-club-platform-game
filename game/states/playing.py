@@ -34,6 +34,4 @@ class PlayingState(State):
             elif isinstance(event, EndLevelEvent):
                 from .end_level import EndLevelState
 
-                game.transition(
-                    EndLevelState(event.flagpole_x, event.flagpole_base_y)
-                )
+                game.transition(EndLevelState(event.flagpole_x, event.flagpole_base_y))

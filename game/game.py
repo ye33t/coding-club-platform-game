@@ -41,7 +41,7 @@ class Game:
         sprites.load_sheets(assets_path)
 
         self.world = World()
-        
+
         self.render_pipeline = RenderPipeline()
         self.render_pipeline.add_layer(BackgroundLayer(self.world), self)
         self.render_pipeline.add_layer(BackgroundDrawablesLayer(self.world), self)
@@ -100,18 +100,20 @@ class Game:
         duration: float = 2.0,
     ) -> None:
         """Transition to a new state using the requested mode."""
+
         def apply_to_state() -> None:
             self._apply_state_change(to_state)
-            
+
         if mode == TransitionMode.INSTANT:
             apply_to_state()
             return
 
         layer = TransitionLayer(
             duration,
-            mode, 
-            on_midpoint = apply_to_state if mode != TransitionMode.FADE_OUT else None, 
-            on_complete = apply_to_state if mode == TransitionMode.FADE_OUT else None)
+            mode,
+            on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
+            on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
+        )
         self.render_pipeline.add_layer(layer, self)
 
     def _apply_state_change(self, new_state: State) -> None:

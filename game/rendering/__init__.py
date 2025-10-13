@@ -1,13 +1,12 @@
 """Rendering helpers and layered pipeline utilities."""
 
-from .effects import DebugOverlayLayer, TransitionLayer, TransitionMode
+from .background import BackgroundLayer
+from .background_drawables import BackgroundDrawablesLayer
+from .debug_overlay import DebugOverlayLayer
+from .foreground_drawables import ForegroundDrawablesLayer
 from .pipeline import RenderPipeline
-from .world_renderer import (
-    BackgroundDrawablesLayer,
-    BackgroundLayer,
-    ForegroundDrawablesLayer,
-    TerrainLayer,
-)
+from .terrain import TerrainLayer
+from .transition import TransitionLayer, TransitionMode
 
 __all__ = [
     "RenderPipeline",

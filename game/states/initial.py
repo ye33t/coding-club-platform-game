@@ -2,7 +2,6 @@
 
 from typing import TYPE_CHECKING
 
-from ..constants import BACKGROUND_COLOR
 from .base import State
 
 if TYPE_CHECKING:
