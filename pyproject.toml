@@ -8,7 +8,6 @@ packages = [{include = "game"}]
 [tool.poetry.scripts]
 format = "format:main"
 game = "main:main"
-test = "pytest:main"
 extractor = "sprite_extractor:main"
 
 [tool.poetry.dependencies]
@@ -21,8 +20,6 @@ black = "^24.0.0"
 isort = "^5.13.0"
 flake8 = "^7.0.0"
 mypy = "^1.8.0"
-pytest = "^8.4.2"
-pytest-cov = "^7.0.0"
 
 [tool.black]
 line-length = 88

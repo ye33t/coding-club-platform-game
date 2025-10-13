@@ -7,14 +7,18 @@
         "bounceable",
         "colliderect",
         "colorkey",
+        "dataclasses",
         "drawables",
         "goomba",
+        "isort",
         "koopa",
+        "mypy",
         "NTSC",
         "paratroopa",
         "powerups",
         "stompable",
-        "troopa"
+        "troopa",
+        "virtualenv"
     ],
     "python.testing.pytestArgs": [
         "tests"
