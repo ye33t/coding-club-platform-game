@@ -1,6 +1,6 @@
 """World physics and game logic."""
 
-from typing import Any, List, Optional, cast
+from typing import Any, Iterator, Optional, cast
 
 from .camera import Camera
 from .effects import EffectManager
@@ -30,6 +30,27 @@ class World:
             self.level.spawn_y,
             self.level.spawn_screen,
         )
+
+    def reset(self) -> None:
+        """Reset the world to the level's spawn configuration."""
+        # Reset Mario to the spawn point defined by the level
+        self.mario.reset(
+            x=self.level.spawn_x,
+            y=self.level.spawn_y,
+            screen=self.level.spawn_screen,
+        )
+
+        # Reset terrain and transient systems to their initial state
+        self.level.reset_terrain()
+        self.effects.clear()
+        self.entities.clear()
+
+        # Reset all spawn triggers back to their pending state
+        self.level.spawn_manager.reset_all_triggers()
+
+        # Reset camera position and ratchet
+        self.camera.x = 0
+        self.camera.max_x = 0
 
     def update(self, keys, dt: float) -> Optional[PhysicsEvent]:
         """Process Mario's intent and update his state.
@@ -63,16 +84,16 @@ class World:
 
         return None
 
-    def get_drawables(self) -> List[Any]:
-        """Get all drawable objects with z-index for rendering.
+    @property
+    def drawables(self) -> Iterator[Any]:
+        """Iterate over drawable objects with z-index for rendering."""
 
-        Returns:
-            List of all drawable objects (Mario, effects, entities)
-        """
-        drawables: List[Any] = [self.mario]
-        drawables.extend(self.effects._effects)
-        drawables.extend(self.entities._entities)
-        return drawables
+        def _iter() -> Iterator[Any]:
+            yield self.mario
+            yield from self.effects._effects
+            yield from self.entities._entities
+
+        return _iter()
 
     def _check_spawn_triggers(self) -> None:
         """Check and activate spawn triggers based on camera position."""
@@ -98,14 +119,3 @@ class World:
                     )
                     if entity:
                         self.entities.spawn(entity)
-
-    def reset_spawn_triggers(self) -> None:
-        """Reset all spawn triggers and clear enemy entities.
-
-        Called when restarting after death, warp, or level reset.
-        """
-        # Reset all triggers to pending state
-        self.level.spawn_manager.reset_all_triggers()
-
-        # Clear all entities (enemies and collectibles)
-        self.entities.clear()

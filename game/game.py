@@ -2,6 +2,7 @@
 
 import os
 import sys
+from itertools import tee
 
 import pygame
 
@@ -109,7 +110,38 @@ class Game:
                 elif event.key == pygame.K_F3:
                     self.show_debug = not self.show_debug
 
-    def draw_background(self, surface: pygame.Surface) -> None:
+    def draw_world(self, surface: pygame.Surface) -> None:
+        """Draw the entire world using z-index based rendering.
+
+        Render order:
+        1. Background (fixed)
+        2. Drawables with negative z-index (sorted, behind terrain)
+        3. Terrain (fixed)
+        4. Drawables with zero/positive z-index (sorted, in front of terrain)
+        """
+        # Get all drawables lazily and split into behind/front tiers
+        drawables_iter = self.world.drawables
+        behind_iter, front_iter = tee(drawables_iter, 2)
+
+        behind = sorted(
+            (d for d in behind_iter if d.z_index < 0), key=lambda d: d.z_index
+        )
+        front = sorted(
+            (d for d in front_iter if d.z_index >= 0), key=lambda d: d.z_index
+        )
+
+        # Render in order
+        self._draw_background(surface)
+
+        for drawable in behind:
+            drawable.draw(surface, self.world.camera)
+
+        self._draw_terrain(surface)
+
+        for drawable in front:
+            drawable.draw(surface, self.world.camera)
+            
+    def _draw_background(self, surface: pygame.Surface) -> None:
         """Draw the visible background tiles."""
         visible_tiles = self.world.level.get_visible_background_tiles(
             self.world.mario.screen, self.world.camera.x
@@ -133,7 +165,7 @@ class Game:
                 int(screen_y),
             )
 
-    def draw_terrain(self, surface: pygame.Surface) -> None:
+    def _draw_terrain(self, surface: pygame.Surface) -> None:
         """Draw the visible terrain tiles."""
         # Get visible tiles from level
         visible_tiles = self.world.level.get_visible_terrain_tiles(
@@ -169,49 +201,6 @@ class Game:
                 int(screen_x),
                 int(screen_y),
             )
-
-    def draw_effects(self, surface: pygame.Surface) -> None:
-        """Draw transient effects like coins."""
-        self.world.effects.draw(surface, self.world.camera)
-
-    def draw_entities(self, surface: pygame.Surface) -> None:
-        """Draw active entities like mushrooms and enemies."""
-        self.world.entities.draw(surface, self.world.camera)
-
-    def draw_mario(self, surface: pygame.Surface) -> None:
-        """Draw Mario at his screen position."""
-        self.world.mario.draw(surface, self.world.camera)
-
-    def draw_world(self, surface: pygame.Surface) -> None:
-        """Draw the entire world using z-index based rendering.
-
-        Render order:
-        1. Background (fixed)
-        2. Drawables with negative z-index (sorted, behind terrain)
-        3. Terrain (fixed)
-        4. Drawables with zero/positive z-index (sorted, in front of terrain)
-        """
-        # Get all drawables
-        drawables = self.world.get_drawables()
-
-        # Split into behind and front based on z-index
-        behind = sorted(
-            [d for d in drawables if d.z_index < 0], key=lambda d: d.z_index
-        )
-        front = sorted(
-            [d for d in drawables if d.z_index >= 0], key=lambda d: d.z_index
-        )
-
-        # Render in order
-        self.draw_background(surface)
-
-        for drawable in behind:
-            drawable.draw(surface, self.world.camera)
-
-        self.draw_terrain(surface)
-
-        for drawable in front:
-            drawable.draw(surface, self.world.camera)
 
     def _draw_tile_grid(self, surface: pygame.Surface) -> None:
         """Draw the 8x8 tile grid for debugging."""
