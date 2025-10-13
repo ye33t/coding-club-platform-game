@@ -22,4 +22,4 @@ class InitialState(State):
         from ..rendering import TransitionMode
         from .start_level import StartLevelState
 
-        game.start_transition(StartLevelState(), TransitionMode.FADE_IN)
+        game.transition(StartLevelState(), TransitionMode.FADE_IN)

@@ -85,54 +85,35 @@ class Game:
         pygame.quit()
         sys.exit()
 
-    def transition_to(self, new_state: State) -> None:
-        """Transition to a new game state.
-
-        Calls on_exit on current state, then on_enter on new state.
-
-        Args:
-            new_state: The state to transition to
-        """
-        self.state.on_exit(self)
-        self.state = new_state
-        self.state.on_enter(self)
-
     def render(self, surface: pygame.Surface) -> None:
         """Render the current frame via the renderer pipeline."""
         self.renderer.draw(surface, self)
 
-    def start_transition(
+    def transition(
         self,
         to_state: State,
-        mode: TransitionMode = TransitionMode.BOTH,
+        mode: TransitionMode = TransitionMode.INSTANT,
         duration: float = 2.0,
     ) -> None:
-        """Begin a screen transition effect while switching states."""
-        if self._active_transition is not None:
+        """Transition to a new state using the requested mode."""
+        def apply_to_state() -> None:
+            self._apply_state_change(to_state)
+            
+        if mode == TransitionMode.INSTANT:
+            apply_to_state()
             return
 
-        def _clear(_: "Game") -> None:
-            self._active_transition = None
-
-        callbacks = TransitionCallbacks(on_complete=_clear)
-
-        if mode == TransitionMode.FADE_OUT:
-
-            def on_complete(game: "Game") -> None:
-                self.transition_to(to_state)
-                _clear(game)
-
-            callbacks.on_complete = on_complete
-        else:
-
-            def on_midpoint(game: "Game") -> None:
-                self.transition_to(to_state)
-
-            callbacks.on_midpoint = on_midpoint
-
-        effect = TransitionEffect(duration, mode, callbacks)
-        self._active_transition = effect
+        effect = TransitionEffect(duration, mode, TransitionCallbacks(
+            on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
+            on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
+        ))
         self.renderer.add_effect(effect, self)
+        
+    def _apply_state_change(self, new_state: State) -> None:
+        """Switch to a new game state immediately."""
+        self.state.on_exit(self)
+        self.state = new_state
+        self.state.on_enter(self)
 
     def _attach_debug_overlay(self) -> None:
         if self._debug_effect is None:
@@ -143,7 +124,7 @@ class Game:
         if self._debug_effect is not None:
             self.renderer.remove_effect(self._debug_effect, self)
             self._debug_effect = None
-            
+
     def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""
         for event in pygame.event.get():
@@ -153,7 +134,7 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     from .states.start_level import StartLevelState
 
-                    self.transition_to(StartLevelState())
+                    self.transition(StartLevelState())
                 elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
                     self.display.change_scale(-1)
                 elif event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:

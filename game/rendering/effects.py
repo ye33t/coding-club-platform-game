@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 class TransitionMode(Enum):
     """Transition animation mode."""
 
+    INSTANT = "instant"
     FADE_IN = "fade_in"
     FADE_OUT = "fade_out"
     BOTH = "both"
@@ -37,8 +38,8 @@ class TransitionMode(Enum):
 class TransitionCallbacks:
     """Callbacks fired during transition lifecycle."""
 
-    on_midpoint: Optional[Callable[["Game"], None]] = None
-    on_complete: Optional[Callable[["Game"], None]] = None
+    on_midpoint: Optional[Callable[[], None]] = None
+    on_complete: Optional[Callable[[], None]] = None
 
 
 class TransitionEffect(RenderEffect):
@@ -59,7 +60,7 @@ class TransitionEffect(RenderEffect):
     def on_add(self, game: "Game") -> None:
         if self._mode == TransitionMode.FADE_IN and self._callbacks.on_midpoint:
             # For pure fade-in we treat midpoint callback as immediate.
-            self._callbacks.on_midpoint(game)
+            self._callbacks.on_midpoint()
             self._midpoint_triggered = True
 
     def update(self, dt: float, game: "Game") -> bool:
@@ -73,12 +74,12 @@ class TransitionEffect(RenderEffect):
                 trigger = self._elapsed >= self._duration / 2
 
             if trigger:
-                self._callbacks.on_midpoint(game)
+                self._callbacks.on_midpoint()
                 self._midpoint_triggered = True
 
         if self._elapsed >= self._duration:
             if self._callbacks.on_complete:
-                self._callbacks.on_complete(game)
+                self._callbacks.on_complete()
             return False
 
         return True

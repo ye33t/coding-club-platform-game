@@ -54,4 +54,4 @@ class EndLevelState(State):
             from .start_level import StartLevelState
 
             self._transition_started = True
-            game.start_transition(StartLevelState(), TransitionMode.BOTH)
+            game.transition(StartLevelState(), TransitionMode.BOTH)

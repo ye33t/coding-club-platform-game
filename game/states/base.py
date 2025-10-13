@@ -11,7 +11,7 @@ class State(ABC):
     """Base class for all game states.
 
     States implement the game loop methods (handle_events, update, draw)
-    and can request state transitions via game.transition_to().
+    and can request state transitions via game.transition().
     """
 
     def on_enter(self, game: "Game") -> None:

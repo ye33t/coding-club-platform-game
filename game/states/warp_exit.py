@@ -65,4 +65,4 @@ class WarpExitState(State):
         if self.distance_moved >= 0:
             from .playing import PlayingState
 
-            game.transition_to(PlayingState())
+            game.transition(PlayingState())

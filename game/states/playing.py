@@ -26,14 +26,14 @@ class PlayingState(State):
             if isinstance(event, DeathEvent):
                 from .death import DeathState
 
-                game.transition_to(DeathState())
+                game.transition(DeathState())
             elif isinstance(event, WarpEvent):
                 from .warp_enter import WarpEnterState
 
-                game.transition_to(WarpEnterState(event.warp_behavior))
+                game.transition(WarpEnterState(event.warp_behavior))
             elif isinstance(event, EndLevelEvent):
                 from .end_level import EndLevelState
 
-                game.transition_to(
+                game.transition(
                     EndLevelState(event.flagpole_x, event.flagpole_base_y)
                 )

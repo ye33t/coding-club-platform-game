@@ -46,4 +46,4 @@ class WarpEnterState(State):
 
             next_state = WarpExitState(self.warp_behavior)
             self._transition_started = True
-            game.start_transition(next_state, TransitionMode.BOTH)
+            game.transition(next_state, TransitionMode.BOTH)

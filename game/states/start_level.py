@@ -20,4 +20,4 @@ class StartLevelState(State):
         # Immediately transition to playing
         from .playing import PlayingState
 
-        game.transition_to(PlayingState())
+        game.transition(PlayingState())
