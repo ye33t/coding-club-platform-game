@@ -8,9 +8,10 @@ from typing import Protocol
 from pygame import Surface
 
 from ..camera import Camera
+from ..rendering.base import Drawable
 
 
-class Effect(ABC):
+class Effect(ABC, Drawable):
     """Simple lifecycle for transient effects."""
 
     z_index: int = 0

@@ -3,12 +3,22 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Protocol
 
 if TYPE_CHECKING:
     from pygame import Surface
 
+    from ..camera import Camera
     from ..game import Game
+
+
+class Drawable(Protocol):
+    """Renderable object that can sort itself via z-index."""
+
+    z_index: int
+
+    def draw(self, surface: "Surface", camera: "Camera") -> None:
+        """Render the drawable to the surface using the provided camera."""
 
 
 class RenderContext:
@@ -16,42 +26,42 @@ class RenderContext:
 
     def __init__(self, game: "Game") -> None:
         self._game = game
-        self._drawables: Optional[List[Any]] = None
-        self._behind: Optional[List[Any]] = None
-        self._front: Optional[List[Any]] = None
+        self._drawables: Optional[List[Drawable]] = None
+        self._behind: Optional[List[Drawable]] = None
+        self._front: Optional[List[Drawable]] = None
 
     @property
     def game(self) -> "Game":
         return self._game
 
     @property
-    def drawables(self) -> List[Any]:
+    def drawables(self) -> List[Drawable]:
         if self._drawables is None:
             self._drawables = list(self._game.world.drawables)
         return self._drawables
 
     @property
-    def behind_drawables(self) -> List[Any]:
+    def behind_drawables(self) -> List[Drawable]:
         if self._behind is None:
             self._prepare_drawable_layers()
         return self._behind or []
 
     @property
-    def front_drawables(self) -> List[Any]:
+    def front_drawables(self) -> List[Drawable]:
         if self._front is None:
             self._prepare_drawable_layers()
         return self._front or []
 
     def _prepare_drawable_layers(self) -> None:
-        behind: List[Any] = []
-        front: List[Any] = []
+        behind: List[Drawable] = []
+        front: List[Drawable] = []
 
         for drawable in self.drawables:
-            target = behind if getattr(drawable, "z_index", 0) < 0 else front
+            target = behind if drawable.z_index < 0 else front
             target.append(drawable)
 
-        behind.sort(key=lambda d: getattr(d, "z_index", 0))
-        front.sort(key=lambda d: getattr(d, "z_index", 0))
+        behind.sort(key=lambda d: d.z_index)
+        front.sort(key=lambda d: d.z_index)
 
         self._behind = behind
         self._front = front

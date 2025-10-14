@@ -1,6 +1,6 @@
 """World physics and game logic."""
 
-from typing import Any, Iterator, Optional, cast
+from typing import Iterator, Optional, cast
 
 from .camera import Camera
 from .effects import EffectManager
@@ -9,6 +9,7 @@ from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
+from .rendering.base import Drawable
 
 
 class World:
@@ -85,10 +86,10 @@ class World:
         return None
 
     @property
-    def drawables(self) -> Iterator[Any]:
+    def drawables(self) -> Iterator[Drawable]:
         """Iterate over drawable objects with z-index for rendering."""
 
-        def _iter() -> Iterator[Any]:
+        def _iter() -> Iterator[Drawable]:
             yield self.mario
             yield from self.effects._effects
             yield from self.entities._entities

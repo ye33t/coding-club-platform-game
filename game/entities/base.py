@@ -10,6 +10,7 @@ from pygame import Rect, Surface
 
 from ..camera import Camera
 from ..constants import TILE_SIZE
+from ..rendering.base import Drawable
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -55,7 +56,7 @@ class CollisionResponse:
         self.bounce_velocity = bounce_velocity
 
 
-class Entity(ABC):
+class Entity(ABC, Drawable):
     """Base class for all game entities."""
 
     z_index: int = 10

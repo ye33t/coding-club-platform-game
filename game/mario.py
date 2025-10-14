@@ -6,11 +6,14 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
 import pygame
+from pygame import Surface
 
 from game.constants import TILE_SIZE
 from game.physics.config import MARIO_TRANSITION_DURATION, MARIO_TRANSITION_INTERVAL
 
+from .camera import Camera
 from .content import sprites
+from .rendering.base import Drawable
 
 
 @dataclass
@@ -57,7 +60,7 @@ class MarioTransition:
             mario.transition = None
 
 
-class Mario:
+class Mario(Drawable):
     """Manages Mario's input processing and rendering."""
 
     def __init__(self, x: float, y: float, screen: int):
@@ -283,7 +286,7 @@ class Mario:
         self.intent.jump = keys[pygame.K_k]
         self.intent.duck = not self.intent.jump and keys[pygame.K_s]
 
-    def draw(self, surface, camera):
+    def draw(self, surface: Surface, camera: Camera) -> None:
         """Draw Mario at current state.
 
         Args:
