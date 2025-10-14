@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Protocol
+from typing import TYPE_CHECKING, Callable, Iterator, Protocol
 
 if TYPE_CHECKING:
     from pygame import Surface
@@ -26,45 +26,42 @@ class RenderContext:
 
     def __init__(self, game: "Game") -> None:
         self._game = game
-        self._drawables: Optional[List[Drawable]] = None
-        self._behind: Optional[List[Drawable]] = None
-        self._front: Optional[List[Drawable]] = None
 
     @property
     def game(self) -> "Game":
         return self._game
 
     @property
-    def drawables(self) -> List[Drawable]:
-        if self._drawables is None:
-            self._drawables = list(self._game.world.drawables)
-        return self._drawables
+    def drawables(self) -> Iterator[Drawable]:
+        return self._game.world.drawables
+    
+    @property
+    def background(self) -> Iterator[Drawable]:
+        return self._layered_drawables(lambda drawable: drawable.z_index < 0)
 
     @property
-    def behind_drawables(self) -> List[Drawable]:
-        if self._behind is None:
-            self._prepare_drawable_layers()
-        return self._behind or []
+    def foreground(self) -> Iterator[Drawable]:
+        return self._layered_drawables(lambda drawable: drawable.z_index >= 0)
 
-    @property
-    def front_drawables(self) -> List[Drawable]:
-        if self._front is None:
-            self._prepare_drawable_layers()
-        return self._front or []
+    def _layered_drawables(
+        self,
+        predicate: Callable[[Drawable], bool],
+    ) -> Iterator[Drawable]:
+        def _iter() -> Iterator[Drawable]:
+            filtered = (
+                drawable
+                for drawable in self._game.world.drawables
+                if predicate(drawable)
+            )
+            for drawable in sorted(
+                filtered,
+                key=lambda candidate: candidate.z_index,
+            ):
+                yield drawable
 
-    def _prepare_drawable_layers(self) -> None:
-        behind: List[Drawable] = []
-        front: List[Drawable] = []
+        return _iter()
 
-        for drawable in self.drawables:
-            target = behind if drawable.z_index < 0 else front
-            target.append(drawable)
 
-        behind.sort(key=lambda d: d.z_index)
-        front.sort(key=lambda d: d.z_index)
-
-        self._behind = behind
-        self._front = front
 
 
 class RenderLayer(ABC):

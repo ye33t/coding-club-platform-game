@@ -25,5 +25,5 @@ class BackgroundDrawablesLayer(RenderLayer):
         game: "Game",
         context: RenderContext,
     ) -> None:
-        for drawable in context.behind_drawables:
+        for drawable in context.background:
             drawable.draw(surface, self._world.camera)
