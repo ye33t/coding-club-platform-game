@@ -76,7 +76,7 @@ class Game:
 
         self._renderer.set_effect(TransitionLayer(
             mode,
-            on_transition=lambda: apply_to_state(),
+            on_transition=apply_to_state,
         ))
 
     def _apply_state_change(self, new_state: State) -> None:
