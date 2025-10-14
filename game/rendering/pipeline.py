@@ -48,15 +48,15 @@ class RenderPipeline:
         layer: Optional[EffectLayer],
     ) -> None:
         """Install or clear the post-process effect rendered last."""
-        if layer is self._effect_layer:
-            return
         self._effect_layer = layer
 
     def draw(self, game: Game) -> None:
         """Draw the game to the render pipeline"""
         if self._effect_layer is not None:
-            if not self._effect_layer.update(game):
+            if self._effect_layer.complete():
                 self.set_effect(None)
+            else:
+                self._effect_layer.update(game)
 
         self._display.clear(BACKGROUND_COLOR)
         surface = self._display.get_native_surface()

@@ -29,56 +29,39 @@ class TransitionLayer(EffectLayer):
 
     def __init__(
         self,
-        duration: float,
         mode: TransitionMode,
-        on_midpoint: Optional[Callable[[], None]] = None,
-        on_complete: Optional[Callable[[], None]] = None,
+        on_transition: Callable[[], None]
     ) -> None:
-        self._duration = duration
         self._mode = mode
-        self._on_midpoint = on_midpoint
-        self._on_complete = on_complete
+        self._on_transition = on_transition
         self._elapsed = 0.0
-        self._midpoint_triggered = False
-        self._completed = False
+        self._triggered = False
+        self._complete = False
+        
+    def complete(self) -> bool:
+        return self._complete
 
-    def update(self, game: Game) -> bool:
-        if self._completed:
-            return False
-
+    def update(self, game: Game) -> None:
         self._elapsed += game.dt
+        
+        if self._elapsed >= self.trigger_time and not self._triggered:
+            print(f"Triggered at {self._elapsed:.2f}s {self._mode}")
+            self._on_transition()
+            self._triggered = True
 
-        if not self._midpoint_triggered and self._on_midpoint:
-            trigger = False
-            if self._mode == TransitionMode.BOTH:
-                trigger = self._elapsed >= self._duration / 2
-            elif self._mode == TransitionMode.FADE_OUT:
-                trigger = False
-            elif self._mode == TransitionMode.FADE_IN:
-                trigger = True
-
-            if trigger:
-                self._on_midpoint()
-                self._midpoint_triggered = True
-
-        if self._elapsed >= self._duration:
-            if not self._midpoint_triggered and self._on_midpoint:
-                # For FADE_OUT we do the state change at completion.
-                self._on_midpoint()
-                self._midpoint_triggered = True
-            if self._on_complete:
-                self._on_complete()
-            self._completed = True
-            return False
-
-        return True
+        if self._elapsed >= self.duration:
+            print(f"Complete at {self._elapsed:.2f}s {self._mode}")
+            self._complete = True
 
     def draw(
         self,
         context: RenderContext,
     ) -> None:
+        if self._complete:
+            return
+        
         progress = (
-            1.0 if self._duration <= 0 else min(1.0, self._elapsed / self._duration)
+            1.0 if self.duration <= 0 else min(1.0, self._elapsed / self.duration)
         )
         max_radius = math.hypot(NATIVE_WIDTH / 2, NATIVE_HEIGHT / 2)
 
@@ -107,3 +90,21 @@ class TransitionLayer(EffectLayer):
 
         mask.set_colorkey(BACKGROUND_COLOR)
         context.surface.blit(mask, (0, 0))
+
+    @property
+    def duration(self) -> float:
+        return {
+            TransitionMode.INSTANT: 0.0,
+            TransitionMode.FADE_IN: 1.0,
+            TransitionMode.FADE_OUT: 1.0,
+            TransitionMode.BOTH: 2.0,
+        }[self._mode]
+
+    @property
+    def trigger_time(self) -> float:
+        return {
+            TransitionMode.INSTANT: 0.0,
+            TransitionMode.FADE_IN: 0.0,
+            TransitionMode.FADE_OUT: self.duration,
+            TransitionMode.BOTH: self.duration / 2,
+        }[self._mode]

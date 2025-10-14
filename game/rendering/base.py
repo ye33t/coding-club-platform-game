@@ -98,6 +98,14 @@ class RenderLayer(ABC):
 
 
 class EffectLayer(RenderLayer):
-    def update(self, game: Game) -> bool:
-        """Advance layer state. Return False to remove the layer."""
-        return True
+    @abstractmethod
+    def complete(self) -> bool:
+        """Whether the effect has finished and can be removed."""
+        pass
+    
+    @abstractmethod
+    def update(self, game: Game) -> None:
+        """Advance layer state."""
+        pass
+    
+    

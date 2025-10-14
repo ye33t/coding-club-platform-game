@@ -63,24 +63,21 @@ class Game:
         self,
         to_state: State,
         mode: TransitionMode = TransitionMode.INSTANT,
-        duration: float = 2.0,
     ) -> None:
         """Transition to a new state using the requested mode."""
 
         def apply_to_state() -> None:
+            print(f"Transitioning to {to_state.__class__.__name__} with mode {mode}")
             self._apply_state_change(to_state)
-
+            
         if mode == TransitionMode.INSTANT:
             apply_to_state()
             return
 
-        layer = TransitionLayer(
-            duration,
+        self._renderer.set_effect(TransitionLayer(
             mode,
-            on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
-            on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
-        )
-        self._renderer.set_effect(layer)
+            on_transition=lambda: apply_to_state(),
+        ))
 
     def _apply_state_change(self, new_state: State) -> None:
         """Switch to a new game state immediately."""
