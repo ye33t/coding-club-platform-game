@@ -5,19 +5,9 @@ import sys
 
 import pygame
 
-from .constants import BACKGROUND_COLOR, FPS
+from .constants import FPS
 from .content import sprites
-from .display import Display
-from .rendering import (
-    BackgroundLayer,
-    BehindDrawablesLayer,
-    DebugOverlayLayer,
-    FrontDrawablesLayer,
-    RenderPipeline,
-    TerrainLayer,
-    TransitionLayer,
-    TransitionMode,
-)
+from .rendering import RenderPipeline, TransitionLayer, TransitionMode
 from .states import InitialState, State
 from .world import World
 
@@ -28,35 +18,18 @@ class Game:
     def __init__(self) -> None:
         """Initialize pygame and game components."""
         pygame.init()
-        self.display = Display()
+
+        self._renderer = RenderPipeline()
         self.clock = pygame.time.Clock()
         self.running = True
-        self.show_debug = False
 
-        # Initialize font for debug info
-        self.font = pygame.font.Font(None, 16)
-
-        # Load sprite sheets
         assets_path = os.path.join(os.path.dirname(__file__), "assets", "images")
         sprites.load_sheets(assets_path)
 
         self.world = World()
-
-        self.render_pipeline = RenderPipeline()
-        self.render_pipeline.configure_base_layers(
-            [
-                BackgroundLayer(),
-                BehindDrawablesLayer(),
-                TerrainLayer(),
-                FrontDrawablesLayer(),
-            ],
-            self,
-        )
-        self._debug_layer = DebugOverlayLayer()
-
-        # Initialize state machine with initial black screen
         self.state: State = InitialState()
         self.state.on_enter(self)
+        self.dt: float = 0
 
     def run(self) -> None:
         """Main game loop."""
@@ -71,32 +44,20 @@ class Game:
 
         while self.running:
             # Calculate delta time
-            dt = self.clock.tick(FPS) / 1000.0
+            self.dt = self.clock.tick(FPS) / 1000.0
 
             # Handle global events
             self._handle_events()
 
             # Update game state
-            self.state.update(self, dt)
+            self.state.update(self, self.dt)
 
             # Render frame
-            self.render_pipeline.update(dt, self)
-            self.display.clear(BACKGROUND_COLOR)
-            surface = self.display.get_native_surface()
-
-            # State-specific drawing
-            self.state.draw(self, surface)
-
-            # Present the frame
-            self.display.present()
+            self._renderer.draw(self)
 
         # Cleanup
         pygame.quit()
         sys.exit()
-
-    def render(self, surface: pygame.Surface) -> None:
-        """Render the current frame via the renderer pipeline."""
-        self.render_pipeline.draw(surface, self)
 
     def transition(
         self,
@@ -119,20 +80,13 @@ class Game:
             on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
             on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
         )
-        self.render_pipeline.set_effect(layer, self)
+        self._renderer.set_effect(layer)
 
     def _apply_state_change(self, new_state: State) -> None:
         """Switch to a new game state immediately."""
         self.state.on_exit(self)
         self.state = new_state
         self.state.on_enter(self)
-
-    def _attach_debug_overlay(self) -> None:
-        self.render_pipeline.add_overlay(self._debug_layer, self)
-
-    def _detach_debug_overlay(self) -> None:
-        if self._debug_layer is not None:
-            self.render_pipeline.remove_overlay(self._debug_layer, self)
 
     def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""
@@ -145,12 +99,8 @@ class Game:
 
                     self.transition(StartLevelState())
                 elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
-                    self.display.change_scale(-1)
+                    self._renderer.change_scale(-1)
                 elif event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:
-                    self.display.change_scale(1)
+                    self._renderer.change_scale(1)
                 elif event.key == pygame.K_F3:
-                    self.show_debug = not self.show_debug
-                    if self.show_debug:
-                        self._attach_debug_overlay()
-                    else:
-                        self._detach_debug_overlay()
+                    self._renderer.toggle_debug()

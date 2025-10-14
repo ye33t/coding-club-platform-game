@@ -1,8 +1,8 @@
 name: World 1-1
 
 spawn:
-  tile_x: 3
-  tile_y: 7
+  tile_x: 7
+  tile_y: 12
   screen: 0
 
 screens:

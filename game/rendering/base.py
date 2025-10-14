@@ -89,16 +89,15 @@ class RenderContext:
 class RenderLayer(ABC):
     """Single layer in the renderer stack."""
 
-    def on_added(self, game: "Game") -> None:
-        """Hook invoked when the layer is added to the renderer."""
-
-    def update(self, dt: float, game: "Game") -> bool:
-        """Advance layer state. Return False to remove the layer."""
-        return True
-
     @abstractmethod
     def draw(
         self,
         context: RenderContext,
     ) -> None:
         """Render the layer."""
+
+
+class EffectLayer(RenderLayer):
+    def update(self, game: Game) -> bool:
+        """Advance layer state. Return False to remove the layer."""
+        return True

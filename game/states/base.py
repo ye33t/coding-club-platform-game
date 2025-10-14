@@ -43,15 +43,3 @@ class State(ABC):
             dt: Time delta since last update in seconds
         """
         pass
-
-    def draw(self, game: "Game", surface) -> None:
-        """Render the current state.
-
-        The surface is pre-cleared and ready to draw on.
-        Do not call display.present() - that's handled by Game.run().
-
-        Args:
-            game: The game context
-            surface: The pygame surface to draw on
-        """
-        game.render(surface)

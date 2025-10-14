@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 import pygame
 
 from ..constants import BACKGROUND_COLOR, BLACK, NATIVE_HEIGHT, NATIVE_WIDTH
-from .base import RenderContext, RenderLayer
+from .base import EffectLayer, RenderContext
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -24,7 +24,7 @@ class TransitionMode(Enum):
     BOTH = "both"
 
 
-class TransitionLayer(RenderLayer):
+class TransitionLayer(EffectLayer):
     """Circular iris transition overlay."""
 
     def __init__(
@@ -42,16 +42,11 @@ class TransitionLayer(RenderLayer):
         self._midpoint_triggered = False
         self._completed = False
 
-    def on_added(self, game: "Game") -> None:
-        if self._mode == TransitionMode.FADE_IN and self._on_midpoint:
-            self._on_midpoint()
-            self._midpoint_triggered = True
-
-    def update(self, dt: float, game: "Game") -> bool:
+    def update(self, game: Game) -> bool:
         if self._completed:
             return False
 
-        self._elapsed += dt
+        self._elapsed += game.dt
 
         if not self._midpoint_triggered and self._on_midpoint:
             trigger = False
@@ -59,6 +54,8 @@ class TransitionLayer(RenderLayer):
                 trigger = self._elapsed >= self._duration / 2
             elif self._mode == TransitionMode.FADE_OUT:
                 trigger = False
+            elif self._mode == TransitionMode.FADE_IN:
+                trigger = True
 
             if trigger:
                 self._on_midpoint()

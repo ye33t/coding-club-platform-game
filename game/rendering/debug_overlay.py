@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 class DebugOverlayLayer(RenderLayer):
     """Draws debug tile grid and textual diagnostics."""
 
-    def update(self, dt: float, game: Game) -> bool:
-        return True
+    def __init__(self) -> None:
+        self._font = pygame.font.Font(None, 16)
 
     def draw(
         self,
@@ -47,15 +47,10 @@ class DebugOverlayLayer(RenderLayer):
             y += SUB_TILE_SIZE
 
     def _draw_debug_info(self, surface: "Surface", game: "Game") -> None:
-        font = game.font
-        if font is None:
-            return
-
         fps = game.clock.get_fps()
         debug_lines = [
             f"FPS: {fps:.1f}",
             f"Resolution: {surface.get_width()}x{surface.get_height()}",
-            f"Scale: {game.display.scale}x",
             f"Mario Pos: ({game.world.mario.x:.2f}, {game.world.mario.y:.2f})",
             f"Mario Vel: ({game.world.mario.vx:.2f}, {game.world.mario.vy:.2f})",
             f"Camera X: {game.world.camera.x:.2f}",
@@ -64,5 +59,5 @@ class DebugOverlayLayer(RenderLayer):
         ]
 
         for i, line in enumerate(debug_lines):
-            text_surface = font.render(line, True, WHITE)
+            text_surface = self._font.render(line, True, WHITE)
             surface.blit(text_surface, (8, 8 + i * 12))
