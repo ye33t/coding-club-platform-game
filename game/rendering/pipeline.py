@@ -31,7 +31,7 @@ class RenderPipeline:
         ]
         self._debug_overlay = DebugOverlayLayer()
         self._overlays: List[RenderLayer] = []
-        self._effect_layers: List[EffectLayer] = []
+        self._effect_layer: Optional[EffectLayer] = None
 
     def change_scale(self, scale: int) -> None:
         self._display.change_scale(scale)
@@ -48,16 +48,21 @@ class RenderPipeline:
         layer: EffectLayer,
     ) -> None:
         """Install or clear the post-process effect rendered last."""
-        self._effect_layers.append(layer)
+        if layer.complete():
+            return
+        
+        if self._effect_layer is None:
+            self._effect_layer = layer
+        else:
+            raise RuntimeError("Cannot enqueue effect while another is active")
 
     def draw(self, game: Game) -> None:
         """Draw the game to the render pipeline"""
-        while len(self._effect_layers) > 0:
-            if self._effect_layers[0].complete():
-                self._effect_layers.pop()
+        if self._effect_layer is not None:
+            if self._effect_layer.complete():
+                self._effect_layer = None
             else:
-                self._effect_layers[0].update(game)
-                break
+                self._effect_layer.update(game)
 
         self._display.clear(BACKGROUND_COLOR)
         surface = self._display.get_native_surface()
@@ -73,5 +78,5 @@ class RenderPipeline:
         """Get the list of all active render layers."""
         yield from self._base_layers
         yield from self._overlays
-        if len(self._effect_layers) > 0:
-            yield self._effect_layers[0]
+        if self._effect_layer is not None:
+            yield self._effect_layer
