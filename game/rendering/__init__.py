@@ -7,7 +7,7 @@ from .debug_overlay import DebugOverlayLayer
 from .front_drawables import FrontDrawablesLayer
 from .pipeline import RenderPipeline
 from .terrain import TerrainLayer
-from .transition import TransitionLayer, TransitionMode
+from .transition import TransitionLayer, TransitionMode, TransitionTimeline
 
 __all__ = [
     "Drawable",
@@ -19,4 +19,5 @@ __all__ = [
     "DebugOverlayLayer",
     "TransitionLayer",
     "TransitionMode",
+    "TransitionTimeline",
 ]
