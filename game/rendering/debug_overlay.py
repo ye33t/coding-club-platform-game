@@ -5,32 +5,29 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pygame
+from pygame import Surface
 
 from ..constants import SUB_TILE_SIZE, WHITE
 from .base import RenderContext, RenderLayer
 
 if TYPE_CHECKING:
-    from pygame import Surface
-
     from ..game import Game
 
 
 class DebugOverlayLayer(RenderLayer):
     """Draws debug tile grid and textual diagnostics."""
 
-    def update(self, dt: float, game: "Game") -> bool:
+    def update(self, dt: float, game: Game) -> bool:
         return True
 
     def draw(
         self,
-        surface: Surface,
-        game: "Game",
         context: RenderContext,
     ) -> None:
-        self._draw_tile_grid(surface, game)
-        self._draw_debug_info(surface, game)
+        self._draw_tile_grid(context.surface, context.game)
+        self._draw_debug_info(context.surface, context.game)
 
-    def _draw_tile_grid(self, surface: "Surface", game: "Game") -> None:
+    def _draw_tile_grid(self, surface: Surface, game: Game) -> None:
         width = surface.get_width()
         height = surface.get_height()
         camera_x = game.world.camera.x

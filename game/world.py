@@ -15,7 +15,7 @@ from .rendering.base import Drawable
 class World:
     """Manages game physics and collision logic."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the world."""
         # Load the default level
         self.level = loader.load("game/assets/levels/world_1_1.yaml")

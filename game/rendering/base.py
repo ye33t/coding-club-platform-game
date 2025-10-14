@@ -10,6 +10,9 @@ if TYPE_CHECKING:
 
     from ..camera import Camera
     from ..game import Game
+    from ..level import Level
+    from ..mario import Mario
+    from ..world import World
 
 
 class Drawable(Protocol):
@@ -24,8 +27,13 @@ class Drawable(Protocol):
 class RenderContext:
     """Shared rendering data computed once per frame."""
 
-    def __init__(self, game: "Game") -> None:
+    def __init__(self, surface: Surface, game: Game) -> None:
+        self._surface = surface
         self._game = game
+
+    @property
+    def surface(self) -> Surface:
+        return self._surface
 
     @property
     def game(self) -> "Game":
@@ -34,13 +42,29 @@ class RenderContext:
     @property
     def drawables(self) -> Iterator[Drawable]:
         return self._game.world.drawables
-    
+
     @property
-    def background(self) -> Iterator[Drawable]:
+    def world(self) -> World:
+        return self._game.world
+
+    @property
+    def level(self) -> Level:
+        return self._game.world.level
+
+    @property
+    def mario(self) -> Mario:
+        return self._game.world.mario
+
+    @property
+    def camera(self) -> Camera:
+        return self._game.world.camera
+
+    @property
+    def behind_drawables(self) -> Iterator[Drawable]:
         return self._layered_drawables(lambda drawable: drawable.z_index < 0)
 
     @property
-    def foreground(self) -> Iterator[Drawable]:
+    def front_drawables(self) -> Iterator[Drawable]:
         return self._layered_drawables(lambda drawable: drawable.z_index >= 0)
 
     def _layered_drawables(
@@ -62,16 +86,11 @@ class RenderContext:
         return _iter()
 
 
-
-
 class RenderLayer(ABC):
     """Single layer in the renderer stack."""
 
     def on_added(self, game: "Game") -> None:
         """Hook invoked when the layer is added to the renderer."""
-
-    def on_removed(self, game: "Game") -> None:
-        """Hook invoked when the layer is removed from the renderer."""
 
     def update(self, dt: float, game: "Game") -> bool:
         """Advance layer state. Return False to remove the layer."""
@@ -80,8 +99,6 @@ class RenderLayer(ABC):
     @abstractmethod
     def draw(
         self,
-        surface: "Surface",
-        game: "Game",
         context: RenderContext,
     ) -> None:
         """Render the layer."""

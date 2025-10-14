@@ -12,8 +12,6 @@ from ..constants import BACKGROUND_COLOR, BLACK, NATIVE_HEIGHT, NATIVE_WIDTH
 from .base import RenderContext, RenderLayer
 
 if TYPE_CHECKING:
-    from pygame import Surface
-
     from ..game import Game
 
 
@@ -80,8 +78,6 @@ class TransitionLayer(RenderLayer):
 
     def draw(
         self,
-        surface: "Surface",
-        game: "Game",
         context: RenderContext,
     ) -> None:
         progress = (
@@ -113,4 +109,4 @@ class TransitionLayer(RenderLayer):
             pygame.draw.circle(mask, BACKGROUND_COLOR, center, int(radius))
 
         mask.set_colorkey(BACKGROUND_COLOR)
-        surface.blit(mask, (0, 0))
+        context.surface.blit(mask, (0, 0))

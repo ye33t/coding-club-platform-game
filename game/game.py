@@ -9,10 +9,10 @@ from .constants import BACKGROUND_COLOR, FPS
 from .content import sprites
 from .display import Display
 from .rendering import (
-    BackgroundDrawablesLayer,
     BackgroundLayer,
+    BehindDrawablesLayer,
     DebugOverlayLayer,
-    ForegroundDrawablesLayer,
+    FrontDrawablesLayer,
     RenderPipeline,
     TerrainLayer,
     TransitionLayer,
@@ -43,10 +43,15 @@ class Game:
         self.world = World()
 
         self.render_pipeline = RenderPipeline()
-        self.render_pipeline.add_layer(BackgroundLayer(self.world), self)
-        self.render_pipeline.add_layer(BackgroundDrawablesLayer(self.world), self)
-        self.render_pipeline.add_layer(TerrainLayer(self.world), self)
-        self.render_pipeline.add_layer(ForegroundDrawablesLayer(self.world), self)
+        self.render_pipeline.configure_base_layers(
+            [
+                BackgroundLayer(),
+                BehindDrawablesLayer(),
+                TerrainLayer(),
+                FrontDrawablesLayer(),
+            ],
+            self,
+        )
         self._debug_layer = DebugOverlayLayer()
 
         # Initialize state machine with initial black screen
@@ -114,7 +119,7 @@ class Game:
             on_midpoint=apply_to_state if mode != TransitionMode.FADE_OUT else None,
             on_complete=apply_to_state if mode == TransitionMode.FADE_OUT else None,
         )
-        self.render_pipeline.add_layer(layer, self)
+        self.render_pipeline.set_effect(layer, self)
 
     def _apply_state_change(self, new_state: State) -> None:
         """Switch to a new game state immediately."""
@@ -123,12 +128,11 @@ class Game:
         self.state.on_enter(self)
 
     def _attach_debug_overlay(self) -> None:
-
-        self.render_pipeline.add_layer(self._debug_layer, self)
+        self.render_pipeline.add_overlay(self._debug_layer, self)
 
     def _detach_debug_overlay(self) -> None:
         if self._debug_layer is not None:
-            self.render_pipeline.remove_layer(self._debug_layer, self)
+            self.render_pipeline.remove_overlay(self._debug_layer, self)
 
     def _handle_events(self) -> None:
         """Handle global events (ESC, scaling, debug toggle)."""
