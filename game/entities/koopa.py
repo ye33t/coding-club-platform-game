@@ -187,10 +187,13 @@ class KoopaTroopaEntity(Entity):
         else:
             direction = -1 if source.state.x < self.state.x else 1
         self.state.vx = horizontal * direction
+        self.kick_cooldown = 0.0
 
 
 class ShellEntity(Entity):
     """Koopa shell that toggles between stationary and moving states."""
+
+    SHELL_KICK_COOLDOWN = 0.1
 
     def __init__(
         self,
@@ -203,6 +206,7 @@ class ShellEntity(Entity):
         self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
         self.knocked_out = False
+        self.kick_cooldown = 0.0
 
         self._horizontal_processor = HorizontalVelocityProcessor(
             speed=KOOPA_SHELL_SPEED
@@ -210,11 +214,9 @@ class ShellEntity(Entity):
         self._wall_bounce_processor = WallBounceProcessor(speed=KOOPA_SHELL_SPEED)
         self.set_pipeline()
 
-        self.knocked_out = False
-
     @property
     def can_damage_entities(self) -> bool:
-        return self.is_moving
+        return self.is_moving and self.kick_cooldown <= 0.0 and not self.knocked_out
 
     @property
     def can_be_damaged_by_entities(self) -> bool:
@@ -243,6 +245,9 @@ class ShellEntity(Entity):
             self.state.x += self.state.vx * dt
             self.state.y += self.state.vy * dt
             return self.state.y >= -100
+
+        if self.kick_cooldown > 0.0:
+            self.kick_cooldown = max(0.0, self.kick_cooldown - dt)
 
         self.process_pipeline(dt, level)
         return True
@@ -276,7 +281,14 @@ class ShellEntity(Entity):
         is_stomp = mario.vy < 0 and mario_bottom > stomp_threshold
 
         if not is_stomp:
-            return CollisionResponse(damage=True) if self.is_moving else None
+            if self.is_moving:
+                if self.kick_cooldown > 0.0:
+                    return None
+                return CollisionResponse(damage=True)
+
+            self._set_moving(True, facing_right=mario.facing_right)
+            self.kick_cooldown = self.SHELL_KICK_COOLDOWN
+            return None
 
         facing_right = mario.facing_right
 
@@ -284,6 +296,7 @@ class ShellEntity(Entity):
             self._set_moving(False)
         else:
             self._set_moving(True, facing_right=facing_right)
+            self.kick_cooldown = self.SHELL_KICK_COOLDOWN
 
         return CollisionResponse(
             remove=False,
@@ -323,6 +336,7 @@ class ShellEntity(Entity):
     def kick(self, facing_right: bool) -> None:
         """Start the shell moving in the provided direction."""
         self._set_moving(True, facing_right=facing_right)
+        self.kick_cooldown = self.SHELL_KICK_COOLDOWN
 
     def stop(self) -> None:
         """Stop the shell in place."""
@@ -346,6 +360,7 @@ class ShellEntity(Entity):
         self.state.vx = speed if self.state.facing_right else -speed
         if not moving:
             self.state.vx = 0.0
+            self.kick_cooldown = 0.0
 
     def _knock_out(self, source: Entity) -> None:
         self.knocked_out = True

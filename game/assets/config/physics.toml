@@ -200,7 +200,7 @@ stomp_bounce_velocity = 200.0
 speed = 0.0
 
 # Horizontal speed after being kicked or stomped while stationary (px/s)
-kick_speed = 160.0
+kick_speed = 220.0
 
 # Downward acceleration (px/s²)
 gravity = 400.0
