@@ -98,8 +98,12 @@ class KoopaTroopaEntity(Entity):
             reflected=self.state.facing_right,
         )
 
-    def on_collide_entity(self, shell: "ShellEntity") -> bool:
-        if self._stomped:
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        return not self._stomped
+
+    def on_collide_entity(self, source: Entity) -> bool:
+        if not self.can_be_damaged_by_entities:
             return False
         return True
 
@@ -155,6 +159,14 @@ class ShellEntity(Entity):
             speed=KOOPA_SHELL_SPEED
         )
         self.set_pipeline()
+
+    @property
+    def can_damage_entities(self) -> bool:
+        return self.is_moving
+
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        return False
 
     def build_pipeline(self) -> Optional[EntityPipeline]:
         """Configure shell physics."""

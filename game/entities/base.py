@@ -16,7 +16,6 @@ from .physics import EntityPhysicsContext, EntityPipeline
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
-    from .koopa import ShellEntity
 
 
 @dataclass(slots=True)
@@ -131,8 +130,25 @@ class Entity(ABC, Drawable):
         """
         return False
 
-    def on_collide_entity(self, shell: "ShellEntity") -> bool:
-        """Handle collision with a moving shell. Return True to remove this entity."""
+    @property
+    def can_damage_entities(self) -> bool:
+        """Whether this entity inflicts damage on other entities when colliding."""
+        return False
+
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        """Whether this entity can be damaged by other entities."""
+        return False
+
+    def on_collide_entity(self, source: "Entity") -> bool:
+        """Handle collision with another entity.
+
+        Args:
+            source: The entity that initiated the collision.
+
+        Returns:
+            True if this entity should be removed after the collision, False otherwise.
+        """
         return False
 
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:

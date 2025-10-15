@@ -9,7 +9,6 @@ from pygame import Surface
 
 from ..camera import Camera
 from .base import Entity
-from .koopa import ShellEntity
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -77,28 +76,29 @@ class EntityManager:
 
     def _handle_shell_collisions(self) -> None:
         """Resolve moving shell collisions with other entities."""
-        moving_shells = [
-            entity
-            for entity in self._entities
-            if isinstance(entity, ShellEntity) and entity.is_moving
+        damage_sources = [
+            entity for entity in self._entities if entity.can_damage_entities
         ]
 
-        if not moving_shells:
+        if not damage_sources:
             return
 
         to_remove: Set[Entity] = set()
 
-        for shell in moving_shells:
-            shell_rect = shell.get_collision_bounds()
+        for source in damage_sources:
+            source_rect = source.get_collision_bounds()
 
             for entity in self._entities:
-                if entity is shell or entity in to_remove:
+                if entity is source or entity in to_remove:
                     continue
 
-                if not shell_rect.colliderect(entity.get_collision_bounds()):
+                if not entity.can_be_damaged_by_entities:
                     continue
 
-                if entity.on_collide_entity(shell):
+                if not source_rect.colliderect(entity.get_collision_bounds()):
+                    continue
+
+                if entity.on_collide_entity(source):
                     to_remove.add(entity)
 
         if to_remove:

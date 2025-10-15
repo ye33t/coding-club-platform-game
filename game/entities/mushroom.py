@@ -28,7 +28,6 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
-    from .koopa import ShellEntity
 
 
 class MushroomEntity(Entity):
@@ -128,5 +127,9 @@ class MushroomEntity(Entity):
             ]
         )
 
-    def on_collide_entity(self, shell: "ShellEntity") -> bool:
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        return True
+
+    def on_collide_entity(self, source: Entity) -> bool:
         return True

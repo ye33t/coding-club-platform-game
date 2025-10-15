@@ -30,7 +30,6 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
-    from .koopa import ShellEntity
 
 
 class GoombaEntity(Entity):
@@ -186,8 +185,12 @@ class GoombaEntity(Entity):
             int(self.state.height),
         )
 
-    def on_collide_entity(self, shell: "ShellEntity") -> bool:
-        if self.is_dead:
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        return not self.is_dead
+
+    def on_collide_entity(self, source: Entity) -> bool:
+        if not self.can_be_damaged_by_entities:
             return False
         self.is_dead = True
         return True
