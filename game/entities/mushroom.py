@@ -16,7 +16,6 @@ from ..physics.config import (
     MUSHROOM_SPEED,
 )
 from .base import CollisionResponse, Entity
-from .koopa import ShellEntity
 from .physics import (
     EntityPipeline,
     GravityProcessor,
@@ -130,20 +129,22 @@ class MushroomEntity(Entity):
 
     @property
     def can_be_damaged_by_entities(self) -> bool:
-        return True
+        return False
 
     def on_collide_entity(self, source: Entity) -> bool:
-        return True
+        if source.can_damage_entities:
+            return True
 
-    def on_entity_block(self, blocker: Entity) -> None:
-        if not isinstance(blocker, ShellEntity):
-            return
+        if source.blocks_entities:
+            if self.state.facing_right:
+                self.state.facing_right = False
+                self.state.x = source.state.x - self.state.width
+            else:
+                self.state.facing_right = True
+                self.state.x = source.state.x + source.state.width
 
-        if self.state.facing_right:
-            self.state.facing_right = False
-            self.state.x = blocker.state.x - self.state.width
-        else:
-            self.state.facing_right = True
-            self.state.x = blocker.state.x + blocker.state.width
+            self.state.vx = (
+                MUSHROOM_SPEED if self.state.facing_right else -MUSHROOM_SPEED
+            )
 
-        self.state.vx = MUSHROOM_SPEED if self.state.facing_right else -MUSHROOM_SPEED
+        return False

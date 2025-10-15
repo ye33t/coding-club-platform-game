@@ -140,6 +140,11 @@ class Entity(ABC, Drawable):
         """Whether this entity can be damaged by other entities."""
         return False
 
+    @property
+    def blocks_entities(self) -> bool:
+        """Whether this entity blocks other entities when colliding."""
+        return False
+
     def on_collide_entity(self, source: "Entity") -> bool:
         """Handle collision with another entity.
 
@@ -150,10 +155,6 @@ class Entity(ABC, Drawable):
             True if this entity should be removed after the collision, False otherwise.
         """
         return False
-
-    def on_entity_block(self, blocker: "Entity") -> None:
-        """Handle a non-damaging collision with a blocking entity."""
-        return None
 
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:
         """Check if entity is off screen and should be removed.

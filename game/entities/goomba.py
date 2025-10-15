@@ -18,7 +18,6 @@ from ..physics.config import (
     GOOMBA_STOMP_BOUNCE_VELOCITY,
 )
 from .base import CollisionResponse, Entity
-from .koopa import ShellEntity
 from .physics import (
     EntityPipeline,
     GravityProcessor,
@@ -191,22 +190,18 @@ class GoombaEntity(Entity):
         return not self.is_dead
 
     def on_collide_entity(self, source: Entity) -> bool:
-        if not self.can_be_damaged_by_entities:
-            return False
-        self.is_dead = True
-        return True
+        if source.can_damage_entities and self.can_be_damaged_by_entities:
+            self.is_dead = True
+            return True
 
-    def on_entity_block(self, blocker: Entity) -> None:
-        if self.is_dead:
-            return
-        if not isinstance(blocker, ShellEntity):
-            return
+        if source.blocks_entities and not self.is_dead:
+            if self.state.facing_right:
+                self.state.facing_right = False
+                self.state.x = source.state.x - self.state.width
+            else:
+                self.state.facing_right = True
+                self.state.x = source.state.x + source.state.width
 
-        if self.state.facing_right:
-            self.state.facing_right = False
-            self.state.x = blocker.state.x - self.state.width
-        else:
-            self.state.facing_right = True
-            self.state.x = blocker.state.x + blocker.state.width
+            self.state.vx = GOOMBA_SPEED if self.state.facing_right else -GOOMBA_SPEED
 
-        self.state.vx = GOOMBA_SPEED if self.state.facing_right else -GOOMBA_SPEED
+        return False

@@ -9,7 +9,6 @@ from pygame import Surface
 
 from ..camera import Camera
 from .base import Entity
-from .koopa import ShellEntity
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -54,7 +53,7 @@ class EntityManager:
                 if not entity.is_off_screen(mario_screen, camera_x):
                     active.append(entity)
         self._entities = active
-        self._handle_shell_collisions()
+        self._handle_entity_collisions()
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render all active entities.
@@ -75,56 +74,37 @@ class EntityManager:
         """Get an iterable of all active entities."""
         return self._entities
 
-    def _handle_shell_collisions(self) -> None:
-        """Resolve moving shell collisions with other entities."""
-        damage_sources = [
-            entity for entity in self._entities if entity.can_damage_entities
-        ]
-
+    def _handle_entity_collisions(self) -> None:
         to_remove: Set[Entity] = set()
 
-        for source in damage_sources:
+        sources = [
+            entity
+            for entity in self._entities
+            if entity.can_damage_entities or entity.blocks_entities
+        ]
+
+        if not sources:
+            return
+
+        for source in sources:
             source_rect = source.get_collision_bounds()
 
-            for entity in self._entities:
-                if entity is source or entity in to_remove:
+            for target in self._entities:
+                if target is source or target in to_remove:
                     continue
 
-                if not entity.can_be_damaged_by_entities:
+                if not source_rect.colliderect(target.get_collision_bounds()):
                     continue
 
-                if not source_rect.colliderect(entity.get_collision_bounds()):
+                if source.can_damage_entities and target.can_be_damaged_by_entities:
+                    if target.on_collide_entity(source):
+                        to_remove.add(target)
                     continue
 
-                if entity.on_collide_entity(source):
-                    to_remove.add(entity)
+                if source.blocks_entities:
+                    target.on_collide_entity(source)
 
         if to_remove:
             self._entities = [
                 entity for entity in self._entities if entity not in to_remove
             ]
-
-        self._handle_stationary_shell_blocks()
-
-    def _handle_stationary_shell_blocks(self) -> None:
-        shells = [
-            entity for entity in self._entities if isinstance(entity, ShellEntity)
-        ]
-
-        if not shells:
-            return
-
-        for shell in shells:
-            if shell.is_moving:
-                continue
-
-            shell_rect = shell.get_collision_bounds()
-
-            for entity in self._entities:
-                if entity is shell or entity.can_damage_entities:
-                    continue
-
-                if not shell_rect.colliderect(entity.get_collision_bounds()):
-                    continue
-
-                entity.on_entity_block(shell)
