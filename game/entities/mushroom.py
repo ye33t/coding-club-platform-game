@@ -16,21 +16,14 @@ from ..physics.config import (
     MUSHROOM_SPEED,
 )
 from .base import CollisionResponse, Entity
-from .physics import (
-    EntityPipeline,
-    GravityProcessor,
-    GroundSnapProcessor,
-    HorizontalVelocityProcessor,
-    VelocityIntegrator,
-    WallBounceProcessor,
-)
+from .mixins import HorizontalMovementConfig, HorizontalMovementMixin
 
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
 
 
-class MushroomEntity(Entity):
+class MushroomEntity(HorizontalMovementMixin, Entity):
     """Mushroom power-up collectible.
 
     Moves horizontally, bounces off walls, stays on platforms.
@@ -59,6 +52,13 @@ class MushroomEntity(Entity):
         self.emerge_target_y = world_y + TILE_SIZE
         self.z_index = -10
         self.final_facing_right = facing_right
+        self.init_horizontal_movement(
+            HorizontalMovementConfig(
+                gravity=MUSHROOM_GRAVITY,
+                speed=MUSHROOM_SPEED,
+                ground_snap_tolerance=MUSHROOM_GROUND_TOLERANCE,
+            )
+        )
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
@@ -115,18 +115,6 @@ class MushroomEntity(Entity):
             power_up_type="mushroom",
         )
 
-    def build_pipeline(self) -> Optional[EntityPipeline]:
-        """Configure physics for post-emerge mushroom behavior."""
-        return EntityPipeline(
-            [
-                GravityProcessor(gravity=MUSHROOM_GRAVITY),
-                HorizontalVelocityProcessor(speed=MUSHROOM_SPEED),
-                VelocityIntegrator(),
-                WallBounceProcessor(speed=MUSHROOM_SPEED),
-                GroundSnapProcessor(tolerance=MUSHROOM_GROUND_TOLERANCE),
-            ]
-        )
-
     @property
     def can_be_damaged_by_entities(self) -> bool:
         return False
@@ -136,15 +124,6 @@ class MushroomEntity(Entity):
             return False
 
         if source.blocks_entities:
-            if self.state.facing_right:
-                self.state.facing_right = False
-                self.state.x = source.state.x - self.state.width
-            else:
-                self.state.facing_right = True
-                self.state.x = source.state.x + source.state.width
-
-            self.state.vx = (
-                MUSHROOM_SPEED if self.state.facing_right else -MUSHROOM_SPEED
-            )
+            self.handle_blocking_entity(source)
 
         return False

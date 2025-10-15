@@ -25,13 +25,11 @@ from ..physics.config import (
     KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY,
 )
 from .base import CollisionResponse, Entity
-from .physics import (
-    EntityPipeline,
-    GravityProcessor,
-    GroundSnapProcessor,
-    HorizontalVelocityProcessor,
-    VelocityIntegrator,
-    WallBounceProcessor,
+from .mixins import (
+    HorizontalMovementConfig,
+    HorizontalMovementMixin,
+    KnockoutMixin,
+    KnockoutSettings,
 )
 
 if TYPE_CHECKING:
@@ -39,7 +37,7 @@ if TYPE_CHECKING:
     from ..mario import Mario
 
 
-class KoopaTroopaEntity(Entity):
+class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
     """Koopa Troopa enemy that spawns a shell when stomped."""
 
     def __init__(
@@ -56,17 +54,29 @@ class KoopaTroopaEntity(Entity):
         self.animation_timer = 0.0
         self.animation_frame = 0
         self._stomped = False
-        self.knocked_out = False
+
+        self.init_horizontal_movement(
+            HorizontalMovementConfig(
+                gravity=KOOPA_TROOPA_GRAVITY,
+                speed=KOOPA_TROOPA_SPEED,
+                ground_snap_tolerance=KOOPA_TROOPA_GROUND_TOLERANCE,
+            )
+        )
+        self.init_knockout(
+            KnockoutSettings(
+                vertical_velocity=ENTITY_KNOCKOUT_VELOCITY_Y,
+                horizontal_velocity=ENTITY_KNOCKOUT_VELOCITY_X,
+                gravity=KOOPA_TROOPA_GRAVITY,
+            )
+        )
 
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
         """Advance Koopa physics and animation."""
-        if self.knocked_out:
-            self.state.vy -= KOOPA_TROOPA_GRAVITY * dt
-            self.state.x += self.state.vx * dt
-            self.state.y += self.state.vy * dt
-            return self.state.y >= -100
+        knockout_result = self.update_knockout(dt)
+        if knockout_result is not None:
+            return knockout_result
 
         if not self._stomped:
             self.animation_timer += dt
@@ -77,18 +87,6 @@ class KoopaTroopaEntity(Entity):
             self.process_pipeline(dt, level)
 
         return True
-
-    def build_pipeline(self) -> Optional[EntityPipeline]:
-        """Configure the Koopa Troopa physics pipeline."""
-        return EntityPipeline(
-            [
-                GravityProcessor(gravity=KOOPA_TROOPA_GRAVITY),
-                HorizontalVelocityProcessor(speed=KOOPA_TROOPA_SPEED),
-                VelocityIntegrator(),
-                WallBounceProcessor(speed=KOOPA_TROOPA_SPEED),
-                GroundSnapProcessor(tolerance=KOOPA_TROOPA_GROUND_TOLERANCE),
-            ]
-        )
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Koopa Troopa."""
@@ -127,20 +125,11 @@ class KoopaTroopaEntity(Entity):
             return False
 
         if source.can_damage_entities and self.can_be_damaged_by_entities:
-            self._knock_out(source)
+            self.trigger_knockout(source)
             return False
 
         if source.blocks_entities and not self._stomped:
-            if self.state.facing_right:
-                self.state.facing_right = False
-                self.state.x = source.state.x - self.state.width
-            else:
-                self.state.facing_right = True
-                self.state.x = source.state.x + source.state.width
-
-            self.state.vx = (
-                KOOPA_TROOPA_SPEED if self.state.facing_right else -KOOPA_TROOPA_SPEED
-            )
+            self.handle_blocking_entity(source)
 
         return False
 
@@ -177,20 +166,11 @@ class KoopaTroopaEntity(Entity):
     def is_stompable(self) -> bool:
         return not self._stomped and not self.knocked_out
 
-    def _knock_out(self, source: Entity) -> None:
-        self.knocked_out = True
+    def on_knockout(self, source: Entity) -> None:
         self._stomped = False
-        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
-        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
-        if source.state.vx != 0:
-            direction = 1 if source.state.vx > 0 else -1
-        else:
-            direction = -1 if source.state.x < self.state.x else 1
-        self.state.vx = horizontal * direction
-        self.kick_cooldown = 0.0
 
 
-class ShellEntity(Entity):
+class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
     """Koopa shell that toggles between stationary and moving states."""
 
     SHELL_KICK_COOLDOWN = 0.1
@@ -205,13 +185,22 @@ class ShellEntity(Entity):
         super().__init__(world_x, world_y, screen)
         self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
-        self.knocked_out = False
         self.kick_cooldown = 0.0
 
-        self._horizontal_processor = HorizontalVelocityProcessor(
-            speed=KOOPA_SHELL_SPEED
+        self.init_horizontal_movement(
+            HorizontalMovementConfig(
+                gravity=KOOPA_SHELL_GRAVITY,
+                speed=KOOPA_SHELL_SPEED,
+                ground_snap_tolerance=KOOPA_SHELL_GROUND_TOLERANCE,
+            )
         )
-        self._wall_bounce_processor = WallBounceProcessor(speed=KOOPA_SHELL_SPEED)
+        self.init_knockout(
+            KnockoutSettings(
+                vertical_velocity=ENTITY_KNOCKOUT_VELOCITY_Y,
+                horizontal_velocity=ENTITY_KNOCKOUT_VELOCITY_X,
+                gravity=KOOPA_SHELL_GRAVITY,
+            )
+        )
         self.set_pipeline()
 
     @property
@@ -226,25 +215,11 @@ class ShellEntity(Entity):
     def blocks_entities(self) -> bool:
         return not self.is_moving and not self.knocked_out
 
-    def build_pipeline(self) -> Optional[EntityPipeline]:
-        """Configure shell physics."""
-        return EntityPipeline(
-            [
-                GravityProcessor(gravity=KOOPA_SHELL_GRAVITY),
-                self._horizontal_processor,
-                VelocityIntegrator(),
-                self._wall_bounce_processor,
-                GroundSnapProcessor(tolerance=KOOPA_SHELL_GROUND_TOLERANCE),
-            ]
-        )
-
     def update(self, dt: float, level: Level) -> bool:
         """Apply gravity and movement based on current state."""
-        if self.knocked_out:
-            self.state.vy -= KOOPA_SHELL_GRAVITY * dt
-            self.state.x += self.state.vx * dt
-            self.state.y += self.state.vy * dt
-            return self.state.y >= -100
+        knockout_result = self.update_knockout(dt)
+        if knockout_result is not None:
+            return knockout_result
 
         if self.kick_cooldown > 0.0:
             self.kick_cooldown = max(0.0, self.kick_cooldown - dt)
@@ -312,23 +287,23 @@ class ShellEntity(Entity):
                 return False
 
             if source.is_moving and self.is_moving:
-                self._knock_out(source)
-                source._knock_out(self)
+                self.trigger_knockout(source)
+                source.trigger_knockout(self)
                 return False
 
             if source.is_moving and not self.is_moving:
-                self._knock_out(source)
+                self.trigger_knockout(source)
                 return False
 
             if not source.is_moving and self.is_moving:
                 if not source.knocked_out:
-                    source._knock_out(self)
+                    source.trigger_knockout(self)
                 return False
 
             return False
 
         if source.can_damage_entities and self.can_be_damaged_by_entities:
-            self._knock_out(source)
+            self.trigger_knockout(source)
             return False
 
         return False
@@ -362,17 +337,9 @@ class ShellEntity(Entity):
             self.state.vx = 0.0
             self.kick_cooldown = 0.0
 
-    def _knock_out(self, source: Entity) -> None:
-        self.knocked_out = True
+    def on_knockout(self, source: Entity) -> None:
         self._horizontal_processor.speed = 0.0
         self._wall_bounce_processor.speed = 0.0
-        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
-        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
-        if source.state.vx != 0:
-            direction = 1 if source.state.vx > 0 else -1
-        else:
-            direction = -1 if source.state.x < self.state.x else 1
-        self.state.vx = horizontal * direction
 
     def _determine_contact_side(self, mario: "Mario") -> str:
         """Determine which side of the shell Mario contacted."""

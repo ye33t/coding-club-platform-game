@@ -21,13 +21,11 @@ from ..physics.config import (
     GOOMBA_STOMP_BOUNCE_VELOCITY,
 )
 from .base import CollisionResponse, Entity
-from .physics import (
-    EntityPipeline,
-    GravityProcessor,
-    GroundSnapProcessor,
-    HorizontalVelocityProcessor,
-    VelocityIntegrator,
-    WallBounceProcessor,
+from .mixins import (
+    HorizontalMovementConfig,
+    HorizontalMovementMixin,
+    KnockoutMixin,
+    KnockoutSettings,
 )
 
 if TYPE_CHECKING:
@@ -35,7 +33,7 @@ if TYPE_CHECKING:
     from ..mario import Mario
 
 
-class GoombaEntity(Entity):
+class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
     """Goomba enemy that walks horizontally and can be stomped."""
 
     def __init__(
@@ -65,7 +63,21 @@ class GoombaEntity(Entity):
         self.is_dead = False
         self.death_timer = 0.0
         self.death_duration: float = float(GOOMBA_DEATH_DURATION)
-        self.knocked_out = False
+
+        self.init_horizontal_movement(
+            HorizontalMovementConfig(
+                gravity=GOOMBA_GRAVITY,
+                speed=GOOMBA_SPEED,
+                ground_snap_tolerance=GOOMBA_GROUND_TOLERANCE,
+            )
+        )
+        self.init_knockout(
+            KnockoutSettings(
+                vertical_velocity=ENTITY_KNOCKOUT_VELOCITY_Y,
+                horizontal_velocity=ENTITY_KNOCKOUT_VELOCITY_X,
+                gravity=GOOMBA_GRAVITY,
+            )
+        )
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
@@ -78,17 +90,9 @@ class GoombaEntity(Entity):
         Returns:
             True to keep entity active, False to remove
         """
-        if self.knocked_out:
-            self.state.vy -= GOOMBA_GRAVITY * dt
-            self.state.x += self.state.vx * dt
-            self.state.y += self.state.vy * dt
-            return self.state.y >= -100
-
-        if self.knocked_out:
-            self.state.vy -= GOOMBA_GRAVITY * dt
-            self.state.x += self.state.vx * dt
-            self.state.y += self.state.vy * dt
-            return self.state.y >= -100
+        knockout_result = self.update_knockout(dt)
+        if knockout_result is not None:
+            return knockout_result
 
         if self.is_dead:
             self.death_timer += dt
@@ -102,18 +106,6 @@ class GoombaEntity(Entity):
         self.process_pipeline(dt, level)
 
         return True
-
-    def build_pipeline(self) -> Optional[EntityPipeline]:
-        """Configure the reusable physics pipeline for Goomba movement."""
-        return EntityPipeline(
-            [
-                GravityProcessor(gravity=GOOMBA_GRAVITY),
-                HorizontalVelocityProcessor(speed=GOOMBA_SPEED),
-                VelocityIntegrator(),
-                WallBounceProcessor(speed=GOOMBA_SPEED),
-                GroundSnapProcessor(tolerance=GOOMBA_GROUND_TOLERANCE),
-            ]
-        )
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Goomba.
@@ -217,32 +209,14 @@ class GoombaEntity(Entity):
         return not self.is_dead
 
     def on_collide_entity(self, source: Entity) -> bool:
-        if self.knocked_out:
-            return False
-
         if source.can_damage_entities and self.can_be_damaged_by_entities:
-            self._knock_out(source)
+            self.trigger_knockout(source)
             return False
 
         if source.blocks_entities and not self.is_dead and not self.knocked_out:
-            if self.state.facing_right:
-                self.state.facing_right = False
-                self.state.x = source.state.x - self.state.width
-            else:
-                self.state.facing_right = True
-                self.state.x = source.state.x + source.state.width
-
-            self.state.vx = GOOMBA_SPEED if self.state.facing_right else -GOOMBA_SPEED
+            self.handle_blocking_entity(source)
 
         return False
 
-    def _knock_out(self, source: Entity) -> None:
-        self.knocked_out = True
+    def on_knockout(self, source: Entity) -> None:
         self.is_dead = True
-        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
-        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
-        if source.state.vx != 0:
-            direction = 1 if source.state.vx > 0 else -1
-        else:
-            direction = -1 if source.state.x < self.state.x else 1
-        self.state.vx = horizontal * direction
