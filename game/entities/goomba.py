@@ -36,7 +36,11 @@ class GoombaEntity(Entity):
     """Goomba enemy that walks horizontally and can be stomped."""
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = -1
+        self,
+        world_x: float,
+        world_y: float,
+        screen: int,
+        facing_right: bool,
     ):
         """Initialize Goomba.
 
@@ -44,10 +48,10 @@ class GoombaEntity(Entity):
             world_x: X position in world pixels
             world_y: Y position in screen-relative pixels (0-224, from bottom)
             screen: Which vertical screen the entity is on
-            direction: Initial horizontal direction (1=right, -1=left)
+            facing_right: Initial facing direction (True=right)
         """
         super().__init__(world_x, world_y, screen)
-        self.state.direction = direction
+        self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
 
         # Animation state

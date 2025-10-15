@@ -39,10 +39,14 @@ class KoopaTroopaEntity(Entity):
     """Koopa Troopa enemy that spawns a shell when stomped."""
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = -1
+        self,
+        world_x: float,
+        world_y: float,
+        screen: int,
+        facing_right: bool,
     ):
         super().__init__(world_x, world_y, screen)
-        self.state.direction = direction
+        self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
 
         self.animation_timer = 0.0
@@ -90,7 +94,7 @@ class KoopaTroopaEntity(Entity):
             sprite_name,
             int(screen_x),
             int(screen_y),
-            reflected=self.state.direction < 0,
+            reflected=self.state.facing_right,
         )
 
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
@@ -104,13 +108,14 @@ class KoopaTroopaEntity(Entity):
 
         if mario.vy < 0 and mario_bottom > stomp_threshold:
             self._stomped = True
-            self.state.direction = 0
+            self.state.vx = 0
+            self.state.facing_right = False
 
             shell = ShellEntity(
                 world_x=self.state.x,
                 world_y=self.state.y,
                 screen=self.state.screen,
-                direction=-1 if mario.facing_right else 1,
+                facing_right=not mario.facing_right,
             )
 
             return CollisionResponse(
@@ -130,10 +135,14 @@ class ShellEntity(Entity):
     """Stationary Koopa shell spawned after stomping a Koopa Troopa."""
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = 0
+        self,
+        world_x: float,
+        world_y: float,
+        screen: int = 0,
+        facing_right: bool = False,
     ):
         super().__init__(world_x, world_y, screen)
-        self.state.direction = direction
+        self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
         self.set_pipeline()
 

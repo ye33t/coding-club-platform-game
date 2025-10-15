@@ -29,7 +29,7 @@ class EntityState:
     screen: int = 0
     width: float = TILE_SIZE
     height: float = TILE_SIZE
-    direction: int = 1
+    facing_right: bool = False
     on_ground: bool = False
 
 

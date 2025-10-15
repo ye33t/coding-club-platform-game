@@ -15,5 +15,5 @@ class HorizontalVelocityProcessor:
 
     def process(self, context: EntityPhysicsContext) -> EntityPhysicsContext:
         state = context.state
-        state.vx = self.speed * state.direction
+        state.vx = self.speed if state.facing_right else -self.speed
         return context

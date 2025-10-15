@@ -46,10 +46,10 @@ class WallBounceProcessor:
         quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
 
         if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-            state.direction *= -1
-            state.vx = self.speed * state.direction
+            state.facing_right = state.vx <= 0
+            state.vx = self.speed if state.facing_right else -self.speed
 
-            if state.direction > 0:
+            if state.facing_right:
                 state.x = (tile_x + 1) * TILE_SIZE
             else:
                 state.x = (tile_x * TILE_SIZE) - state.width

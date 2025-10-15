@@ -181,7 +181,7 @@ ground_tolerance = 2.0
 
 [koopa_troopa]
 # Horizontal patrol speed in pixels/second
-speed = 30.0
+speed = 20.0
 
 # Downward acceleration applied to Koopas (px/s²)
 gravity = 400.0

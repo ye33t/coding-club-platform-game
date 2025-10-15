@@ -37,7 +37,11 @@ class MushroomEntity(Entity):
     """
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = 1
+        self,
+        world_x: float,
+        world_y: float,
+        screen: int,
+        facing_right: bool,
     ):
         """Initialize mushroom.
 
@@ -45,16 +49,16 @@ class MushroomEntity(Entity):
             world_x: X position in world pixels
             world_y: Y position in screen-relative pixels (0-224, from bottom)
             screen: Which vertical screen the entity is on
-            direction: Initial horizontal direction (1=right, -1=left)
+            facing_right: Initial facing direction (True=right)
         """
         super().__init__(world_x, world_y, screen)
-        self.state.direction = direction
+        self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
 
         self.emerging = True
         self.emerge_target_y = world_y + TILE_SIZE
         self.z_index = -10
-        self.final_direction = direction
+        self.final_facing_right = facing_right
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
@@ -74,7 +78,7 @@ class MushroomEntity(Entity):
                 self.state.y = self.emerge_target_y
                 self.emerging = False
                 self.z_index = 10
-                self.state.direction = self.final_direction
+                self.state.facing_right = self.final_facing_right
         else:
             self.process_pipeline(dt, level)
 
