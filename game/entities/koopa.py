@@ -202,11 +202,15 @@ class ShellEntity(Entity):
         super().__init__(world_x, world_y, screen)
         self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
+        self.knocked_out = False
 
         self._horizontal_processor = HorizontalVelocityProcessor(
             speed=KOOPA_SHELL_SPEED
         )
+        self._wall_bounce_processor = WallBounceProcessor(speed=KOOPA_SHELL_SPEED)
         self.set_pipeline()
+
+        self.knocked_out = False
 
     @property
     def can_damage_entities(self) -> bool:
@@ -214,11 +218,11 @@ class ShellEntity(Entity):
 
     @property
     def can_be_damaged_by_entities(self) -> bool:
-        return False
+        return not self.knocked_out
 
     @property
     def blocks_entities(self) -> bool:
-        return not self.is_moving
+        return not self.is_moving and not self.knocked_out
 
     def build_pipeline(self) -> Optional[EntityPipeline]:
         """Configure shell physics."""
@@ -227,25 +231,42 @@ class ShellEntity(Entity):
                 GravityProcessor(gravity=KOOPA_SHELL_GRAVITY),
                 self._horizontal_processor,
                 VelocityIntegrator(),
+                self._wall_bounce_processor,
                 GroundSnapProcessor(tolerance=KOOPA_SHELL_GROUND_TOLERANCE),
             ]
         )
 
     def update(self, dt: float, level: Level) -> bool:
         """Apply gravity and movement based on current state."""
+        if self.knocked_out:
+            self.state.vy -= KOOPA_SHELL_GRAVITY * dt
+            self.state.x += self.state.vx * dt
+            self.state.y += self.state.vy * dt
+            return self.state.y >= -100
+
         self.process_pipeline(dt, level)
         return True
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Koopa shell."""
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
-        sprites.draw_at_position(
-            surface,
-            "enemies",
-            "koopa_troopa_shell",
-            int(screen_x),
-            int(screen_y),
-        )
+        if self.knocked_out:
+            sprite = sprites.get("enemies", "koopa_troopa_shell")
+            if sprite is None:
+                return
+            flipped = pygame.transform.flip(sprite, False, True)
+            draw_x = int(screen_x)
+            screen_y_px = NATIVE_HEIGHT - int(screen_y)
+            draw_y = screen_y_px - flipped.get_height()
+            surface.blit(flipped, (draw_x, draw_y))
+        else:
+            sprites.draw_at_position(
+                surface,
+                "enemies",
+                "koopa_troopa_shell",
+                int(screen_x),
+                int(screen_y),
+            )
 
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Toggle movement based on stomp direction."""
@@ -269,6 +290,36 @@ class ShellEntity(Entity):
             bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
         )
 
+    def on_collide_entity(self, source: Entity) -> bool:
+        if self.knocked_out:
+            return False
+
+        if isinstance(source, ShellEntity):
+            if source.knocked_out:
+                return False
+
+            if source.is_moving and self.is_moving:
+                self._knock_out(source)
+                source._knock_out(self)
+                return False
+
+            if source.is_moving and not self.is_moving:
+                self._knock_out(source)
+                return False
+
+            if not source.is_moving and self.is_moving:
+                if not source.knocked_out:
+                    source._knock_out(self)
+                return False
+
+            return False
+
+        if source.can_damage_entities and self.can_be_damaged_by_entities:
+            self._knock_out(source)
+            return False
+
+        return False
+
     def kick(self, facing_right: bool) -> None:
         """Start the shell moving in the provided direction."""
         self._set_moving(True, facing_right=facing_right)
@@ -291,9 +342,22 @@ class ShellEntity(Entity):
 
         speed = KOOPA_SHELL_KICK_SPEED if moving else KOOPA_SHELL_SPEED
         self._horizontal_processor.speed = speed
+        self._wall_bounce_processor.speed = speed
         self.state.vx = speed if self.state.facing_right else -speed
         if not moving:
             self.state.vx = 0.0
+
+    def _knock_out(self, source: Entity) -> None:
+        self.knocked_out = True
+        self._horizontal_processor.speed = 0.0
+        self._wall_bounce_processor.speed = 0.0
+        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
+        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
+        if source.state.vx != 0:
+            direction = 1 if source.state.vx > 0 else -1
+        else:
+            direction = -1 if source.state.x < self.state.x else 1
+        self.state.vx = horizontal * direction
 
     def _determine_contact_side(self, mario: "Mario") -> str:
         """Determine which side of the shell Mario contacted."""
