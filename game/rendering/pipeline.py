@@ -50,7 +50,7 @@ class RenderPipeline:
         """Install or clear the post-process effect rendered last."""
         if layer.complete():
             return
-        
+
         if self._effect_layer is None:
             self._effect_layer = layer
         else:

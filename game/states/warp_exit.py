@@ -61,7 +61,6 @@ class WarpExitState(State):
         game.world.mario.y += move_amount
         self.distance_moved += move_amount
 
-        # When fully out of pipe, return to playing
         if self.distance_moved >= 0:
             from .playing import PlayingState
 

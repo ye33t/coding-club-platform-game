@@ -44,6 +44,9 @@ class DeathState(State):
 
         # Check if Mario has fallen far enough to end animation
         if mario.y < RESET_THRESHOLD_Y and not self._transition_started:
+            if game.transitioning:
+                return
+
             # Transition to start level with screen fade
             from ..rendering import TransitionMode
             from .start_level import StartLevelState

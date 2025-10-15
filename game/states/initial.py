@@ -18,6 +18,9 @@ class InitialState(State):
     def update(self, game: "Game", dt: float) -> None:
         """Immediately transition to start level with fade-in."""
 
+        if game.transitioning:
+            return
+
         from ..rendering import TransitionMode
         from .start_level import StartLevelState
 

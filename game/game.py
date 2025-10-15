@@ -39,6 +39,11 @@ class Game:
         self._pending_state: Optional[State] = None
         self._transition_timeline: Optional[TransitionTimeline] = None
 
+    @property
+    def transitioning(self) -> bool:
+        """Return True while a transition effect is active."""
+        return self._transition_timeline is not None
+
     def run(self) -> None:
         """Main game loop."""
         print("Starting NES Platform Game...")
@@ -109,9 +114,10 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    from .states.start_level import StartLevelState
+                    if not self.transitioning:
+                        from .states.start_level import StartLevelState
 
-                    self.transition(StartLevelState())
+                        self.transition(StartLevelState())
                 elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
                     self._renderer.change_scale(-1)
                 elif event.key == pygame.K_EQUALS or event.key == pygame.K_KP_PLUS:

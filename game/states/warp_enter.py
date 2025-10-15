@@ -39,11 +39,13 @@ class WarpEnterState(State):
         game.world.mario.y -= move_amount
         self.distance_moved += move_amount
 
-        # When fully inside pipe, transition to exit
         if self.distance_moved >= warp_distance and not self._transition_started:
+            if game.transitioning:
+                return
+
             from ..rendering import TransitionMode
             from .warp_exit import WarpExitState
 
-            next_state = WarpExitState(self.warp_behavior)
             self._transition_started = True
+            next_state = WarpExitState(self.warp_behavior)
             game.transition(next_state, TransitionMode.BOTH)

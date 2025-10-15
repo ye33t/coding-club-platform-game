@@ -49,6 +49,9 @@ class EndLevelState(State):
 
         # Check if Mario has reached the base
         if mario.y <= self.flagpole_base_y and not self._transition_started:
+            if game.transitioning:
+                return
+
             # Transition to start level with screen fade
             from ..rendering import TransitionMode
             from .start_level import StartLevelState
