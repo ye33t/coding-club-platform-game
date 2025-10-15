@@ -165,3 +165,16 @@ stomp_bounce_velocity = 200.0
 
 # Time in seconds to keep the flattened Goomba before removal
 death_duration = 0.5
+
+[mushroom]
+# Horizontal speed for mushrooms (px/s)
+speed = 50.0
+
+# Downward acceleration (px/s²)
+gravity = 400.0
+
+# Speed the mushroom emerges upward from a block (px/s)
+emerge_speed = 30.0
+
+# Ground snap tolerance when settling on tiles (px)
+ground_tolerance = 2.0

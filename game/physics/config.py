@@ -90,3 +90,9 @@ GOOMBA_GROUND_TOLERANCE = config["goomba"]["ground_tolerance"]
 GOOMBA_ANIMATION_FPS = config["goomba"]["animation_fps"]
 GOOMBA_STOMP_BOUNCE_VELOCITY = config["goomba"]["stomp_bounce_velocity"]
 GOOMBA_DEATH_DURATION = config["goomba"]["death_duration"]
+
+# Mushroom collectible
+MUSHROOM_SPEED = config["mushroom"]["speed"]
+MUSHROOM_GRAVITY = config["mushroom"]["gravity"]
+MUSHROOM_EMERGE_SPEED = config["mushroom"]["emerge_speed"]
+MUSHROOM_GROUND_TOLERANCE = config["mushroom"]["ground_tolerance"]

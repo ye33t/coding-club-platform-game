@@ -9,6 +9,12 @@ from pygame import Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..content import sprites
+from ..physics.config import (
+    MUSHROOM_EMERGE_SPEED,
+    MUSHROOM_GRAVITY,
+    MUSHROOM_GROUND_TOLERANCE,
+    MUSHROOM_SPEED,
+)
 from .base import CollisionResponse, Entity
 from .physics import (
     EntityPipeline,
@@ -22,12 +28,6 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
-
-
-MUSHROOM_SPEED = 50.0
-MUSHROOM_GRAVITY = 400.0
-MUSHROOM_EMERGE_SPEED = 30.0
-GROUND_DETECTION_TOLERANCE = 2.0
 
 
 class MushroomEntity(Entity):
@@ -112,13 +112,13 @@ class MushroomEntity(Entity):
         )
 
     def build_pipeline(self) -> Optional[EntityPipeline]:
-        """Configure physics for post-emerge mushroom behaviour."""
+        """Configure physics for post-emerge mushroom behavior."""
         return EntityPipeline(
             [
                 GravityProcessor(gravity=MUSHROOM_GRAVITY),
                 HorizontalVelocityProcessor(speed=MUSHROOM_SPEED),
                 VelocityIntegrator(),
                 WallBounceProcessor(speed=MUSHROOM_SPEED),
-                GroundSnapProcessor(tolerance=GROUND_DETECTION_TOLERANCE),
+                GroundSnapProcessor(tolerance=MUSHROOM_GROUND_TOLERANCE),
             ]
         )
