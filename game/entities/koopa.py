@@ -278,12 +278,12 @@ class ShellEntity(Entity):
         if not is_stomp:
             return CollisionResponse(damage=True) if self.is_moving else None
 
-        contact_side = self._determine_contact_side(mario)
+        facing_right = mario.facing_right
 
         if self.is_moving:
             self._set_moving(False)
         else:
-            self._set_moving(True, facing_right=(contact_side == "left"))
+            self._set_moving(True, facing_right=facing_right)
 
         return CollisionResponse(
             remove=False,
