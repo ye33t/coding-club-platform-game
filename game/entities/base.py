@@ -10,10 +10,11 @@ from pygame import Rect, Surface
 
 from ..camera import Camera
 from ..constants import TILE_SIZE
+from ..rendering.base import Drawable
 
 if TYPE_CHECKING:
     from ..level import Level
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 @dataclass(slots=True)
@@ -55,7 +56,7 @@ class CollisionResponse:
         self.bounce_velocity = bounce_velocity
 
 
-class Entity(ABC):
+class Entity(ABC, Drawable):
     """Base class for all game entities."""
 
     z_index: int = 10
@@ -104,7 +105,7 @@ class Entity(ABC):
             int(self.state.height),
         )
 
-    def on_collide_mario(self, mario_state: MarioState) -> Optional[CollisionResponse]:
+    def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle collision with Mario.
 
         Args:

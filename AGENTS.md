@@ -2,16 +2,14 @@
 
 ## Project Structure & Module Organization
 
-- `game/` holds runtime code; key subpackages include `physics/` for the pipeline processors, `states/` for Mario state transitions, and `terrain/` plus `levels/` for tile data.
+- `game/` holds runtime code; key sub-packages include `physics/` for the pipeline processors, `states/` for Mario state transitions, and `terrain/` plus `levels/` for tile data.
 - Art, level YAML, and runtime configs live under `game/assets/`; update these in tandem with code changes so assets remain in sync.
 - Reusable scripts (`main.py`, `sprite_extractor.py`, `format.py`) sit at the repo root, while automated checks belong in `format.py`.
-- Tests reside in `tests/`, mirroring the package layout, but we are not expanding the suite right now.
 
-## Build, Test, and Development Commands
+## Build and Development Commands
 
 - `poetry install`: set up the virtualenv and install runtime plus dev dependencies.
 - `poetry run game`: launch the playable demo via `main:main`.
-- `poetry run pytest` (or `poetry run test`): execute the automated test suite defined in `pytest.ini`.
 - `poetry run format`: run the formatting and linting pipeline (isort → black → flake8 → mypy) defined in `format.py`.
 
 ## Coding Style & Naming Conventions
@@ -23,8 +21,7 @@
 
 ## Testing Guidelines
 
-- We are currently **not authoring new automated tests**; rely on manual QA plus the existing smoke test.
-- You can still run `poetry run pytest` to ensure the smoke check passes before shipping changes.
+- Testing is performed manually by running the game.
 
 ## Commit & Pull Request Guidelines
 

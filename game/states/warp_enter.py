@@ -18,17 +18,13 @@ class WarpEnterState(State):
             warp_behavior: The warp behavior containing destination info
         """
         self.warp_behavior = warp_behavior
-        self.distance_moved = 0.0
 
     def on_enter(self, game) -> None:
         """Start warp enter animation."""
         self.distance_moved = 0.0
+        self._transition_started = False
         # Set Mario to render behind terrain
         game.world.mario.z_index = -10
-
-    def handle_events(self, game) -> None:
-        """No input during warp."""
-        pass
 
     def on_exit(self, game) -> None:
         """Reset Mario's z_index when exiting warp."""
@@ -38,21 +34,18 @@ class WarpEnterState(State):
         """Move mario down into pipe."""
         from ..physics.config import WARP_SPEED
 
-        warp_distance = game.world.mario.state.height
+        warp_distance = game.world.mario.height
         move_amount = WARP_SPEED * dt
-        game.world.mario.state.y -= move_amount
+        game.world.mario.y -= move_amount
         self.distance_moved += move_amount
 
-        # When fully inside pipe, transition to exit
-        if self.distance_moved >= warp_distance:
-            from .screen_transition import ScreenTransitionState, TransitionMode
+        if self.distance_moved >= warp_distance and not self._transition_started:
+            if game.transitioning:
+                return
+
+            from ..rendering import TransitionMode
             from .warp_exit import WarpExitState
 
+            self._transition_started = True
             next_state = WarpExitState(self.warp_behavior)
-            game.transition_to(
-                ScreenTransitionState(self, next_state, TransitionMode.BOTH)
-            )
-
-    def draw(self, game, surface) -> None:
-        """Draw with mario behind tiles."""
-        game.draw_world(surface)
+            game.transition(next_state, TransitionMode.BOTH)

@@ -13,11 +13,11 @@ class VelocityProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Update position from velocity."""
-        mario_state = context.mario_state
+        mario = context.mario
         dt = context.dt
 
         # Update position based on velocity and delta time
-        mario_state.x += mario_state.vx * dt
-        mario_state.y += mario_state.vy * dt
+        mario.x += mario.vx * dt
+        mario.y += mario.vy * dt
 
         return context

@@ -12,13 +12,6 @@ class PlayingState(State):
     Handles player input, world updates, and rendering during active play.
     """
 
-    def handle_events(self, game) -> None:
-        """Process state-specific events during gameplay.
-
-        Global events (ESC, +/-, F3) are handled by Game._handle_events().
-        """
-        pass  # No state-specific events yet
-
     def update(self, game, dt: float) -> None:
         """Update game state during gameplay."""
         # Get current keyboard state
@@ -33,18 +26,12 @@ class PlayingState(State):
             if isinstance(event, DeathEvent):
                 from .death import DeathState
 
-                game.transition_to(DeathState())
+                game.transition(DeathState())
             elif isinstance(event, WarpEvent):
                 from .warp_enter import WarpEnterState
 
-                game.transition_to(WarpEnterState(event.warp_behavior))
+                game.transition(WarpEnterState(event.warp_behavior))
             elif isinstance(event, EndLevelEvent):
                 from .end_level import EndLevelState
 
-                game.transition_to(
-                    EndLevelState(event.flagpole_x, event.flagpole_base_y)
-                )
-
-    def draw(self, game, surface) -> None:
-        """Draw everything to the screen during gameplay."""
-        game.draw_world(surface)
+                game.transition(EndLevelState(event.flagpole_x, event.flagpole_base_y))

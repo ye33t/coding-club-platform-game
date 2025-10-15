@@ -34,34 +34,34 @@ class WallCollisionProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Check and resolve wall collisions using quadrant masks."""
-        mario_state = context.mario_state
+        mario = context.mario
         level = context.level
 
         # Only check if moving in the appropriate direction
-        if self.direction == Direction.LEFT and mario_state.vx >= 0:
+        if self.direction == Direction.LEFT and mario.vx >= 0:
             return context
-        if self.direction == Direction.RIGHT and mario_state.vx <= 0:
+        if self.direction == Direction.RIGHT and mario.vx <= 0:
             return context
 
         # Calculate edge position based on direction
         if self.direction == Direction.LEFT:
-            edge_x = mario_state.x
+            edge_x = mario.x
         else:  # RIGHT
-            edge_x = mario_state.x + mario_state.width - 1
+            edge_x = mario.x + mario.width - 1
 
         # Check at multiple heights (bottom, middle, top)
         # Skip the very bottom to avoid collision with ground tiles
         sample_heights = [
-            mario_state.y + WALL_DEAD_ZONE,  # Above feet (tolerance for ground)
-            mario_state.y + mario_state.height / 2,  # Middle
-            mario_state.y + mario_state.height - WALL_SAMPLE_TOP_OFFSET,  # Near top
+            mario.y + WALL_DEAD_ZONE,  # Above feet (tolerance for ground)
+            mario.y + mario.height / 2,  # Middle
+            mario.y + mario.height - WALL_SAMPLE_TOP_OFFSET,  # Near top
         ]
 
         for sample_y in sample_heights:
             tile_x = int(edge_x // TILE_SIZE)
             tile_y = int(sample_y // TILE_SIZE)
 
-            tile_type = level.get_terrain_tile(mario_state.screen, tile_x, tile_y)
+            tile_type = level.get_terrain_tile(mario.screen, tile_x, tile_y)
             tile_def = level.get_tile_definition(tile_type)
 
             if not tile_def or tile_def.collision_mask == 0:
@@ -79,12 +79,12 @@ class WallCollisionProcessor(PhysicsProcessor):
                 # Hit a wall - push Mario out
                 if self.direction == Direction.LEFT:
                     # Push to the right edge of the tile
-                    mario_state.x = (tile_x + 1) * TILE_SIZE
+                    mario.x = (tile_x + 1) * TILE_SIZE
                 else:  # RIGHT
                     # Push to the left edge of the tile
-                    mario_state.x = (tile_x * TILE_SIZE) - mario_state.width
+                    mario.x = (tile_x * TILE_SIZE) - mario.width
 
-                mario_state.vx = 0  # Stop horizontal movement
+                mario.vx = 0  # Stop horizontal movement
                 break
 
         return context

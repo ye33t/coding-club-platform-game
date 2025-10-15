@@ -2,14 +2,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional, Set
-
-from ..camera import CameraState
-from ..mario import MarioIntent, MarioState
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
+    from ..camera import Camera
     from ..entities import Entity
     from ..level import Level
+    from ..mario import Mario
     from .events import PhysicsEvent
 
 
@@ -18,19 +17,25 @@ class PhysicsContext:
     """Carries data through the physics pipeline.
 
     This context object is passed through each processor in the pipeline,
-    allowing processors to access and modify the state and access level data.
+    allowing processors to access and modify the state and supporting data.
     """
 
-    mario_state: MarioState  # The current/evolving state of Mario
-    mario_intent: MarioIntent  # What the player wants Mario to do
+    mario: "Mario"  # Live Mario instance (state mutated in place)
+    camera: "Camera"  # Live camera instance mutated in place
     level: "Level"  # Level data for collision detection
-    camera_state: CameraState  # Camera state for boundary checks
     dt: float  # Delta time for this frame
-    event: Optional["PhysicsEvent"] = None  # Event that triggers state transition
+    events: List["PhysicsEvent"] = field(
+        default_factory=list
+    )  # Events raised this frame
     entities: List["Entity"] = field(default_factory=list)  # Active game entities
-    entities_to_remove: Set["Entity"] = field(
-        default_factory=set
-    )  # Entities flagged for removal during processing
+
+    def add_event(self, event: "PhysicsEvent") -> None:
+        """Record a physics event emitted by the pipeline."""
+        self.events.append(event)
+
+    def has_short_circuit_event(self) -> bool:
+        """Check if any event requests short-circuiting the pipeline."""
+        return any(evt.short_circuit for evt in self.events)
 
 
 class PhysicsProcessor(ABC):

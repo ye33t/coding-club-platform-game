@@ -18,7 +18,6 @@ class WarpExitState(State):
             warp_behavior: The warp behavior containing destination info
         """
         self.warp_behavior = warp_behavior
-        self.distance_moved = 0.0
 
     def on_enter(self, game) -> None:
         """Setup exit: change screen, position mario at destination."""
@@ -37,25 +36,18 @@ class WarpExitState(State):
         pixel_y = pipe_y * TILE_SIZE
 
         # Position mario at pipe, offset down by mario's height (hidden)
-        game.world.mario.state.screen = self.warp_behavior.to_screen
-        game.world.mario.state.x = pixel_x
-        game.world.mario.state.y = pixel_y
+        game.world.mario.screen = self.warp_behavior.to_screen
+        game.world.mario.x = pixel_x
+        game.world.mario.y = pixel_y
 
         # Reset camera to follow mario at new position
         from ..constants import NATIVE_WIDTH
 
         screen_center = NATIVE_WIDTH // 2
         ideal_camera_x = max(0, pixel_x - screen_center)
-        game.world.camera.state.x = ideal_camera_x
-        game.world.camera.state.max_x = ideal_camera_x
-
-        self.distance_moved = -game.world.mario.state.height
-
-        # Optional: Flash screen black here
-
-    def handle_events(self, game) -> None:
-        """No input during warp."""
-        pass
+        game.world.camera.x = ideal_camera_x
+        game.world.camera.max_x = ideal_camera_x
+        self.distance_moved = -game.world.mario.height
 
     def on_exit(self, game) -> None:
         """Reset Mario's z_index when exiting warp."""
@@ -66,15 +58,10 @@ class WarpExitState(State):
         from ..physics.config import WARP_SPEED
 
         move_amount = WARP_SPEED * dt
-        game.world.mario.state.y += move_amount
+        game.world.mario.y += move_amount
         self.distance_moved += move_amount
 
-        # When fully out of pipe, return to playing
         if self.distance_moved >= 0:
             from .playing import PlayingState
 
-            game.transition_to(PlayingState())
-
-    def draw(self, game, surface) -> None:
-        """Draw with mario behind tiles."""
-        game.draw_world(surface)
+            game.transition(PlayingState())

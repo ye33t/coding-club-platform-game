@@ -15,51 +15,27 @@ from .ground_collision import GroundCollisionProcessor
 from .intent import IntentProcessor
 from .movement import MovementProcessor
 from .power_up import MarioTransitionProcessor
+from .terrain_behaviors import TerrainBehaviorProcessor
 from .velocity import VelocityProcessor
 from .wall_collision import Direction, WallCollisionProcessor
 from .warp_event import WarpEventProcessor
 
 if TYPE_CHECKING:
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 class PhysicsPipeline:
-    """Orchestrates physics processors in a defined order.
-
-    The pipeline processes physics in this order:
-    1. Intent - Convert player input to target states
-    2. EndLevelEvent - Check if Mario touched flagpole (short-circuits)
-    3. WarpEvent - Check if Mario is warping (short-circuits)
-    4. DeathEvent - Check if Mario fell below screen (short-circuits)
-    5. Movement - Apply friction/deceleration
-    6. Gravity - Apply gravity and handle jumping
-    7. Velocity - Update position from velocity
-    8. Boundaries - Enforce world boundaries
-    9. WallCollision (LEFT) - Detect and resolve left wall hits
-    10. WallCollision (RIGHT) - Detect and resolve right wall hits
-    11. CeilingCollision - Detect and resolve ceiling hits
-    12. GroundCollision - Detect and resolve ground/slopes
-    13. FlagpoleClamp - Prevent Mario from sliding past the flagpole
-    14. Action - Determine action from final state
-    15. EntityCollision - Check collisions between Mario and entities
-
-    This order ensures that:
-    - Input is processed first
-    - Game events are detected early and short-circuit the pipeline
-    - Forces are applied (gravity, friction)
-    - Position is updated
-    - Collisions are resolved separately
-    - Final action is determined
-    - Entity collisions checked after Mario's state is finalized
-    """
+    """Orchestrates physics processors in a defined order."""
 
     def __init__(self) -> None:
         """Initialize the pipeline with default processors."""
         self.processors: List[PhysicsProcessor] = [
-            IntentProcessor(),
+            # short-circuiting event processors first
             EndLevelEventProcessor(),
             WarpEventProcessor(),
             DeathEventProcessor(),
+            # core physics processors
+            IntentProcessor(),
             MovementProcessor(),
             GravityProcessor(),
             VelocityProcessor(),
@@ -69,9 +45,11 @@ class PhysicsPipeline:
             CeilingCollisionProcessor(),
             GroundCollisionProcessor(),
             FlagpoleClampProcessor(),
-            ActionProcessor(),
-            MarioTransitionProcessor(),
             EntityCollisionProcessor(),
+            # post-movement processors
+            ActionProcessor(),
+            TerrainBehaviorProcessor(),
+            MarioTransitionProcessor(),
         ]
 
         # Optional: Enable/disable debugging
@@ -91,18 +69,21 @@ class PhysicsPipeline:
                 if self.debug:
                     processor_name = processor.__class__.__name__
                     print(f"Processing: {processor_name}")
-                    self._debug_state(context.mario_state, f"Before {processor_name}")
+                    self._debug_state(context.mario, f"Before {processor_name}")
 
                 context = processor.process(context)
 
                 if self.debug:
                     name = processor.__class__.__name__
-                    self._debug_state(context.mario_state, f"After {name}")
+                    self._debug_state(context.mario, f"After {name}")
 
                 # Short-circuit if an event was raised
-                if context.event is not None:
+                if context.has_short_circuit_event():
                     if self.debug:
-                        print(f"Event raised: {context.event.__class__.__name__}")
+                        latest = next(
+                            evt for evt in reversed(context.events) if evt.short_circuit
+                        )
+                        print(f"Event raised: {latest.__class__.__name__}")
                     return context
 
         return context
@@ -131,10 +112,10 @@ class PhysicsPipeline:
             p for p in self.processors if not isinstance(p, processor_type)
         ]
 
-    def _debug_state(self, mario_state: "MarioState", label: str) -> None:
+    def _debug_state(self, mario: "Mario", label: str) -> None:
         """Debug helper to print state."""
         print(
-            f"  {label}: pos=({mario_state.x:.1f}, {mario_state.y:.1f}), "
-            f"vel=({mario_state.vx:.1f}, {mario_state.vy:.1f}), "
-            f"on_ground={mario_state.on_ground}, action={mario_state.action}"
+            f"  {label}: pos=({mario.x:.1f}, {mario.y:.1f}), "
+            f"vel=({mario.vx:.1f}, {mario.vy:.1f}), "
+            f"on_ground={mario.on_ground}, action={mario.action}"
         )

@@ -23,8 +23,8 @@ class IntentProcessor(PhysicsProcessor):
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         """Process player intent."""
-        mario_state = context.mario_state
-        intent = context.mario_intent
+        mario = context.mario
+        intent = mario.intent
 
         # Calculate target horizontal velocity based on intent
         target_vx = 0.0
@@ -33,27 +33,27 @@ class IntentProcessor(PhysicsProcessor):
             target_vx = RUN_SPEED if intent.run else WALK_SPEED
 
             # Check for skidding (trying to reverse direction quickly)
-            if mario_state.vx < -SKID_THRESHOLD and mario_state.on_ground:
-                mario_state.action = "skidding"
-            elif mario_state.action != "skidding":
-                mario_state.facing_right = True
+            if mario.vx < -SKID_THRESHOLD and mario.on_ground:
+                mario.action = "skidding"
+            elif mario.action != "skidding":
+                mario.facing_right = True
 
         elif intent.move_left:
             target_vx = -(RUN_SPEED if intent.run else WALK_SPEED)
 
             # Check for skidding
-            if mario_state.vx > SKID_THRESHOLD and mario_state.on_ground:
-                mario_state.action = "skidding"
-            elif mario_state.action != "skidding":
-                mario_state.facing_right = False
+            if mario.vx > SKID_THRESHOLD and mario.on_ground:
+                mario.action = "skidding"
+            elif mario.action != "skidding":
+                mario.facing_right = False
 
         # Apply acceleration whenever there's input
         if target_vx != 0:
             # Choose acceleration based on state
-            if mario_state.action == "skidding":
+            if mario.action == "skidding":
                 # Stronger deceleration when skidding
                 acceleration = SKID_DECELERATION * context.dt
-            elif mario_state.on_ground:
+            elif mario.on_ground:
                 # Normal ground acceleration
                 acceleration = GROUND_ACCELERATION * context.dt
             else:
@@ -61,16 +61,16 @@ class IntentProcessor(PhysicsProcessor):
                 acceleration = AIR_ACCELERATION * context.dt
 
             # Apply acceleration to move velocity toward target
-            if target_vx > mario_state.vx:
+            if target_vx > mario.vx:
                 # Accelerating to the right
-                mario_state.vx = min(target_vx, mario_state.vx + acceleration)
-            elif target_vx < mario_state.vx:
+                mario.vx = min(target_vx, mario.vx + acceleration)
+            elif target_vx < mario.vx:
                 # Accelerating to the left (or decelerating)
-                mario_state.vx = max(target_vx, mario_state.vx - acceleration)
+                mario.vx = max(target_vx, mario.vx - acceleration)
 
         # Handle jump intent
         # Just mark if we should jump - GravityProcessor will handle it
-        if intent.jump and mario_state.on_ground:
+        if intent.jump and mario.on_ground:
             # Set a flag that GravityProcessor will read
             # For now, we'll use the intent directly in GravityProcessor
             pass

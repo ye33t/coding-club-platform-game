@@ -14,7 +14,7 @@ from .base import CollisionResponse, Entity
 
 if TYPE_CHECKING:
     from ..level import Level
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 GOOMBA_SPEED = 30.0
@@ -112,11 +112,11 @@ class GoombaEntity(Entity):
                 int(screen_y),
             )
 
-    def on_collide_mario(self, mario_state: MarioState) -> Optional[CollisionResponse]:
+    def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle collision with Mario.
 
         Args:
-            mario_state: Mario's current state
+            mario: Mario's live object
 
         Returns:
             CollisionResponse describing what should happen
@@ -125,13 +125,13 @@ class GoombaEntity(Entity):
             return None
 
         # Check if Mario is falling onto the Goomba (stomping)
-        mario_bottom = mario_state.y
+        mario_bottom = mario.y
         goomba_top = self.state.y + self.state.height
 
         # Mario is stomping if falling and bottom is above top 1/3 of Goomba
         # This is more forgiving - allows stomping when hitting top portion
         stomp_threshold = goomba_top - (self.state.height * 0.33)  # Top third
-        if mario_state.vy < 0 and mario_bottom > stomp_threshold:
+        if mario.vy < 0 and mario_bottom > stomp_threshold:
             # Mario stomped the Goomba
             self.is_dead = True
             self.state.vx = 0  # Stop horizontal movement

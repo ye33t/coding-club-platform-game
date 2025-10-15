@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING, List
 
 from pygame import Surface
 
@@ -27,6 +27,14 @@ class EntityManager:
             entity: Entity to add
         """
         self._entities.append(entity)
+
+    def remove(self, entity: Entity) -> None:
+        """Remove an entity from the manager.
+
+        Args:
+            entity: Entity to remove
+        """
+        self._entities.remove(entity)
 
     def update(
         self, dt: float, level: Level, mario_screen: int, camera_x: float
@@ -56,23 +64,11 @@ class EntityManager:
         for entity in self._entities:
             entity.draw(surface, camera)
 
-    def get_entities(self) -> List[Entity]:
-        """Get list of active entities.
-
-        Returns:
-            List of all active entities
-        """
-        return self._entities.copy()
-
     def clear(self) -> None:
         """Remove all active entities."""
         self._entities.clear()
 
-    def remove_entities(self, entities: Iterable[Entity]) -> None:
-        """Remove specified entities from the manager."""
-        if not entities:
-            return
-        removal_ids = {id(entity) for entity in entities}
-        self._entities = [
-            entity for entity in self._entities if id(entity) not in removal_ids
-        ]
+    @property
+    def items(self) -> List[Entity]:
+        """Get an iterable of all active entities."""
+        return self._entities

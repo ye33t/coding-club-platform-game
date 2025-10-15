@@ -14,7 +14,7 @@ from .base import CollisionResponse, Entity
 
 if TYPE_CHECKING:
     from ..level import Level
-    from ..mario import MarioState
+    from ..mario import Mario
 
 
 MUSHROOM_SPEED = 50.0
@@ -94,11 +94,11 @@ class MushroomEntity(Entity):
             int(screen_y),
         )
 
-    def on_collide_mario(self, mario_state: MarioState) -> Optional[CollisionResponse]:
+    def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle collision with Mario.
 
         Args:
-            mario_state: Mario's current state
+            mario: Mario's live object
 
         Returns:
             CollisionResponse to remove mushroom and apply power-up

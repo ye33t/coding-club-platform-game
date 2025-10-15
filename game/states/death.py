@@ -18,40 +18,38 @@ class DeathState(State):
     - Transitions to StartLevelState when animation is complete
     """
 
+    def __init__(self) -> None:
+        self._transition_started = False
+
     def on_enter(self, game: "Game") -> None:
         """Initialize death animation."""
+        self._transition_started = False
         # Give Mario the death leap velocity
-        game.world.mario.state.vy = DEATH_LEAP_VELOCITY
-        game.world.mario.state.vx = 0
+        game.world.mario.vy = DEATH_LEAP_VELOCITY
+        game.world.mario.vx = 0
 
         # Tells the renderer what animation to use for Mario
-        game.world.mario.state.action = "dying"
-
-    def handle_events(self, game: "Game") -> None:
-        """No input during death."""
-        pass
+        game.world.mario.size = "small"
+        game.world.mario.action = "dying"
 
     def update(self, game: "Game", dt: float) -> None:
         """Update death animation."""
         mario = game.world.mario
 
         # Apply gravity
-        mario.state.vy -= GRAVITY * dt
+        mario.vy -= GRAVITY * dt
 
         # Update position
-        mario.state.y += mario.state.vy * dt
-
-        # Update animation
-        mario.update_animation()
+        mario.y += mario.vy * dt
 
         # Check if Mario has fallen far enough to end animation
-        if mario.state.y < RESET_THRESHOLD_Y:
+        if mario.y < RESET_THRESHOLD_Y and not self._transition_started:
+            if game.transitioning:
+                return
+
             # Transition to start level with screen fade
-            from .screen_transition import ScreenTransitionState
+            from ..rendering import TransitionMode
             from .start_level import StartLevelState
 
-            game.transition_to(ScreenTransitionState(self, StartLevelState()))
-
-    def draw(self, game: "Game", surface) -> None:
-        """Draw Mario during death animation."""
-        game.draw_world(surface)
+            self._transition_started = True
+            game.transition(StartLevelState(), TransitionMode.BOTH)
