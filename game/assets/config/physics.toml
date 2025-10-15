@@ -178,3 +178,32 @@ emerge_speed = 30.0
 
 # Ground snap tolerance when settling on tiles (px)
 ground_tolerance = 2.0
+
+[koopa_troopa]
+# Horizontal patrol speed in pixels/second
+speed = 30.0
+
+# Downward acceleration applied to Koopas (px/s²)
+gravity = 400.0
+
+# Ground snap tolerance in pixels
+ground_tolerance = 2.0
+
+# Animation frames per second for walking cycle
+animation_fps = 4.0
+
+# Upward velocity applied to Mario after stomping (px/s)
+stomp_bounce_velocity = 200.0
+
+[koopa_shell]
+# Horizontal speed when stationary shell is kicked (px/s) - default 0 for idle shell
+speed = 0.0
+
+# Downward acceleration (px/s²)
+gravity = 400.0
+
+# Ground snap tolerance in pixels
+ground_tolerance = 2.0
+
+# Upward velocity applied to Mario when stomping the shell (px/s)
+stomp_bounce_velocity = 200.0

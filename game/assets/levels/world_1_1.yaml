@@ -93,7 +93,7 @@ screens:
         A:
           entities:
             a:
-              type: goomba
+              type: koopa_troopa
               facing: left
         B:
           entities:

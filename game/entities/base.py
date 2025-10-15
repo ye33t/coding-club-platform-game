@@ -42,6 +42,7 @@ class CollisionResponse:
         damage: bool = False,
         power_up_type: Optional[str] = None,
         bounce_velocity: Optional[float] = None,
+        spawn_entity: Optional["Entity"] = None,
     ):
         """Initialize collision response.
 
@@ -50,11 +51,13 @@ class CollisionResponse:
             damage: Damage Mario
             power_up_type: Specific power-up identifier (e.g., "mushroom")
             bounce_velocity: Upward velocity to apply to Mario (e.g., for stomping)
+            spawn_entity: Entity to spawn after collision (e.g., Koopa shell)
         """
         self.remove = remove
         self.damage = damage
         self.power_up_type = power_up_type
         self.bounce_velocity = bounce_velocity
+        self.spawn_entity = spawn_entity
 
 
 class Entity(ABC, Drawable):

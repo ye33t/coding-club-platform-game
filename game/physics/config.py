@@ -96,3 +96,16 @@ MUSHROOM_SPEED = config["mushroom"]["speed"]
 MUSHROOM_GRAVITY = config["mushroom"]["gravity"]
 MUSHROOM_EMERGE_SPEED = config["mushroom"]["emerge_speed"]
 MUSHROOM_GROUND_TOLERANCE = config["mushroom"]["ground_tolerance"]
+
+# Koopa Troopa enemy
+KOOPA_TROOPA_SPEED = config["koopa_troopa"]["speed"]
+KOOPA_TROOPA_GRAVITY = config["koopa_troopa"]["gravity"]
+KOOPA_TROOPA_GROUND_TOLERANCE = config["koopa_troopa"]["ground_tolerance"]
+KOOPA_TROOPA_ANIMATION_FPS = config["koopa_troopa"]["animation_fps"]
+KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY = config["koopa_troopa"]["stomp_bounce_velocity"]
+
+# Koopa shell
+KOOPA_SHELL_SPEED = config["koopa_shell"]["speed"]
+KOOPA_SHELL_GRAVITY = config["koopa_shell"]["gravity"]
+KOOPA_SHELL_GROUND_TOLERANCE = config["koopa_shell"]["ground_tolerance"]
+KOOPA_SHELL_STOMP_BOUNCE_VELOCITY = config["koopa_shell"]["stomp_bounce_velocity"]

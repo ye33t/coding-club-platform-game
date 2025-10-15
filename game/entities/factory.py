@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional
 
 from .base import Entity
 from .goomba import GoombaEntity
+from .koopa import KoopaTroopaEntity, ShellEntity
 from .mushroom import MushroomEntity
 
 
@@ -41,6 +42,14 @@ class EntityFactory:
         elif entity_type == "mushroom":
             direction = self._parse_direction(params.get("facing", "right"))
             return MushroomEntity(world_x, world_y, screen, direction)
+
+        elif entity_type == "koopa_troopa":
+            direction = self._parse_direction(params.get("facing", "left"))
+            return KoopaTroopaEntity(world_x, world_y, screen, direction)
+
+        elif entity_type == "koopa_shell":
+            direction = self._parse_direction(params.get("facing", "left"))
+            return ShellEntity(world_x, world_y, screen, direction)
 
         # Unknown entity type
         return None
