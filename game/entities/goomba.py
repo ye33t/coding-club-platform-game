@@ -9,8 +9,15 @@ from pygame import Rect, Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..content import sprites
-from ..content.tile_definitions import is_quadrant_solid
 from .base import CollisionResponse, Entity
+from .physics import (
+    EntityPipeline,
+    GravityProcessor,
+    GroundSnapProcessor,
+    HorizontalVelocityProcessor,
+    VelocityIntegrator,
+    WallBounceProcessor,
+)
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -40,9 +47,7 @@ class GoombaEntity(Entity):
         """
         super().__init__(world_x, world_y, screen)
         self.state.direction = direction
-        self.state.vx = GOOMBA_SPEED * direction
-        self.state.width = TILE_SIZE
-        self.state.height = TILE_SIZE
+        self.configure_size(TILE_SIZE, TILE_SIZE)
 
         # Animation state
         self.animation_timer = 0.0
@@ -52,6 +57,7 @@ class GoombaEntity(Entity):
         self.is_dead = False
         self.death_timer = 0.0
         self.DEATH_DURATION = 0.5  # Time to show squashed sprite before removal
+        self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
         """Update Goomba physics.
@@ -67,19 +73,26 @@ class GoombaEntity(Entity):
             self.death_timer += dt
             return self.death_timer < self.DEATH_DURATION
 
-        # Update animation
         self.animation_timer += dt
         if self.animation_timer >= 1.0 / ANIMATION_SPEED:
             self.animation_timer = 0.0
             self.animation_frame = 1 - self.animation_frame
 
-        # Apply physics
-        self._apply_gravity(dt)
-        self._apply_horizontal_movement(dt)
-        self._check_wall_collision(level)
-        self._check_ground_collision(level)
+        self.process_pipeline(dt, level)
 
         return True
+
+    def build_pipeline(self) -> Optional[EntityPipeline]:
+        """Configure the reusable physics pipeline for Goomba movement."""
+        return EntityPipeline(
+            [
+                GravityProcessor(gravity=GOOMBA_GRAVITY),
+                HorizontalVelocityProcessor(speed=GOOMBA_SPEED),
+                VelocityIntegrator(),
+                WallBounceProcessor(speed=GOOMBA_SPEED),
+                GroundSnapProcessor(tolerance=GROUND_DETECTION_TOLERANCE),
+            ]
+        )
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Goomba.
@@ -166,110 +179,3 @@ class GoombaEntity(Entity):
             int(self.state.width),
             int(self.state.height),
         )
-
-    def _apply_gravity(self, dt: float) -> None:
-        """Apply gravity to Goomba velocity."""
-        self.state.vy -= GOOMBA_GRAVITY * dt
-
-    def _apply_horizontal_movement(self, dt: float) -> None:
-        """Update position based on velocity."""
-        self.state.x += self.state.vx * dt
-        self.state.y += self.state.vy * dt
-
-    def _check_wall_collision(self, level: Level) -> None:
-        """Check for wall collisions and reverse direction if hit.
-
-        Args:
-            level: Level for collision detection
-        """
-        # Determine which edge to check based on movement direction
-        if self.state.vx > 0:
-            edge_x = self.state.x + self.state.width - 1
-        else:
-            edge_x = self.state.x
-
-        # Sample at mid-height
-        sample_y = self.state.y + self.state.height / 2
-
-        tile_x = int(edge_x // TILE_SIZE)
-        tile_y = int(sample_y // TILE_SIZE)
-
-        tile_type = level.get_terrain_tile(self.state.screen, tile_x, tile_y)
-        tile_def = level.get_tile_definition(tile_type)
-
-        if not tile_def or tile_def.collision_mask == 0:
-            return
-
-        x_in_tile = edge_x - (tile_x * TILE_SIZE)
-        y_in_tile = sample_y - (tile_y * TILE_SIZE)
-
-        quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
-        quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
-
-        if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-            # Bounce off wall
-            self.state.direction *= -1
-            self.state.vx = GOOMBA_SPEED * self.state.direction
-
-            # Snap to tile edge
-            if self.state.direction > 0:
-                self.state.x = (tile_x + 1) * TILE_SIZE
-            else:
-                self.state.x = (tile_x * TILE_SIZE) - self.state.width
-
-    def _check_ground_collision(self, level: Level) -> None:
-        """Check for ground collision and snap to surface.
-
-        Args:
-            level: Level for collision detection
-        """
-        highest_ground = -1.0
-        found_ground = False
-
-        # Sample points across the Goomba's width
-        sample_points = [
-            self.state.x,
-            self.state.x + self.state.width / 2,
-            self.state.x + self.state.width - 1,
-        ]
-
-        for sample_x in sample_points:
-            tile_x = int(sample_x // TILE_SIZE)
-            base_tile_y = int(self.state.y // TILE_SIZE)
-
-            for check_y in [base_tile_y, base_tile_y - 1]:
-                if check_y < 0:
-                    continue
-
-                tile_type = level.get_terrain_tile(self.state.screen, tile_x, check_y)
-                tile_def = level.get_tile_definition(tile_type)
-
-                if not tile_def or tile_def.collision_mask == 0:
-                    continue
-
-                x_in_tile = sample_x - (tile_x * TILE_SIZE)
-                quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
-
-                for quadrant_y in [0, 1]:
-                    if not is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-                        continue
-
-                    quadrant_top_y = check_y * TILE_SIZE + (quadrant_y + 1) * (
-                        TILE_SIZE / 2
-                    )
-
-                    if (
-                        abs(self.state.y - quadrant_top_y) <= GROUND_DETECTION_TOLERANCE
-                        or self.state.y < quadrant_top_y
-                    ):
-                        if self.state.y <= quadrant_top_y + 1:
-                            found_ground = True
-                            if highest_ground < 0 or quadrant_top_y > highest_ground:
-                                highest_ground = quadrant_top_y
-
-        if found_ground and self.state.vy <= 0:
-            self.state.y = highest_ground
-            self.state.vy = 0
-            self.state.on_ground = True
-        else:
-            self.state.on_ground = False

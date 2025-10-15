@@ -11,6 +11,7 @@ from pygame import Rect, Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..rendering.base import Drawable
+from .physics import EntityPhysicsContext, EntityPipeline
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -70,6 +71,7 @@ class Entity(ABC, Drawable):
             screen: Which vertical screen the entity is on
         """
         self.state = EntityState(x=world_x, y=world_y, screen=screen)
+        self._pipeline: Optional[EntityPipeline] = None
 
     @abstractmethod
     def update(self, dt: float, level: Level) -> bool:
@@ -151,3 +153,29 @@ class Entity(ABC, Drawable):
             return True
 
         return False
+
+    def configure_size(self, width: float, height: float) -> None:
+        """Helper to configure the entity's collision dimensions."""
+        self.state.width = width
+        self.state.height = height
+
+    def build_pipeline(self) -> Optional[EntityPipeline]:
+        """Create the entity physics pipeline (override in subclasses)."""
+        return None
+
+    def set_pipeline(self) -> None:
+        """Build and cache the entity pipeline."""
+        self._pipeline = self.build_pipeline()
+
+    def process_pipeline(self, dt: float, level: "Level") -> None:
+        """Execute the entity pipeline if one is configured."""
+        if self._pipeline is None:
+            return
+
+        context = EntityPhysicsContext(
+            entity=self,
+            state=self.state,
+            level=level,
+            dt=dt,
+        )
+        self._pipeline.process(context)
