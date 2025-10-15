@@ -30,6 +30,7 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
+    from .koopa import ShellEntity
 
 
 class GoombaEntity(Entity):
@@ -39,8 +40,8 @@ class GoombaEntity(Entity):
         self,
         world_x: float,
         world_y: float,
-        screen: int,
-        facing_right: bool,
+        screen: int = 0,
+        facing_right: bool = False,
     ):
         """Initialize Goomba.
 
@@ -184,3 +185,9 @@ class GoombaEntity(Entity):
             int(self.state.width),
             int(self.state.height),
         )
+
+    def on_collide_entity(self, shell: "ShellEntity") -> bool:
+        if self.is_dead:
+            return False
+        self.is_dead = True
+        return True

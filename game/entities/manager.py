@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Set
 
 from pygame import Surface
 
 from ..camera import Camera
 from .base import Entity
+from .koopa import ShellEntity
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -53,6 +54,7 @@ class EntityManager:
                 if not entity.is_off_screen(mario_screen, camera_x):
                     active.append(entity)
         self._entities = active
+        self._handle_shell_collisions()
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render all active entities.
@@ -72,3 +74,34 @@ class EntityManager:
     def items(self) -> List[Entity]:
         """Get an iterable of all active entities."""
         return self._entities
+
+    def _handle_shell_collisions(self) -> None:
+        """Resolve moving shell collisions with other entities."""
+        moving_shells = [
+            entity
+            for entity in self._entities
+            if isinstance(entity, ShellEntity) and entity.is_moving
+        ]
+
+        if not moving_shells:
+            return
+
+        to_remove: Set[Entity] = set()
+
+        for shell in moving_shells:
+            shell_rect = shell.get_collision_bounds()
+
+            for entity in self._entities:
+                if entity is shell or entity in to_remove:
+                    continue
+
+                if not shell_rect.colliderect(entity.get_collision_bounds()):
+                    continue
+
+                if entity.on_collide_entity(shell):
+                    to_remove.add(entity)
+
+        if to_remove:
+            self._entities = [
+                entity for entity in self._entities if entity not in to_remove
+            ]

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from pygame import Surface
+from pygame import Rect, Surface
 
 from ..camera import Camera
 from ..constants import TILE_SIZE
@@ -12,6 +12,7 @@ from ..content import sprites
 from ..physics.config import (
     KOOPA_SHELL_GRAVITY,
     KOOPA_SHELL_GROUND_TOLERANCE,
+    KOOPA_SHELL_KICK_SPEED,
     KOOPA_SHELL_SPEED,
     KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
     KOOPA_TROOPA_ANIMATION_FPS,
@@ -42,8 +43,8 @@ class KoopaTroopaEntity(Entity):
         self,
         world_x: float,
         world_y: float,
-        screen: int,
-        facing_right: bool,
+        screen: int = 0,
+        facing_right: bool = False,
     ):
         super().__init__(world_x, world_y, screen)
         self.state.facing_right = facing_right
@@ -97,6 +98,11 @@ class KoopaTroopaEntity(Entity):
             reflected=self.state.facing_right,
         )
 
+    def on_collide_entity(self, shell: "ShellEntity") -> bool:
+        if self._stomped:
+            return False
+        return True
+
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle Mario collision, spawning a shell on stomp."""
         if self._stomped:
@@ -108,7 +114,7 @@ class KoopaTroopaEntity(Entity):
 
         if mario.vy < 0 and mario_bottom > stomp_threshold:
             self._stomped = True
-            self.state.vx = 0
+            self.state.vx = 0.0
             self.state.facing_right = False
 
             shell = ShellEntity(
@@ -132,7 +138,7 @@ class KoopaTroopaEntity(Entity):
 
 
 class ShellEntity(Entity):
-    """Stationary Koopa shell spawned after stomping a Koopa Troopa."""
+    """Koopa shell that toggles between stationary and moving states."""
 
     def __init__(
         self,
@@ -144,23 +150,27 @@ class ShellEntity(Entity):
         super().__init__(world_x, world_y, screen)
         self.state.facing_right = facing_right
         self.configure_size(TILE_SIZE, TILE_SIZE)
-        self.set_pipeline()
 
-    def update(self, dt: float, level: Level) -> bool:
-        """Apply gravity to keep the shell grounded."""
-        self.process_pipeline(dt, level)
-        return True
+        self._horizontal_processor = HorizontalVelocityProcessor(
+            speed=KOOPA_SHELL_SPEED
+        )
+        self.set_pipeline()
 
     def build_pipeline(self) -> Optional[EntityPipeline]:
         """Configure shell physics."""
         return EntityPipeline(
             [
                 GravityProcessor(gravity=KOOPA_SHELL_GRAVITY),
-                HorizontalVelocityProcessor(speed=KOOPA_SHELL_SPEED),
+                self._horizontal_processor,
                 VelocityIntegrator(),
                 GroundSnapProcessor(tolerance=KOOPA_SHELL_GROUND_TOLERANCE),
             ]
         )
+
+    def update(self, dt: float, level: Level) -> bool:
+        """Apply gravity and movement based on current state."""
+        self.process_pipeline(dt, level)
+        return True
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Koopa shell."""
@@ -174,19 +184,74 @@ class ShellEntity(Entity):
         )
 
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
-        """Bounce Mario when stomping; damage otherwise."""
+        """Toggle movement based on stomp direction."""
         mario_bottom = mario.y
         shell_top = self.state.y + self.state.height
         stomp_threshold = shell_top - (self.state.height * 0.33)
+        is_stomp = mario.vy < 0 and mario_bottom > stomp_threshold
 
-        if mario.vy < 0 and mario_bottom > stomp_threshold:
-            return CollisionResponse(
-                remove=False,
-                bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
-            )
+        if not is_stomp:
+            return CollisionResponse(damage=True) if self.is_moving else None
 
-        return CollisionResponse(damage=True)
+        contact_side = self._determine_contact_side(mario)
+
+        if self.is_moving:
+            self._set_moving(False)
+        else:
+            self._set_moving(True, facing_right=(contact_side == "left"))
+
+        return CollisionResponse(
+            remove=False,
+            bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
+        )
+
+    def kick(self, facing_right: bool) -> None:
+        """Start the shell moving in the provided direction."""
+        self._set_moving(True, facing_right=facing_right)
+
+    def stop(self) -> None:
+        """Stop the shell in place."""
+        self._set_moving(False)
 
     @property
     def is_stompable(self) -> bool:
         return True
+
+    @property
+    def is_moving(self) -> bool:
+        return self._horizontal_processor.speed != 0.0
+
+    def _set_moving(self, moving: bool, *, facing_right: Optional[bool] = None) -> None:
+        if facing_right is not None:
+            self.state.facing_right = facing_right
+
+        speed = KOOPA_SHELL_KICK_SPEED if moving else KOOPA_SHELL_SPEED
+        self._horizontal_processor.speed = speed
+        self.state.vx = speed if self.state.facing_right else -speed
+        if not moving:
+            self.state.vx = 0.0
+
+    def _determine_contact_side(self, mario: "Mario") -> str:
+        """Determine which side of the shell Mario contacted."""
+        shell_rect: Rect = self.get_collision_bounds()
+        shell_center = shell_rect.centerx
+
+        tolerance = 1.0
+        front_edge = mario.x + mario.width if mario.facing_right else mario.x
+        back_edge = mario.x if mario.facing_right else mario.x + mario.width
+
+        def classify(edge_x: float) -> Optional[str]:
+            if shell_rect.left - tolerance <= edge_x <= shell_rect.right + tolerance:
+                return "left" if edge_x <= shell_center else "right"
+            return None
+
+        front_side = classify(front_edge)
+        if front_side is not None:
+            return front_side
+
+        back_side = classify(back_edge)
+        if back_side is not None:
+            return back_side
+
+        mario_center = mario.x + (mario.width / 2)
+        return "left" if mario_center <= shell_center else "right"

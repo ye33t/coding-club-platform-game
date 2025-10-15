@@ -28,6 +28,7 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
+    from .koopa import ShellEntity
 
 
 class MushroomEntity(Entity):
@@ -126,3 +127,6 @@ class MushroomEntity(Entity):
                 GroundSnapProcessor(tolerance=MUSHROOM_GROUND_TOLERANCE),
             ]
         )
+
+    def on_collide_entity(self, shell: "ShellEntity") -> bool:
+        return True

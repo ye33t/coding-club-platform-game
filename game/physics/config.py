@@ -106,6 +106,7 @@ KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY = config["koopa_troopa"]["stomp_bounce_veloci
 
 # Koopa shell
 KOOPA_SHELL_SPEED = config["koopa_shell"]["speed"]
+KOOPA_SHELL_KICK_SPEED = config["koopa_shell"]["kick_speed"]
 KOOPA_SHELL_GRAVITY = config["koopa_shell"]["gravity"]
 KOOPA_SHELL_GROUND_TOLERANCE = config["koopa_shell"]["ground_tolerance"]
 KOOPA_SHELL_STOMP_BOUNCE_VELOCITY = config["koopa_shell"]["stomp_bounce_velocity"]
