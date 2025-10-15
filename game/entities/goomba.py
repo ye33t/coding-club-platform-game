@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+import pygame
 from pygame import Rect, Surface
 
 from ..camera import Camera
-from ..constants import TILE_SIZE
+from ..constants import NATIVE_HEIGHT, TILE_SIZE
 from ..content import sprites
 from ..physics.config import (
+    ENTITY_KNOCKOUT_VELOCITY_X,
+    ENTITY_KNOCKOUT_VELOCITY_Y,
     GOOMBA_ANIMATION_FPS,
     GOOMBA_DEATH_DURATION,
     GOOMBA_GRAVITY,
@@ -62,6 +65,7 @@ class GoombaEntity(Entity):
         self.is_dead = False
         self.death_timer = 0.0
         self.death_duration: float = float(GOOMBA_DEATH_DURATION)
+        self.knocked_out = False
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
@@ -74,6 +78,18 @@ class GoombaEntity(Entity):
         Returns:
             True to keep entity active, False to remove
         """
+        if self.knocked_out:
+            self.state.vy -= GOOMBA_GRAVITY * dt
+            self.state.x += self.state.vx * dt
+            self.state.y += self.state.vy * dt
+            return self.state.y >= -100
+
+        if self.knocked_out:
+            self.state.vy -= GOOMBA_GRAVITY * dt
+            self.state.x += self.state.vx * dt
+            self.state.y += self.state.vy * dt
+            return self.state.y >= -100
+
         if self.is_dead:
             self.death_timer += dt
             return self.death_timer < self.death_duration
@@ -107,6 +123,17 @@ class GoombaEntity(Entity):
             camera: Camera for coordinate transformation
         """
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
+
+        if self.knocked_out:
+            sprite = sprites.get("enemies", "goomba_walk1")
+            if sprite is None:
+                return
+            flipped = pygame.transform.flip(sprite, False, True)
+            draw_x = int(screen_x)
+            screen_y_px = NATIVE_HEIGHT - int(screen_y)
+            draw_y = screen_y_px - flipped.get_height()
+            surface.blit(flipped, (draw_x, draw_y))
+            return
 
         if self.is_dead:
             # Draw squashed Goomba
@@ -190,11 +217,14 @@ class GoombaEntity(Entity):
         return not self.is_dead
 
     def on_collide_entity(self, source: Entity) -> bool:
-        if source.can_damage_entities and self.can_be_damaged_by_entities:
-            self.is_dead = True
-            return True
+        if self.knocked_out:
+            return False
 
-        if source.blocks_entities and not self.is_dead:
+        if source.can_damage_entities and self.can_be_damaged_by_entities:
+            self._knock_out(source)
+            return False
+
+        if source.blocks_entities and not self.is_dead and not self.knocked_out:
             if self.state.facing_right:
                 self.state.facing_right = False
                 self.state.x = source.state.x - self.state.width
@@ -205,3 +235,14 @@ class GoombaEntity(Entity):
             self.state.vx = GOOMBA_SPEED if self.state.facing_right else -GOOMBA_SPEED
 
         return False
+
+    def _knock_out(self, source: Entity) -> None:
+        self.knocked_out = True
+        self.is_dead = True
+        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
+        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
+        if source.state.vx != 0:
+            direction = 1 if source.state.vx > 0 else -1
+        else:
+            direction = -1 if source.state.x < self.state.x else 1
+        self.state.vx = horizontal * direction

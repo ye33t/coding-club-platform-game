@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+import pygame
 from pygame import Rect, Surface
 
 from ..camera import Camera
-from ..constants import TILE_SIZE
+from ..constants import NATIVE_HEIGHT, TILE_SIZE
 from ..content import sprites
 from ..physics.config import (
+    ENTITY_KNOCKOUT_VELOCITY_X,
+    ENTITY_KNOCKOUT_VELOCITY_Y,
     KOOPA_SHELL_GRAVITY,
     KOOPA_SHELL_GROUND_TOLERANCE,
     KOOPA_SHELL_KICK_SPEED,
@@ -53,11 +56,18 @@ class KoopaTroopaEntity(Entity):
         self.animation_timer = 0.0
         self.animation_frame = 0
         self._stomped = False
+        self.knocked_out = False
 
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
         """Advance Koopa physics and animation."""
+        if self.knocked_out:
+            self.state.vy -= KOOPA_TROOPA_GRAVITY * dt
+            self.state.x += self.state.vx * dt
+            self.state.y += self.state.vy * dt
+            return self.state.y >= -100
+
         if not self._stomped:
             self.animation_timer += dt
             if self.animation_timer >= 1.0 / KOOPA_TROOPA_ANIMATION_FPS:
@@ -82,29 +92,43 @@ class KoopaTroopaEntity(Entity):
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render the Koopa Troopa."""
-        if self._stomped:
+        if self._stomped and not self.knocked_out:
             return
 
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
         sprite_name = (
             "koopa_troopa_walk1" if self.animation_frame == 0 else "koopa_troopa_walk2"
         )
-        sprites.draw_at_position(
-            surface,
-            "enemies",
-            sprite_name,
-            int(screen_x),
-            int(screen_y),
-            reflected=self.state.facing_right,
-        )
+        if self.knocked_out:
+            sprite = sprites.get("enemies", sprite_name)
+            if sprite is None:
+                return
+            flipped = pygame.transform.flip(sprite, False, True)
+            draw_x = int(screen_x)
+            screen_y_px = NATIVE_HEIGHT - int(screen_y)
+            draw_y = screen_y_px - flipped.get_height()
+            surface.blit(flipped, (draw_x, draw_y))
+        else:
+            sprites.draw_at_position(
+                surface,
+                "enemies",
+                sprite_name,
+                int(screen_x),
+                int(screen_y),
+                reflected=self.state.facing_right,
+            )
 
     @property
     def can_be_damaged_by_entities(self) -> bool:
         return not self._stomped
 
     def on_collide_entity(self, source: Entity) -> bool:
+        if self.knocked_out:
+            return False
+
         if source.can_damage_entities and self.can_be_damaged_by_entities:
-            return True
+            self._knock_out(source)
+            return False
 
         if source.blocks_entities and not self._stomped:
             if self.state.facing_right:
@@ -122,7 +146,7 @@ class KoopaTroopaEntity(Entity):
 
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle Mario collision, spawning a shell on stomp."""
-        if self._stomped:
+        if self._stomped or self.knocked_out:
             return None
 
         mario_bottom = mario.y
@@ -151,7 +175,18 @@ class KoopaTroopaEntity(Entity):
 
     @property
     def is_stompable(self) -> bool:
-        return not self._stomped
+        return not self._stomped and not self.knocked_out
+
+    def _knock_out(self, source: Entity) -> None:
+        self.knocked_out = True
+        self._stomped = False
+        self.state.vy = ENTITY_KNOCKOUT_VELOCITY_Y
+        horizontal = ENTITY_KNOCKOUT_VELOCITY_X
+        if source.state.vx != 0:
+            direction = 1 if source.state.vx > 0 else -1
+        else:
+            direction = -1 if source.state.x < self.state.x else 1
+        self.state.vx = horizontal * direction
 
 
 class ShellEntity(Entity):

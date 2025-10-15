@@ -110,3 +110,7 @@ KOOPA_SHELL_KICK_SPEED = config["koopa_shell"]["kick_speed"]
 KOOPA_SHELL_GRAVITY = config["koopa_shell"]["gravity"]
 KOOPA_SHELL_GROUND_TOLERANCE = config["koopa_shell"]["ground_tolerance"]
 KOOPA_SHELL_STOMP_BOUNCE_VELOCITY = config["koopa_shell"]["stomp_bounce_velocity"]
+
+# Entity knock-out (shell hits)
+ENTITY_KNOCKOUT_VELOCITY_Y = config["entity_knockout"]["launch_velocity_y"]
+ENTITY_KNOCKOUT_VELOCITY_X = config["entity_knockout"]["launch_velocity_x"]

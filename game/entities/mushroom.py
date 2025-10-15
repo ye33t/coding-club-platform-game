@@ -133,7 +133,7 @@ class MushroomEntity(Entity):
 
     def on_collide_entity(self, source: Entity) -> bool:
         if source.can_damage_entities:
-            return True
+            return False
 
         if source.blocks_entities:
             if self.state.facing_right:

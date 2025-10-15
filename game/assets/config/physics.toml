@@ -210,3 +210,10 @@ ground_tolerance = 2.0
 
 # Upward velocity applied to Mario when stomping the shell (px/s)
 stomp_bounce_velocity = 200.0
+
+[entity_knockout]
+# Upward velocity applied to entities when hit by a damaging shell (px/s)
+launch_velocity_y = 150.0
+
+# Horizontal velocity magnitude applied based on shell direction (px/s)
+launch_velocity_x = 75.0
