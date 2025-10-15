@@ -9,6 +9,7 @@ from pygame import Surface
 
 from ..camera import Camera
 from .base import Entity
+from .koopa import ShellEntity
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -80,9 +81,6 @@ class EntityManager:
             entity for entity in self._entities if entity.can_damage_entities
         ]
 
-        if not damage_sources:
-            return
-
         to_remove: Set[Entity] = set()
 
         for source in damage_sources:
@@ -105,3 +103,28 @@ class EntityManager:
             self._entities = [
                 entity for entity in self._entities if entity not in to_remove
             ]
+
+        self._handle_stationary_shell_blocks()
+
+    def _handle_stationary_shell_blocks(self) -> None:
+        shells = [
+            entity for entity in self._entities if isinstance(entity, ShellEntity)
+        ]
+
+        if not shells:
+            return
+
+        for shell in shells:
+            if shell.is_moving:
+                continue
+
+            shell_rect = shell.get_collision_bounds()
+
+            for entity in self._entities:
+                if entity is shell or entity.can_damage_entities:
+                    continue
+
+                if not shell_rect.colliderect(entity.get_collision_bounds()):
+                    continue
+
+                entity.on_entity_block(shell)

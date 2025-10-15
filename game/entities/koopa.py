@@ -107,6 +107,23 @@ class KoopaTroopaEntity(Entity):
             return False
         return True
 
+    def on_entity_block(self, blocker: Entity) -> None:
+        if self._stomped:
+            return
+        if not isinstance(blocker, ShellEntity):
+            return
+
+        if self.state.facing_right:
+            self.state.facing_right = False
+            self.state.x = blocker.state.x - self.state.width
+        else:
+            self.state.facing_right = True
+            self.state.x = blocker.state.x + blocker.state.width
+
+        self.state.vx = (
+            KOOPA_TROOPA_SPEED if self.state.facing_right else -KOOPA_TROOPA_SPEED
+        )
+
     def on_collide_mario(self, mario: "Mario") -> Optional[CollisionResponse]:
         """Handle Mario collision, spawning a shell on stomp."""
         if self._stomped:

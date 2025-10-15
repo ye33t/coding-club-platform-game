@@ -151,6 +151,10 @@ class Entity(ABC, Drawable):
         """
         return False
 
+    def on_entity_block(self, blocker: "Entity") -> None:
+        """Handle a non-damaging collision with a blocking entity."""
+        return None
+
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:
         """Check if entity is off screen and should be removed.
 
