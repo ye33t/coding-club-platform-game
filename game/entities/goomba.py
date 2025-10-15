@@ -9,6 +9,14 @@ from pygame import Rect, Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..content import sprites
+from ..physics.config import (
+    GOOMBA_ANIMATION_FPS,
+    GOOMBA_DEATH_DURATION,
+    GOOMBA_GRAVITY,
+    GOOMBA_GROUND_TOLERANCE,
+    GOOMBA_SPEED,
+    GOOMBA_STOMP_BOUNCE_VELOCITY,
+)
 from .base import CollisionResponse, Entity
 from .physics import (
     EntityPipeline,
@@ -22,13 +30,6 @@ from .physics import (
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
-
-
-GOOMBA_SPEED = 30.0
-GOOMBA_GRAVITY = 400.0
-GROUND_DETECTION_TOLERANCE = 2.0
-ANIMATION_SPEED = 4.0  # Frames per second
-STOMP_BOUNCE_VELOCITY = 200.0  # Mario bounce velocity when stomping
 
 
 class GoombaEntity(Entity):
@@ -56,7 +57,7 @@ class GoombaEntity(Entity):
         # Death state
         self.is_dead = False
         self.death_timer = 0.0
-        self.DEATH_DURATION = 0.5  # Time to show squashed sprite before removal
+        self.death_duration: float = float(GOOMBA_DEATH_DURATION)
         self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
@@ -71,10 +72,10 @@ class GoombaEntity(Entity):
         """
         if self.is_dead:
             self.death_timer += dt
-            return self.death_timer < self.DEATH_DURATION
+            return self.death_timer < self.death_duration
 
         self.animation_timer += dt
-        if self.animation_timer >= 1.0 / ANIMATION_SPEED:
+        if self.animation_timer >= 1.0 / GOOMBA_ANIMATION_FPS:
             self.animation_timer = 0.0
             self.animation_frame = 1 - self.animation_frame
 
@@ -90,7 +91,7 @@ class GoombaEntity(Entity):
                 HorizontalVelocityProcessor(speed=GOOMBA_SPEED),
                 VelocityIntegrator(),
                 WallBounceProcessor(speed=GOOMBA_SPEED),
-                GroundSnapProcessor(tolerance=GROUND_DETECTION_TOLERANCE),
+                GroundSnapProcessor(tolerance=GOOMBA_GROUND_TOLERANCE),
             ]
         )
 
@@ -150,8 +151,8 @@ class GoombaEntity(Entity):
             self.state.vx = 0  # Stop horizontal movement
             # Return response with bounce velocity for Mario
             return CollisionResponse(
-                remove=False,  # Keep entity for death animation
-                bounce_velocity=STOMP_BOUNCE_VELOCITY,
+                remove=False,
+                bounce_velocity=GOOMBA_STOMP_BOUNCE_VELOCITY,
             )
         else:
             # Mario ran into the Goomba - damage Mario

@@ -82,3 +82,11 @@ STOMP_VELOCITY_Y_SCALE = config["stomp"]["velocity_y_scale"]
 
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)
+
+# Goomba enemy
+GOOMBA_SPEED = config["goomba"]["speed"]
+GOOMBA_GRAVITY = config["goomba"]["gravity"]
+GOOMBA_GROUND_TOLERANCE = config["goomba"]["ground_tolerance"]
+GOOMBA_ANIMATION_FPS = config["goomba"]["animation_fps"]
+GOOMBA_STOMP_BOUNCE_VELOCITY = config["goomba"]["stomp_bounce_velocity"]
+GOOMBA_DEATH_DURATION = config["goomba"]["death_duration"]
