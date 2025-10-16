@@ -35,8 +35,6 @@ class EndLevelState(State):
         self._transition_started = False
         self._flag_prop: Optional[FlagpoleProp] = None
         
-        self._flag_descending = False
-        self._flag_finished = False
         self._walk_started = False
 
     def on_enter(self, game) -> None:
@@ -52,12 +50,8 @@ class EndLevelState(State):
         prop = game.world.props.get("flagpole")
         if isinstance(prop, FlagpoleProp):
             self._flag_prop = prop
-            self._flag_descending = True
-            self._flag_finished = False
         else:
             self._flag_prop = None
-            self._flag_descending = False
-            self._flag_finished = True
 
     def update(self, game, dt: float) -> None:
         """Descend Mario down the flagpole."""
@@ -70,28 +64,23 @@ class EndLevelState(State):
         # Move Mario down at constant speed
         mario.y -= FLAGPOLE_DESCENT_SPEED * dt
 
-        mario_at_base = False
-
         # Clamp Mario's position at the base and flip him to the other side of the pole
         if mario.y <= self.flagpole_base_y:
             mario.y = self.flagpole_base_y
             mario.x = self.flagpole_x
             mario.facing_right = False
-            mario_at_base = True
 
-        if self._flag_descending and not self._flag_finished:
-            if self._flag_prop is not None:
-                self._flag_finished = self._flag_prop.descend(dt)
-            else:
-                self._flag_finished = True
+        if self._flag_prop is not None and not self._flag_prop.complete:
+            self._flag_prop.descend(dt)
+            return
 
-        if self._flag_finished and not self._walk_started:
+        if not self._walk_started:
             self._begin_walk(game)
             game.world.update(pygame.key.get_pressed(), dt)
             return
 
         # Check if Mario has reached the base
-        if mario_at_base and self._flag_finished and not self._transition_started:
+        if not self._transition_started:
             if game.transitioning:
                 return
 
@@ -107,6 +96,7 @@ class EndLevelState(State):
         mario = game.world.mario
         mario.set_intent_override(None)
         self._walk_started = False
+        self._flag_prop = None
 
     def _begin_walk(self, game) -> None:
         if self._walk_started:

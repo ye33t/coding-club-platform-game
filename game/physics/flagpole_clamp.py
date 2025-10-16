@@ -23,7 +23,7 @@ class FlagpoleClampProcessor(PhysicsProcessor):
             return context
         
         prop = context.props.get("flagpole")
-        if isinstance(prop, FlagpoleProp) and prop.running():
+        if isinstance(prop, FlagpoleProp) and prop.complete:
             return context
 
         flagpole_x = flagpole_instances[0].x

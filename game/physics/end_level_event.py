@@ -33,7 +33,7 @@ class EndLevelEventProcessor(PhysicsProcessor):
             return context  # No flagpole on this screen
         
         prop = context.props.get("flagpole")
-        if isinstance(prop, FlagpoleProp) and prop.running():
+        if isinstance(prop, FlagpoleProp) and prop.complete:
             return context
 
         # Get flagpole X position (all instances have same x after validation)

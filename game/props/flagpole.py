@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional
 
 from ..constants import SUB_TILE_SIZE, TILE_SIZE
@@ -10,15 +11,13 @@ from ..effects import SpriteEffect
 from ..terrain.flagpole import FlagpoleBehavior
 from .base import Prop
 
-
 @dataclass
 class FlagpoleState:
     effect: SpriteEffect
     world_x: float
     world_y: float
     base_y: float
-    running: bool = False
-
+    complete: bool = False
 
 class FlagpoleProp(Prop):
     """Maintains the static flag sprite at the top of the flagpole."""
@@ -26,8 +25,9 @@ class FlagpoleProp(Prop):
     def __init__(self) -> None:
         self._state: Optional[FlagpoleState] = None
         
-    def running(self) -> bool:
-        return self._state.running if self._state else False
+    @property
+    def complete(self) -> bool:
+        return self._state.complete if self._state else False
 
     def spawn(self, world) -> None:  # noqa: D401
         """Create the decorative flag if the level contains a flagpole."""
@@ -75,22 +75,20 @@ class FlagpoleProp(Prop):
             self._state.effect.deactivate()
         self._state = None
 
-    def descend(self, dt: float) -> bool:
-        """Slide the flag downward toward the base; True when finished."""
+    def descend(self, dt: float) -> None:
+        """Slide the flag downward toward the base."""
         if self._state is None:
-            return True
-        
-        self._state.running = True
+            return
 
         from ..physics.config import FLAGPOLE_DESCENT_SPEED
+        self._state.complete = False
 
         next_y = self._state.world_y - FLAGPOLE_DESCENT_SPEED * dt
         if next_y <= self._state.base_y:
             self._state.world_y = self._state.base_y
             self._state.effect.set_position(self._state.world_x, self._state.world_y)
-            return True
+            self._state.complete = True
+            return
 
         self._state.world_y = next_y
         self._state.effect.set_position(self._state.world_x, self._state.world_y)
-        self._state.running = False
-        return False
