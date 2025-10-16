@@ -58,7 +58,7 @@ class FlagpoleProp(Prop):
             world_y=flag_world_y,
             base_y=flag_base_y,
         )
-        
+
         world.effects.spawn(self._state.effect)
 
     def reset(self, world) -> None:
