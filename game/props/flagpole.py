@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
 from typing import Optional
 
 from ..constants import SUB_TILE_SIZE, TILE_SIZE
 from ..effects import SpriteEffect
 from ..terrain.flagpole import FlagpoleBehavior
 from .base import Prop
+
 
 @dataclass
 class FlagpoleState:
@@ -19,12 +19,13 @@ class FlagpoleState:
     base_y: float
     complete: bool = False
 
+
 class FlagpoleProp(Prop):
     """Maintains the static flag sprite at the top of the flagpole."""
 
     def __init__(self) -> None:
         self._state: Optional[FlagpoleState] = None
-        
+
     @property
     def complete(self) -> bool:
         return self._state.complete if self._state else False
@@ -81,6 +82,7 @@ class FlagpoleProp(Prop):
             return
 
         from ..physics.config import FLAGPOLE_DESCENT_SPEED
+
         self._state.complete = False
 
         next_y = self._state.world_y - FLAGPOLE_DESCENT_SPEED * dt

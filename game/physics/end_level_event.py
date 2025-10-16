@@ -1,6 +1,7 @@
 """Detect when Mario touches the flagpole and raise end level event."""
 
 from game.props.flagpole import FlagpoleProp
+
 from ..constants import TILE_SIZE
 from ..terrain.flagpole import FlagpoleBehavior
 from .base import PhysicsContext, PhysicsProcessor
@@ -31,7 +32,7 @@ class EndLevelEventProcessor(PhysicsProcessor):
 
         if not flagpole_instances:
             return context  # No flagpole on this screen
-        
+
         prop = context.props.get("flagpole")
         if isinstance(prop, FlagpoleProp) and prop.complete:
             return context

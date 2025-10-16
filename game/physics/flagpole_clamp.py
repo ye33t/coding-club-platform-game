@@ -1,6 +1,7 @@
 """Clamp Mario against the flagpole during the end-level sequence."""
 
 from game.props.flagpole import FlagpoleProp
+
 from ..constants import TILE_SIZE
 from ..terrain.flagpole import FlagpoleBehavior
 from .base import PhysicsContext, PhysicsProcessor
@@ -21,7 +22,7 @@ class FlagpoleClampProcessor(PhysicsProcessor):
 
         if not flagpole_instances:
             return context
-        
+
         prop = context.props.get("flagpole")
         if isinstance(prop, FlagpoleProp) and prop.complete:
             return context

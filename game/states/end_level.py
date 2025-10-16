@@ -34,7 +34,7 @@ class EndLevelState(State):
         self.flagpole_base_y = flagpole_base_y
         self._transition_started = False
         self._flag_prop: Optional[FlagpoleProp] = None
-        
+
         self._walk_started = False
 
     def on_enter(self, game) -> None:
@@ -70,11 +70,13 @@ class EndLevelState(State):
             mario.x = self.flagpole_x
             mario.facing_right = False
 
+        at_base = mario.y <= self.flagpole_base_y
+
         if self._flag_prop is not None and not self._flag_prop.complete:
             self._flag_prop.descend(dt)
             return
 
-        if not self._walk_started:
+        if at_base and not self._walk_started:
             self._begin_walk(game)
             game.world.update(pygame.key.get_pressed(), dt)
             return
@@ -89,7 +91,7 @@ class EndLevelState(State):
             from .start_level import StartLevelState
 
             self._transition_started = True
-            
+
             game.transition(StartLevelState(), TransitionMode.BOTH)
 
     def on_exit(self, game) -> None:
