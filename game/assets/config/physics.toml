@@ -146,3 +146,74 @@ interval = 0.05
 # Scales Mario's downward velocity when stomping an enemy
 # Lower values = more velocity dampening
 velocity_y_scale = 0.85
+
+[goomba]
+# Horizontal patrol speed in pixels/second
+speed = 30.0
+
+# Downward acceleration applied to Goombas (px/s²)
+gravity = 400.0
+
+# Ground snap tolerance in pixels
+ground_tolerance = 2.0
+
+# Animation frames per second for walking cycle
+animation_fps = 4.0
+
+# Upward velocity applied to Mario after stomping (px/s)
+stomp_bounce_velocity = 200.0
+
+# Time in seconds to keep the flattened Goomba before removal
+death_duration = 0.5
+
+[mushroom]
+# Horizontal speed for mushrooms (px/s)
+speed = 50.0
+
+# Downward acceleration (px/s²)
+gravity = 400.0
+
+# Speed the mushroom emerges upward from a block (px/s)
+emerge_speed = 30.0
+
+# Ground snap tolerance when settling on tiles (px)
+ground_tolerance = 2.0
+
+[koopa_troopa]
+# Horizontal patrol speed in pixels/second
+speed = 20.0
+
+# Downward acceleration applied to Koopas (px/s²)
+gravity = 400.0
+
+# Ground snap tolerance in pixels
+ground_tolerance = 2.0
+
+# Animation frames per second for walking cycle
+animation_fps = 4.0
+
+# Upward velocity applied to Mario after stomping (px/s)
+stomp_bounce_velocity = 200.0
+
+[koopa_shell]
+# Horizontal speed while stationary (should remain zero)
+speed = 0.0
+
+# Horizontal speed after being kicked or stomped while stationary (px/s)
+kick_speed = 220.0
+
+# Downward acceleration (px/s²)
+gravity = 400.0
+
+# Ground snap tolerance in pixels
+ground_tolerance = 2.0
+
+# Upward velocity applied to Mario when stomping the shell (px/s)
+stomp_bounce_velocity = 200.0
+
+[entity_knockout]
+# Upward velocity applied to entities when hit by a damaging shell (px/s)
+launch_velocity_y = 150.0
+
+# Horizontal velocity magnitude applied based on shell direction (px/s)
+launch_velocity_x = 75.0

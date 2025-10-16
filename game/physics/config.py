@@ -82,3 +82,35 @@ STOMP_VELOCITY_Y_SCALE = config["stomp"]["velocity_y_scale"]
 
 # Warp (hardcoded - not user-tunable)
 WARP_SPEED = 16.0  # pixels/second (1 tile per second)
+
+# Goomba enemy
+GOOMBA_SPEED = config["goomba"]["speed"]
+GOOMBA_GRAVITY = config["goomba"]["gravity"]
+GOOMBA_GROUND_TOLERANCE = config["goomba"]["ground_tolerance"]
+GOOMBA_ANIMATION_FPS = config["goomba"]["animation_fps"]
+GOOMBA_STOMP_BOUNCE_VELOCITY = config["goomba"]["stomp_bounce_velocity"]
+GOOMBA_DEATH_DURATION = config["goomba"]["death_duration"]
+
+# Mushroom collectible
+MUSHROOM_SPEED = config["mushroom"]["speed"]
+MUSHROOM_GRAVITY = config["mushroom"]["gravity"]
+MUSHROOM_EMERGE_SPEED = config["mushroom"]["emerge_speed"]
+MUSHROOM_GROUND_TOLERANCE = config["mushroom"]["ground_tolerance"]
+
+# Koopa Troopa enemy
+KOOPA_TROOPA_SPEED = config["koopa_troopa"]["speed"]
+KOOPA_TROOPA_GRAVITY = config["koopa_troopa"]["gravity"]
+KOOPA_TROOPA_GROUND_TOLERANCE = config["koopa_troopa"]["ground_tolerance"]
+KOOPA_TROOPA_ANIMATION_FPS = config["koopa_troopa"]["animation_fps"]
+KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY = config["koopa_troopa"]["stomp_bounce_velocity"]
+
+# Koopa shell
+KOOPA_SHELL_SPEED = config["koopa_shell"]["speed"]
+KOOPA_SHELL_KICK_SPEED = config["koopa_shell"]["kick_speed"]
+KOOPA_SHELL_GRAVITY = config["koopa_shell"]["gravity"]
+KOOPA_SHELL_GROUND_TOLERANCE = config["koopa_shell"]["ground_tolerance"]
+KOOPA_SHELL_STOMP_BOUNCE_VELOCITY = config["koopa_shell"]["stomp_bounce_velocity"]
+
+# Entity knock-out (shell hits)
+ENTITY_KNOCKOUT_VELOCITY_Y = config["entity_knockout"]["launch_velocity_y"]
+ENTITY_KNOCKOUT_VELOCITY_X = config["entity_knockout"]["launch_velocity_x"]

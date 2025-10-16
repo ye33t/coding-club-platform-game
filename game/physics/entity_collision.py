@@ -6,7 +6,7 @@ from game.constants import TILE_SIZE
 
 from .base import PhysicsContext, PhysicsProcessor
 from .config import STOMP_VELOCITY_Y_SCALE
-from .events import DeathEvent, RemoveEntityEvent
+from .events import DeathEvent, RemoveEntityEvent, SpawnEntityEvent
 
 
 class EntityCollisionProcessor(PhysicsProcessor):
@@ -86,6 +86,9 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
             if response.remove:
                 context.add_event(RemoveEntityEvent(entity))
+
+            if response.spawn_entity is not None:
+                context.add_event(SpawnEntityEvent(response.spawn_entity))
 
         return context
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Set
 
 from pygame import Surface
 
@@ -53,6 +53,7 @@ class EntityManager:
                 if not entity.is_off_screen(mario_screen, camera_x):
                     active.append(entity)
         self._entities = active
+        self._handle_entity_collisions()
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render all active entities.
@@ -72,3 +73,38 @@ class EntityManager:
     def items(self) -> List[Entity]:
         """Get an iterable of all active entities."""
         return self._entities
+
+    def _handle_entity_collisions(self) -> None:
+        to_remove: Set[Entity] = set()
+
+        sources = [
+            entity
+            for entity in self._entities
+            if entity.can_damage_entities or entity.blocks_entities
+        ]
+
+        if not sources:
+            return
+
+        for source in sources:
+            source_rect = source.get_collision_bounds()
+
+            for target in self._entities:
+                if target is source or target in to_remove:
+                    continue
+
+                if not source_rect.colliderect(target.get_collision_bounds()):
+                    continue
+
+                if source.can_damage_entities and target.can_be_damaged_by_entities:
+                    if target.on_collide_entity(source):
+                        to_remove.add(target)
+                    continue
+
+                if source.blocks_entities:
+                    target.on_collide_entity(source)
+
+        if to_remove:
+            self._entities = [
+                entity for entity in self._entities if entity not in to_remove
+            ]

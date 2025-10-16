@@ -9,28 +9,32 @@ from pygame import Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..content import sprites
-from ..content.tile_definitions import is_quadrant_solid
+from ..physics.config import (
+    MUSHROOM_EMERGE_SPEED,
+    MUSHROOM_GRAVITY,
+    MUSHROOM_GROUND_TOLERANCE,
+    MUSHROOM_SPEED,
+)
 from .base import CollisionResponse, Entity
+from .mixins import HorizontalMovementConfig, HorizontalMovementMixin
 
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
 
 
-MUSHROOM_SPEED = 50.0
-MUSHROOM_GRAVITY = 400.0
-MUSHROOM_EMERGE_SPEED = 30.0
-GROUND_DETECTION_TOLERANCE = 2.0
-
-
-class MushroomEntity(Entity):
+class MushroomEntity(HorizontalMovementMixin, Entity):
     """Mushroom power-up collectible.
 
     Moves horizontally, bounces off walls, stays on platforms.
     """
 
     def __init__(
-        self, world_x: float, world_y: float, screen: int = 0, direction: int = 1
+        self,
+        world_x: float,
+        world_y: float,
+        screen: int,
+        facing_right: bool,
     ):
         """Initialize mushroom.
 
@@ -38,18 +42,24 @@ class MushroomEntity(Entity):
             world_x: X position in world pixels
             world_y: Y position in screen-relative pixels (0-224, from bottom)
             screen: Which vertical screen the entity is on
-            direction: Initial horizontal direction (1=right, -1=left)
+            facing_right: Initial facing direction (True=right)
         """
         super().__init__(world_x, world_y, screen)
-        self.state.direction = direction
-        self.state.vx = 0
-        self.state.width = TILE_SIZE
-        self.state.height = TILE_SIZE
+        self.state.facing_right = facing_right
+        self.configure_size(TILE_SIZE, TILE_SIZE)
 
         self.emerging = True
         self.emerge_target_y = world_y + TILE_SIZE
         self.z_index = -10
-        self.final_direction = direction
+        self.final_facing_right = facing_right
+        self.init_horizontal_movement(
+            HorizontalMovementConfig(
+                gravity=MUSHROOM_GRAVITY,
+                speed=MUSHROOM_SPEED,
+                ground_snap_tolerance=MUSHROOM_GROUND_TOLERANCE,
+            )
+        )
+        self.set_pipeline()
 
     def update(self, dt: float, level: Level) -> bool:
         """Update mushroom physics.
@@ -68,12 +78,9 @@ class MushroomEntity(Entity):
                 self.state.y = self.emerge_target_y
                 self.emerging = False
                 self.z_index = 10
-                self.state.vx = MUSHROOM_SPEED * self.final_direction
+                self.state.facing_right = self.final_facing_right
         else:
-            self._apply_gravity(dt)
-            self._apply_horizontal_movement(dt)
-            self._check_wall_collision(level)
-            self._check_ground_collision(level)
+            self.process_pipeline(dt, level)
 
         return True
 
@@ -108,104 +115,15 @@ class MushroomEntity(Entity):
             power_up_type="mushroom",
         )
 
-    def _apply_gravity(self, dt: float) -> None:
-        """Apply gravity to mushroom velocity."""
-        self.state.vy -= MUSHROOM_GRAVITY * dt
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        return False
 
-    def _apply_horizontal_movement(self, dt: float) -> None:
-        """Update position based on velocity."""
-        self.state.x += self.state.vx * dt
-        self.state.y += self.state.vy * dt
+    def on_collide_entity(self, source: Entity) -> bool:
+        if source.can_damage_entities:
+            return False
 
-    def _check_wall_collision(self, level: Level) -> None:
-        """Check for wall collisions and reverse direction if hit.
+        if source.blocks_entities:
+            self.handle_blocking_entity(source)
 
-        Args:
-            level: Level for collision detection
-        """
-        if self.state.vx > 0:
-            edge_x = self.state.x + self.state.width - 1
-        else:
-            edge_x = self.state.x
-
-        sample_y = self.state.y + self.state.height / 2
-
-        tile_x = int(edge_x // TILE_SIZE)
-        tile_y = int(sample_y // TILE_SIZE)
-
-        tile_type = level.get_terrain_tile(self.state.screen, tile_x, tile_y)
-        tile_def = level.get_tile_definition(tile_type)
-
-        if not tile_def or tile_def.collision_mask == 0:
-            return
-
-        x_in_tile = edge_x - (tile_x * TILE_SIZE)
-        y_in_tile = sample_y - (tile_y * TILE_SIZE)
-
-        quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
-        quadrant_y = 0 if y_in_tile < (TILE_SIZE / 2) else 1
-
-        if is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-            self.state.direction *= -1
-            self.state.vx = MUSHROOM_SPEED * self.state.direction
-
-            if self.state.direction > 0:
-                self.state.x = (tile_x + 1) * TILE_SIZE
-            else:
-                self.state.x = (tile_x * TILE_SIZE) - self.state.width
-
-    def _check_ground_collision(self, level: Level) -> None:
-        """Check for ground collision and snap to surface.
-
-        Args:
-            level: Level for collision detection
-        """
-        highest_ground = -1.0
-        found_ground = False
-
-        sample_points = [
-            self.state.x,
-            self.state.x + self.state.width / 2,
-            self.state.x + self.state.width - 1,
-        ]
-
-        for sample_x in sample_points:
-            tile_x = int(sample_x // TILE_SIZE)
-            base_tile_y = int(self.state.y // TILE_SIZE)
-
-            for check_y in [base_tile_y, base_tile_y - 1]:
-                if check_y < 0:
-                    continue
-
-                tile_type = level.get_terrain_tile(self.state.screen, tile_x, check_y)
-                tile_def = level.get_tile_definition(tile_type)
-
-                if not tile_def or tile_def.collision_mask == 0:
-                    continue
-
-                x_in_tile = sample_x - (tile_x * TILE_SIZE)
-                quadrant_x = 0 if x_in_tile < (TILE_SIZE / 2) else 1
-
-                for quadrant_y in [0, 1]:
-                    if not is_quadrant_solid(tile_def, quadrant_x, quadrant_y):
-                        continue
-
-                    quadrant_top_y = check_y * TILE_SIZE + (quadrant_y + 1) * (
-                        TILE_SIZE / 2
-                    )
-
-                    if (
-                        abs(self.state.y - quadrant_top_y) <= GROUND_DETECTION_TOLERANCE
-                        or self.state.y < quadrant_top_y
-                    ):
-                        if self.state.y <= quadrant_top_y + 1:
-                            found_ground = True
-                            if highest_ground < 0 or quadrant_top_y > highest_ground:
-                                highest_ground = quadrant_top_y
-
-        if found_ground and self.state.vy <= 0:
-            self.state.y = highest_ground
-            self.state.vy = 0
-            self.state.on_ground = True
-        else:
-            self.state.on_ground = False
+        return False

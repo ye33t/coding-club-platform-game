@@ -11,6 +11,7 @@ from pygame import Rect, Surface
 from ..camera import Camera
 from ..constants import TILE_SIZE
 from ..rendering.base import Drawable
+from .physics import EntityPhysicsContext, EntityPipeline
 
 if TYPE_CHECKING:
     from ..level import Level
@@ -28,7 +29,7 @@ class EntityState:
     screen: int = 0
     width: float = TILE_SIZE
     height: float = TILE_SIZE
-    direction: int = 1
+    facing_right: bool = False
     on_ground: bool = False
 
 
@@ -41,6 +42,7 @@ class CollisionResponse:
         damage: bool = False,
         power_up_type: Optional[str] = None,
         bounce_velocity: Optional[float] = None,
+        spawn_entity: Optional["Entity"] = None,
     ):
         """Initialize collision response.
 
@@ -49,11 +51,13 @@ class CollisionResponse:
             damage: Damage Mario
             power_up_type: Specific power-up identifier (e.g., "mushroom")
             bounce_velocity: Upward velocity to apply to Mario (e.g., for stomping)
+            spawn_entity: Entity to spawn after collision (e.g., Koopa shell)
         """
         self.remove = remove
         self.damage = damage
         self.power_up_type = power_up_type
         self.bounce_velocity = bounce_velocity
+        self.spawn_entity = spawn_entity
 
 
 class Entity(ABC, Drawable):
@@ -70,6 +74,7 @@ class Entity(ABC, Drawable):
             screen: Which vertical screen the entity is on
         """
         self.state = EntityState(x=world_x, y=world_y, screen=screen)
+        self._pipeline: Optional[EntityPipeline] = None
 
     @abstractmethod
     def update(self, dt: float, level: Level) -> bool:
@@ -125,6 +130,32 @@ class Entity(ABC, Drawable):
         """
         return False
 
+    @property
+    def can_damage_entities(self) -> bool:
+        """Whether this entity inflicts damage on other entities when colliding."""
+        return False
+
+    @property
+    def can_be_damaged_by_entities(self) -> bool:
+        """Whether this entity can be damaged by other entities."""
+        return False
+
+    @property
+    def blocks_entities(self) -> bool:
+        """Whether this entity blocks other entities when colliding."""
+        return False
+
+    def on_collide_entity(self, source: "Entity") -> bool:
+        """Handle collision with another entity.
+
+        Args:
+            source: The entity that initiated the collision.
+
+        Returns:
+            True if this entity should be removed after the collision, False otherwise.
+        """
+        return False
+
     def is_off_screen(self, mario_screen: int, camera_x: float) -> bool:
         """Check if entity is off screen and should be removed.
 
@@ -151,3 +182,29 @@ class Entity(ABC, Drawable):
             return True
 
         return False
+
+    def configure_size(self, width: float, height: float) -> None:
+        """Helper to configure the entity's collision dimensions."""
+        self.state.width = width
+        self.state.height = height
+
+    def build_pipeline(self) -> Optional[EntityPipeline]:
+        """Create the entity physics pipeline (override in subclasses)."""
+        return None
+
+    def set_pipeline(self) -> None:
+        """Build and cache the entity pipeline."""
+        self._pipeline = self.build_pipeline()
+
+    def process_pipeline(self, dt: float, level: "Level") -> None:
+        """Execute the entity pipeline if one is configured."""
+        if self._pipeline is None:
+            return
+
+        context = EntityPhysicsContext(
+            entity=self,
+            state=self.state,
+            level=level,
+            dt=dt,
+        )
+        self._pipeline.process(context)

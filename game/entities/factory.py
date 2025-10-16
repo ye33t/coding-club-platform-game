@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional
 
 from .base import Entity
 from .goomba import GoombaEntity
+from .koopa import KoopaTroopaEntity, ShellEntity
 from .mushroom import MushroomEntity
 
 
@@ -35,29 +36,25 @@ class EntityFactory:
         params = params or {}
 
         if entity_type == "goomba":
-            direction = self._parse_direction(params.get("facing", "left"))
-            return GoombaEntity(world_x, world_y, screen, direction)
+            facing_right = self._parse_facing(params.get("facing", "left"))
+            return GoombaEntity(world_x, world_y, screen, facing_right)
 
         elif entity_type == "mushroom":
-            direction = self._parse_direction(params.get("facing", "right"))
-            return MushroomEntity(world_x, world_y, screen, direction)
+            facing_right = self._parse_facing(params.get("facing", "right"))
+            return MushroomEntity(world_x, world_y, screen, facing_right)
+
+        elif entity_type == "koopa_troopa":
+            facing_right = self._parse_facing(params.get("facing", "left"))
+            return KoopaTroopaEntity(world_x, world_y, screen, facing_right)
+
+        elif entity_type == "koopa_shell":
+            facing_right = self._parse_facing(params.get("facing", "left"))
+            return ShellEntity(world_x, world_y, screen, facing_right)
 
         # Unknown entity type
         return None
 
-    def _parse_direction(self, facing: str) -> int:
-        """Parse a facing direction string into a direction value.
-
-        Args:
-            facing: Direction string ("left" or "right")
-
-        Returns:
-            -1 for left, 1 for right
-        """
-        if facing == "left":
-            return -1
-        elif facing == "right":
-            return 1
-        else:
-            # Default to left if unknown
-            return -1
+    def _parse_facing(self, facing: str) -> bool:
+        """Parse facing direction into a boolean flag."""
+        normalized = facing.strip().lower()
+        return normalized == "right"

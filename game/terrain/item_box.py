@@ -74,7 +74,7 @@ class ItemBoxBehavior(TerrainBehavior):
                             world_x=mushroom_x,
                             world_y=mushroom_y,
                             screen=context.screen,
-                            direction=1,
+                            facing_right=True,
                         )
                     )
                 )
