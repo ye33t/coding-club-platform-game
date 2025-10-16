@@ -27,7 +27,7 @@ class World:
         self.entities = EntityManager()
         self.entity_factory = EntityFactory()
         self.props = PropManager()
-        self.props.register(FlagpoleProp())
+        self.props.register("flagpole", FlagpoleProp())
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
