@@ -30,12 +30,14 @@ class SpriteEffect(Effect):
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Draw the sprite at its current world position."""
+        screen_x, screen_y = camera.world_to_screen(self.world_x, self.world_y)
+
         sprites.draw_at_position(
             surface,
             self.sprite_sheet,
             self.sprite_name,
-            int(self.world_x),
-            int(self.world_y),
+            int(screen_x),
+            int(screen_y),
             self.reflected,
         )
 

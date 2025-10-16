@@ -5,10 +5,10 @@ sprite_sheets:
     colorkey: [146, 144, 255]
     sprites:
       flag:
-        offset: [92, 102]
+        offset: [92, 106]
         size: [2, 2]
       flag_castle:
-        offset: [110, 102]
+        offset: [110, 106]
         size: [2, 2]
 
       mushroom:

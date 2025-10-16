@@ -3,13 +3,15 @@
 from typing import Iterator, Optional, cast
 
 from .camera import Camera
-from .effects import EffectManager
+from .constants import SUB_TILE_SIZE, TILE_SIZE
+from .effects import EffectManager, SpriteEffect
 from .entities import EntityFactory, EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
 from .rendering.base import Drawable
+from .terrain.flagpole import FlagpoleBehavior
 
 
 class World:
@@ -25,12 +27,16 @@ class World:
         self.entities = EntityManager()
         self.entity_factory = EntityFactory()
 
+        self._flagpole_flag: SpriteEffect | None = None
+
         # Create Mario at the level's spawn point
         self.mario = Mario(
             self.level.spawn_x,
             self.level.spawn_y,
             self.level.spawn_screen,
         )
+
+        self._spawn_flagpole_flag()
 
     def reset(self) -> None:
         """Reset the world to the level's spawn configuration."""
@@ -45,6 +51,9 @@ class World:
         self.level.reset_terrain()
         self.effects.clear()
         self.entities.clear()
+
+        self._flagpole_flag = None
+        self._spawn_flagpole_flag()
 
         # Reset all spawn triggers back to their pending state
         self.level.spawn_manager.reset_all_triggers()
@@ -98,8 +107,6 @@ class World:
 
     def _check_spawn_triggers(self) -> None:
         """Check and activate spawn triggers based on camera position."""
-        from .constants import TILE_SIZE
-
         # Get triggered spawn triggers
         triggered = self.level.spawn_manager.check_triggers(self.camera.x)
 
@@ -120,3 +127,32 @@ class World:
                     )
                     if entity:
                         self.entities.spawn(entity)
+
+    def _spawn_flagpole_flag(self) -> None:
+        """Spawn the decorative flag sprite at the top of the flagpole."""
+        flagpole_tiles = [
+            instance
+            for instance in self.level.terrain_manager.instances.values()
+            if isinstance(instance.behavior, FlagpoleBehavior)
+        ]
+
+        if not flagpole_tiles:
+            return
+
+        top_tile = max(flagpole_tiles, key=lambda tile: tile.y)
+        pole_x = top_tile.x * TILE_SIZE + SUB_TILE_SIZE - 1
+        pole_top_y = (top_tile.y - 1) * TILE_SIZE
+
+        flag_x = pole_x - TILE_SIZE
+        flag_bottom_y = pole_top_y
+
+        flag_effect = SpriteEffect(
+            sprite_sheet="other",
+            sprite_name="flag",
+            world_x=flag_x,
+            world_y=flag_bottom_y,
+            z_index=5,
+        )
+
+        self.effects.spawn(flag_effect)
+        self._flagpole_flag = flag_effect
