@@ -192,6 +192,9 @@ class Mario(Drawable):
         self._last_vx = self.vx
         self.intent = MarioIntent()
         self.visible = True
+        self._intent_override: (
+            Callable[[pygame.key.ScancodeWrapper], MarioIntent] | None
+        ) = None
 
     def get_animation_progress(self) -> float:
         """Get the current animation progress as a percentage (0.0 to 1.0)."""
@@ -281,6 +284,10 @@ class Mario(Drawable):
 
     def update_intent(self, keys) -> None:
         """Process raw input and update the stored intent."""
+        if self._intent_override is not None:
+            self.intent = self._intent_override(keys)
+            return
+
         self.intent.move_right = keys[pygame.K_d]
         self.intent.move_left = not self.intent.move_right and keys[pygame.K_a]
         self.intent.run = keys[pygame.K_j]
@@ -330,3 +337,11 @@ class Mario(Drawable):
         frame = min(self.frame, len(sprite_list) - 1)
 
         return sprite_list[frame]
+
+    def set_intent_override(
+        self, provider: Callable[[pygame.key.ScancodeWrapper], MarioIntent] | None
+    ) -> Callable[[pygame.key.ScancodeWrapper], MarioIntent] | None:
+        """Set or clear a scripted intent provider."""
+        previous = self._intent_override
+        self._intent_override = provider
+        return previous

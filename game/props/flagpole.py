@@ -17,6 +17,7 @@ class FlagpoleState:
     world_x: float
     world_y: float
     base_y: float
+    running: bool = False
 
 
 class FlagpoleProp(Prop):
@@ -24,6 +25,9 @@ class FlagpoleProp(Prop):
 
     def __init__(self) -> None:
         self._state: Optional[FlagpoleState] = None
+        
+    def running(self) -> bool:
+        return self._state.running if self._state else False
 
     def spawn(self, world) -> None:  # noqa: D401
         """Create the decorative flag if the level contains a flagpole."""
@@ -75,6 +79,8 @@ class FlagpoleProp(Prop):
         """Slide the flag downward toward the base; True when finished."""
         if self._state is None:
             return True
+        
+        self._state.running = True
 
         from ..physics.config import FLAGPOLE_DESCENT_SPEED
 
@@ -86,4 +92,5 @@ class FlagpoleProp(Prop):
 
         self._state.world_y = next_y
         self._state.effect.set_position(self._state.world_x, self._state.world_y)
+        self._state.running = False
         return False

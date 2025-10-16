@@ -76,6 +76,7 @@ class World:
             camera=self.camera,
             level=self.level,
             entities=self.entities.items,
+            props=self.props,
         )
 
         processed_context = self.physics.process(context)
