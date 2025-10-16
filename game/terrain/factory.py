@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 
 from .base import TerrainBehavior
 from .bounce import BounceBehavior
+from .castle_exit import CastleExitBehavior
 from .flagpole import FlagpoleBehavior
 from .item_box import ItemBoxBehavior, ItemBoxSpawnType
 from .none import NoneBehavior
@@ -81,8 +82,40 @@ class BehaviorFactory:
                     "Item box spawns parameter must be an integer if provided."
                 )
             return ItemBoxBehavior(spawn_type=spawn_type, spawn_count=spawn_count)
+        elif behavior_type == "castle_exit":
+            if not params or "role" not in params:
+                raise BehaviorFactoryError(
+                    "castle_exit behavior requires a 'role' parameter."
+                )
+
+            role = params["role"]
+            if not isinstance(role, str):
+                raise BehaviorFactoryError(
+                    "castle_exit role parameter must be a string."
+                )
+
+            offset_x = params.get("offset_x", 0.0)
+            offset_y = params.get("offset_y", 0.0)
+            start_offset_y = params.get("start_offset_y")
+
+            try:
+                offset_x = float(offset_x)
+                offset_y = float(offset_y)
+                if start_offset_y is not None:
+                    start_offset_y = float(start_offset_y)
+            except (TypeError, ValueError) as exc:
+                raise BehaviorFactoryError(
+                    "castle_exit offsets must be numbers if provided."
+                ) from exc
+
+            return CastleExitBehavior(
+                role=role,
+                offset_x=offset_x,
+                offset_y=offset_y,
+                start_offset_y=start_offset_y,
+            )
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "
-                f"Available types: bounce, none, warp, flagpole, item_box"
+                "Available types: bounce, none, warp, flagpole, item_box, castle_exit"
             )

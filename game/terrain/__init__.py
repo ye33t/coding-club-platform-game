@@ -2,6 +2,7 @@
 
 from .base import BehaviorContext, TerrainBehavior, TileEvent, TileState, VisualState
 from .bounce import BounceBehavior
+from .castle_exit import CastleExitBehavior
 from .factory import BehaviorFactory, BehaviorFactoryError
 from .flagpole import FlagpoleBehavior
 from .item_box import ItemBoxBehavior, ItemBoxSpawnType
@@ -16,6 +17,7 @@ __all__ = [
     "TileState",
     "VisualState",
     "BounceBehavior",
+    "CastleExitBehavior",
     "FlagpoleBehavior",
     "ItemBoxBehavior",
     "ItemBoxSpawnType",

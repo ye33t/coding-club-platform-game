@@ -191,6 +191,7 @@ class Mario(Drawable):
         self._last_size = self.size
         self._last_vx = self.vx
         self.intent = MarioIntent()
+        self.visible = True
 
     def get_animation_progress(self) -> float:
         """Get the current animation progress as a percentage (0.0 to 1.0)."""
@@ -293,6 +294,9 @@ class Mario(Drawable):
             surface: Surface to draw on
             camera: Camera for coordinate transformation
         """
+        if not self.visible:
+            return
+
         self._update_animation()
 
         sprite_name = self._get_sprite_name()
