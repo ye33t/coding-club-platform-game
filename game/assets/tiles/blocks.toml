@@ -28,7 +28,6 @@ slug = "brick"
 sprite_sheet = "background"
 sprite = "brick"
 collision_mask = "full"
-simple_key = "K"
 
 [[tiles]]
 slug = "brick_top"
