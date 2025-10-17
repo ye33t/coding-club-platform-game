@@ -6,12 +6,14 @@ from typing import Optional
 
 import pygame
 
-from game.constants import TILE_SIZE
+from game.constants import SUB_TILE_SIZE, TILE_SIZE
 
 from ..mario import MarioIntent
 from ..physics.config import FLAGPOLE_DESCENT_SPEED
 from ..props import FlagpoleProp
+from ..terrain import CastleExitBehavior
 from .base import State
+from .complete_level import CastleFlagAnchor, CastleWalkAnchor, CompleteLevelState
 
 
 class EndLevelState(State):
@@ -20,7 +22,8 @@ class EndLevelState(State):
     This state:
     - Locks Mario's X position to the flagpole center
     - Descends Mario at constant speed
-    - Transitions to StartLevelState when Mario reaches the base
+    - Starts Mario toward the castle entrance
+    - Hands off to CompleteLevelState once Mario reaches the archway
     """
 
     def __init__(self, flagpole_x: float, flagpole_base_y: float):
@@ -36,6 +39,8 @@ class EndLevelState(State):
         self._flag_prop: Optional[FlagpoleProp] = None
 
         self._walk_started = False
+        self._castle_walk_anchor: CastleWalkAnchor | None = None
+        self._castle_flag_anchor: CastleFlagAnchor | None = None
 
     def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
@@ -53,12 +58,15 @@ class EndLevelState(State):
         else:
             self._flag_prop = None
 
+        self._collect_castle_anchors(game)
+
     def update(self, game, dt: float) -> None:
         """Descend Mario down the flagpole."""
         mario = game.world.mario
 
         if self._walk_started:
             game.world.update(pygame.key.get_pressed(), dt)
+            self._check_castle_entry(game)
             return
 
         # Move Mario down at constant speed
@@ -81,24 +89,13 @@ class EndLevelState(State):
             game.world.update(pygame.key.get_pressed(), dt)
             return
 
-        # Check if Mario has reached the base
-        if not self._transition_started:
-            if game.transitioning:
-                return
-
-            # Transition to start level with screen fade
-            from ..rendering import TransitionMode
-            from .start_level import StartLevelState
-
-            self._transition_started = True
-
-            game.transition(StartLevelState(), TransitionMode.BOTH)
-
     def on_exit(self, game) -> None:
         mario = game.world.mario
         mario.set_intent_override(None)
         self._walk_started = False
         self._flag_prop = None
+        self._castle_walk_anchor = None
+        self._castle_flag_anchor = None
 
     def _begin_walk(self, game) -> None:
         if self._walk_started:
@@ -109,3 +106,70 @@ class EndLevelState(State):
 
         game.world.mario.set_intent_override(_walk_intent)
         self._walk_started = True
+
+    def _collect_castle_anchors(self, game) -> None:
+        walk_anchor: CastleWalkAnchor | None = None
+        flag_anchor: CastleFlagAnchor | None = None
+
+        for instance in game.world.level.terrain_manager.instances.values():
+            behavior = instance.behavior
+            if not isinstance(behavior, CastleExitBehavior):
+                continue
+
+            world_x = behavior.world_x(instance.x)
+            world_y = behavior.world_y(instance.y)
+
+            if behavior.role == "walk" and walk_anchor is None:
+                walk_anchor = CastleWalkAnchor(
+                    screen=instance.screen,
+                    world_x=world_x,
+                    world_y=world_y,
+                )
+            elif behavior.role == "flag" and flag_anchor is None:
+                flag_anchor = CastleFlagAnchor(
+                    screen=instance.screen,
+                    world_x=world_x,
+                    final_y=world_y,
+                    initial_y=behavior.initial_flag_y(instance.y),
+                )
+
+            if walk_anchor and flag_anchor:
+                break
+
+        self._castle_walk_anchor = walk_anchor
+        self._castle_flag_anchor = flag_anchor
+
+        if self._castle_walk_anchor is None:
+            raise RuntimeError(
+                "EndLevelState requires a castle exit marker with role 'walk'. "
+                "Add a `castle_exit` behavior with `role: walk` to the level."
+            )
+
+        if self._castle_flag_anchor is None:
+            raise RuntimeError(
+                "EndLevelState requires a castle exit marker with role 'flag'. "
+                "Add a `castle_exit` behavior with `role: flag` to the level."
+            )
+
+    def _check_castle_entry(self, game) -> None:
+        if self._transition_started or self._castle_walk_anchor is None:
+            return
+
+        mario = game.world.mario
+        anchor = self._castle_walk_anchor
+
+        if mario.screen != anchor.screen:
+            return
+
+        trigger_x = anchor.world_x + SUB_TILE_SIZE // 2
+        if mario.x < trigger_x:
+            return
+
+        mario.set_intent_override(None)
+        mario.vx = 0.0
+        mario.visible = False
+        self._transition_started = True
+
+        game.transition(
+            CompleteLevelState(self._castle_walk_anchor, self._castle_flag_anchor)
+        )
