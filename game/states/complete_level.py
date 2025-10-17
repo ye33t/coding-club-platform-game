@@ -52,18 +52,19 @@ class CompleteLevelState(State):
         self._current_flag_y: Optional[float] = None
         self._flag_finished: bool = flag_anchor is None
 
-        self._flag_raise_speed = FLAGPOLE_DESCENT_SPEED
+        self._flag_raise_speed = FLAGPOLE_DESCENT_SPEED * 0.6
         self._completion_delay = 1.0
         self._completion_timer = 0.0
 
     def on_enter(self, game) -> None:
         """Prepare the castle finale sequence."""
         mario = game.world.mario
-        
+
         def _empty_intent(_: pygame.key.ScancodeWrapper) -> MarioIntent:
             return MarioIntent()
+
         mario.set_intent_override(_empty_intent)
-        
+
         mario.vx = 0.0
         mario.vy = 0.0
         mario.visible = False
@@ -94,14 +95,15 @@ class CompleteLevelState(State):
                 next_y = self._flag_anchor.final_y
                 self._flag_finished = True
             self._current_flag_y = next_y
-            self._flag_effect.set_position(self._flag_anchor.world_x + FLAG_X_OFFSET, next_y)
+            self._flag_effect.set_position(
+                self._flag_anchor.world_x + FLAG_X_OFFSET, next_y
+            )
         else:
             self._completion_timer += dt
             if (
                 self._completion_timer >= self._completion_delay
                 and not game.transitioning
             ):
-                pass
                 from .start_level import StartLevelState
 
                 game.transition(StartLevelState(), TransitionMode.BOTH)

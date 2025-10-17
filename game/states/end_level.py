@@ -6,10 +6,10 @@ from typing import Optional
 
 import pygame
 
-from game.constants import SUB_TILE_SIZE, TILE_SIZE
+from game.constants import NATIVE_WIDTH, TILE_SIZE
 
 from ..mario import MarioIntent
-from ..physics.config import FLAGPOLE_DESCENT_SPEED
+from ..physics.config import FLAGPOLE_DESCENT_SPEED, WALK_SPEED
 from ..props import FlagpoleProp
 from ..terrain import CastleExitBehavior
 from .base import State
@@ -41,6 +41,13 @@ class EndLevelState(State):
         self._walk_started = False
         self._castle_walk_anchor: CastleWalkAnchor | None = None
         self._castle_flag_anchor: CastleFlagAnchor | None = None
+        self._victory_walk_speed = WALK_SPEED * 0.6
+        self._flag_drop_complete = False
+        self._camera_center_active = False
+        self._camera_center_elapsed = 0.0
+        self._camera_center_duration = 0.75
+        self._camera_start_x = 0.0
+        self._camera_target_x = 0.0
 
     def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
@@ -59,35 +66,36 @@ class EndLevelState(State):
             self._flag_prop = None
 
         self._collect_castle_anchors(game)
+        self._flag_drop_complete = False
+        self._camera_center_active = False
+        self._camera_center_elapsed = 0.0
+        camera = game.world.camera
+        self._camera_start_x = camera.x
+        self._camera_target_x = camera.x
 
     def update(self, game, dt: float) -> None:
-        """Descend Mario down the flagpole."""
+        """Advance end-of-level sequence."""
         mario = game.world.mario
 
-        if self._walk_started:
-            game.world.update(pygame.key.get_pressed(), dt)
-            self._check_castle_entry(game)
-            return
+        if not self._flag_drop_complete:
+            self._update_flagpole_descent(game, mario, dt)
+            if not self._flag_drop_complete:
+                return
 
-        # Move Mario down at constant speed
-        mario.y -= FLAGPOLE_DESCENT_SPEED * dt
+        if self._camera_center_active:
+            self._update_camera_center(game, dt)
+            if self._camera_center_active:
+                return
 
-        # Clamp Mario's position at the base and flip him to the other side of the pole
-        if mario.y <= self.flagpole_base_y:
-            mario.y = self.flagpole_base_y
-            mario.x = self.flagpole_x
-            mario.facing_right = False
-
-        at_base = mario.y <= self.flagpole_base_y
-
-        if self._flag_prop is not None and not self._flag_prop.complete:
-            self._flag_prop.descend(dt)
-            return
-
-        if at_base and not self._walk_started:
+        if not self._walk_started:
             self._begin_walk(game)
             game.world.update(pygame.key.get_pressed(), dt)
+            self._cap_victory_speed(mario)
             return
+
+        game.world.update(pygame.key.get_pressed(), dt)
+        self._cap_victory_speed(mario)
+        self._check_castle_entry(game)
 
     def on_exit(self, game) -> None:
         mario = game.world.mario
@@ -96,6 +104,9 @@ class EndLevelState(State):
         self._flag_prop = None
         self._castle_walk_anchor = None
         self._castle_flag_anchor = None
+        self._flag_drop_complete = False
+        self._camera_center_active = False
+        self._camera_center_elapsed = 0.0
 
     def _begin_walk(self, game) -> None:
         if self._walk_started:
@@ -104,7 +115,11 @@ class EndLevelState(State):
         def _walk_intent(_: pygame.key.ScancodeWrapper) -> MarioIntent:
             return MarioIntent(move_right=True)
 
-        game.world.mario.set_intent_override(_walk_intent)
+        mario = game.world.mario
+        mario.vx = 0.0
+        mario.facing_right = True
+        game.world.camera.update(mario.x, game.world.level.width_pixels)
+        mario.set_intent_override(_walk_intent)
         self._walk_started = True
 
     def _collect_castle_anchors(self, game) -> None:
@@ -161,7 +176,7 @@ class EndLevelState(State):
         if mario.screen != anchor.screen:
             return
 
-        trigger_x = anchor.world_x + SUB_TILE_SIZE // 2
+        trigger_x = anchor.world_x + TILE_SIZE * 0.5
         if mario.x < trigger_x:
             return
 
@@ -173,3 +188,87 @@ class EndLevelState(State):
         game.transition(
             CompleteLevelState(self._castle_walk_anchor, self._castle_flag_anchor)
         )
+
+    def _update_flagpole_descent(self, game, mario, dt: float) -> None:
+        """Slide Mario down the pole while the flag falls."""
+        mario.y -= FLAGPOLE_DESCENT_SPEED * dt
+        if mario.y <= self.flagpole_base_y:
+            mario.y = self.flagpole_base_y
+            mario.x = self.flagpole_x - TILE_SIZE
+
+        flag_prop = self._flag_prop
+        if flag_prop is not None:
+            was_complete = flag_prop.complete
+            if not was_complete:
+                flag_prop.descend(dt)
+            if flag_prop.complete and not was_complete:
+                self._on_flag_drop_complete(game)
+        elif mario.y <= self.flagpole_base_y:
+            self._on_flag_drop_complete(game)
+
+    def _on_flag_drop_complete(self, game) -> None:
+        """Trigger the pause once both Mario and the flag reach the base."""
+        if self._flag_drop_complete:
+            return
+
+        mario = game.world.mario
+        if mario.y > self.flagpole_base_y:
+            return
+
+        mario.facing_right = False
+        mario.x = self.flagpole_x
+        self._flag_drop_complete = True
+        self._start_camera_center(game)
+
+    def _start_camera_center(self, game) -> None:
+        """Begin easing the camera to keep Mario centered."""
+        camera = game.world.camera
+        level_width = game.world.level.width_pixels
+        mario = game.world.mario
+
+        half_width = NATIVE_WIDTH / 2
+        max_camera_x = max(0.0, level_width - NATIVE_WIDTH)
+        target = max(0.0, min(mario.x - half_width, max_camera_x))
+        target = max(camera.x, target)
+
+        self._camera_start_x = camera.x
+        self._camera_target_x = target
+        self._camera_center_elapsed = 0.0
+
+        if abs(target - camera.x) <= 1e-2 or self._camera_center_duration <= 0:
+            camera.x = target
+            if camera.max_x < target:
+                camera.max_x = target
+            self._camera_center_active = False
+        else:
+            self._camera_center_active = True
+
+    def _update_camera_center(self, game, dt: float) -> None:
+        """Ease the camera toward its target center position."""
+        if not self._camera_center_active:
+            return
+
+        self._camera_center_elapsed = min(
+            self._camera_center_elapsed + dt, self._camera_center_duration
+        )
+
+        if self._camera_center_duration <= 0:
+            t = 1.0
+        else:
+            t = min(1.0, self._camera_center_elapsed / self._camera_center_duration)
+
+        new_x = (
+            self._camera_start_x + (self._camera_target_x - self._camera_start_x) * t
+        )
+
+        camera = game.world.camera
+        camera.x = new_x
+        if camera.max_x < new_x:
+            camera.max_x = new_x
+
+        if t >= 1.0:
+            self._camera_center_active = False
+
+    def _cap_victory_speed(self, mario) -> None:
+        """Clamp Mario's scripted walk speed for the victory march."""
+        mario.vx = max(0.0, min(mario.vx, self._victory_walk_speed))
