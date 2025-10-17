@@ -12,6 +12,7 @@ from ..mario import MarioIntent
 from ..physics.config import FLAGPOLE_DESCENT_SPEED, WALK_SPEED
 from ..props import FlagpoleProp
 from ..terrain import CastleExitBehavior
+from ..terrain.flagpole import FlagpoleBehavior
 from .base import State
 from .complete_level import CastleFlagAnchor, CastleWalkAnchor, CompleteLevelState
 
@@ -48,6 +49,7 @@ class EndLevelState(State):
         self._camera_center_duration = 0.75
         self._camera_start_x = 0.0
         self._camera_target_x = 0.0
+        self._flagpole_clamp_y: float | None = None
 
     def on_enter(self, game) -> None:
         """Lock Mario to flagpole position."""
@@ -66,12 +68,14 @@ class EndLevelState(State):
             self._flag_prop = None
 
         self._collect_castle_anchors(game)
+        self._collect_flagpole_geometry(game)
         self._flag_drop_complete = False
         self._camera_center_active = False
         self._camera_center_elapsed = 0.0
         camera = game.world.camera
         self._camera_start_x = camera.x
         self._camera_target_x = camera.x
+        self._apply_flagpole_top_clamp(mario)
 
     def update(self, game, dt: float) -> None:
         """Advance end-of-level sequence."""
@@ -107,6 +111,7 @@ class EndLevelState(State):
         self._flag_drop_complete = False
         self._camera_center_active = False
         self._camera_center_elapsed = 0.0
+        self._flagpole_clamp_y = None
 
     def _begin_walk(self, game) -> None:
         if self._walk_started:
@@ -192,6 +197,7 @@ class EndLevelState(State):
     def _update_flagpole_descent(self, game, mario, dt: float) -> None:
         """Slide Mario down the pole while the flag falls."""
         mario.y -= FLAGPOLE_DESCENT_SPEED * dt
+        self._apply_flagpole_top_clamp(mario)
         if mario.y <= self.flagpole_base_y:
             mario.y = self.flagpole_base_y
             mario.x = self.flagpole_x - TILE_SIZE
@@ -219,6 +225,7 @@ class EndLevelState(State):
         mario.x = self.flagpole_x
         self._flag_drop_complete = True
         self._start_camera_center(game)
+        self._apply_flagpole_top_clamp(mario)
 
     def _start_camera_center(self, game) -> None:
         """Begin easing the camera to keep Mario centered."""
@@ -272,3 +279,34 @@ class EndLevelState(State):
     def _cap_victory_speed(self, mario) -> None:
         """Clamp Mario's scripted walk speed for the victory march."""
         mario.vx = max(0.0, min(mario.vx, self._victory_walk_speed))
+
+    def _collect_flagpole_geometry(self, game) -> None:
+        """Determine flagpole clamp height based on flagpole tiles."""
+        flagpole_tiles = [
+            instance
+            for instance in game.world.level.terrain_manager.instances.values()
+            if isinstance(instance.behavior, FlagpoleBehavior)
+        ]
+
+        if not flagpole_tiles:
+            self._flagpole_clamp_y = None
+            return
+
+        unique_rows = sorted({instance.y for instance in flagpole_tiles})
+        if not unique_rows:
+            self._flagpole_clamp_y = None
+            return
+
+        if len(unique_rows) >= 2:
+            clamp_tile_y = unique_rows[-2]
+        else:
+            clamp_tile_y = unique_rows[-1]
+
+        self._flagpole_clamp_y = clamp_tile_y * TILE_SIZE
+
+    def _apply_flagpole_top_clamp(self, mario) -> None:
+        """Prevent Mario from sitting above the second-from-top flag tile."""
+        if self._flagpole_clamp_y is None:
+            return
+        if mario.y > self._flagpole_clamp_y:
+            mario.y = self._flagpole_clamp_y
