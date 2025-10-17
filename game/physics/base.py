@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List
 
+from game.props.manager import PropManager
+
 if TYPE_CHECKING:
     from ..camera import Camera
     from ..entities import Entity
@@ -24,6 +26,7 @@ class PhysicsContext:
     camera: "Camera"  # Live camera instance mutated in place
     level: "Level"  # Level data for collision detection
     dt: float  # Delta time for this frame
+    props: "PropManager"
     events: List["PhysicsEvent"] = field(
         default_factory=list
     )  # Events raised this frame

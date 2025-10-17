@@ -3,12 +3,14 @@
 from typing import Iterator, Optional, cast
 
 from .camera import Camera
+from .constants import TILE_SIZE
 from .effects import EffectManager
 from .entities import EntityFactory, EntityManager
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
+from .props import FlagpoleProp, PropManager
 from .rendering.base import Drawable
 
 
@@ -24,6 +26,8 @@ class World:
         self.effects = EffectManager()
         self.entities = EntityManager()
         self.entity_factory = EntityFactory()
+        self.props = PropManager()
+        self.props.register("flagpole", FlagpoleProp())
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -31,6 +35,8 @@ class World:
             self.level.spawn_y,
             self.level.spawn_screen,
         )
+
+        self.props.spawn_all(self)
 
     def reset(self) -> None:
         """Reset the world to the level's spawn configuration."""
@@ -45,6 +51,7 @@ class World:
         self.level.reset_terrain()
         self.effects.clear()
         self.entities.clear()
+        self.props.reset(self)
 
         # Reset all spawn triggers back to their pending state
         self.level.spawn_manager.reset_all_triggers()
@@ -69,6 +76,7 @@ class World:
             camera=self.camera,
             level=self.level,
             entities=self.entities.items,
+            props=self.props,
         )
 
         processed_context = self.physics.process(context)
@@ -77,6 +85,7 @@ class World:
             if event.dispatch(self, processed_context):
                 return cast(PhysicsEvent, event)
 
+        self.props.update(self, dt)
         self.effects.update(dt)
 
         self.camera.update(self.mario.x, self.level.width_pixels)
@@ -98,8 +107,6 @@ class World:
 
     def _check_spawn_triggers(self) -> None:
         """Check and activate spawn triggers based on camera position."""
-        from .constants import TILE_SIZE
-
         # Get triggered spawn triggers
         triggered = self.level.spawn_manager.check_triggers(self.camera.x)
 

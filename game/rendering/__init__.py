@@ -2,6 +2,7 @@
 
 from .background import BackgroundLayer
 from .base import Drawable
+from .behind_background_drawables import BehindBackgroundDrawablesLayer
 from .behind_drawables import BehindDrawablesLayer
 from .debug_overlay import DebugOverlayLayer
 from .front_drawables import FrontDrawablesLayer
@@ -13,6 +14,7 @@ __all__ = [
     "Drawable",
     "RenderPipeline",
     "BackgroundLayer",
+    "BehindBackgroundDrawablesLayer",
     "BehindDrawablesLayer",
     "TerrainLayer",
     "FrontDrawablesLayer",

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Iterable, List, Optional
 from game.constants import BACKGROUND_COLOR
 from game.display import Display
 from game.rendering.background import BackgroundLayer
+from game.rendering.behind_background_drawables import BehindBackgroundDrawablesLayer
 from game.rendering.behind_drawables import BehindDrawablesLayer
 from game.rendering.debug_overlay import DebugOverlayLayer
 from game.rendering.front_drawables import FrontDrawablesLayer
@@ -24,6 +25,7 @@ class RenderPipeline:
     def __init__(self) -> None:
         self._display = Display()
         self._base_layers: List[RenderLayer] = [
+            BehindBackgroundDrawablesLayer(),
             BackgroundLayer(),
             BehindDrawablesLayer(),
             TerrainLayer(),

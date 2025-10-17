@@ -41,23 +41,27 @@ collision_mask = "full"
 slug = "void"
 sprite_sheet = "background"
 sprite = "void"
+simple_key = "v"
 
 [[tiles]]
 slug = "arch_left"
 sprite_sheet = "background"
 sprite = "arch_left"
 collision_mask = "left_half"
+simple_key = "L"
 
 [[tiles]]
 slug = "arch_center"
 sprite_sheet = "background"
 sprite = "arch_center"
+simple_key = "A"
 
 [[tiles]]
 slug = "arch_right"
 sprite_sheet = "background"
 sprite = "arch_right"
 collision_mask = "right_half"
+simple_key = "R"
 
 [[tiles]]
 slug = "battlement"
@@ -70,6 +74,7 @@ slug = "battlement_1"
 sprite_sheet = "background"
 sprite = "battlement_1"
 collision_mask = "full"
+simple_key = "H"
 
 [[tiles]]
 slug = "bridge_rails"

@@ -60,8 +60,14 @@ class RenderContext:
         return self._game.world.camera
 
     @property
+    def behind_background_drawables(self) -> Iterator[Drawable]:
+        return self._layered_drawables(lambda drawable: drawable.z_index < -10)
+
+    @property
     def behind_drawables(self) -> Iterator[Drawable]:
-        return self._layered_drawables(lambda drawable: drawable.z_index < 0)
+        return self._layered_drawables(
+            lambda drawable: drawable.z_index < 0 and drawable.z_index >= -10
+        )
 
     @property
     def front_drawables(self) -> Iterator[Drawable]:
