@@ -15,63 +15,63 @@ simple_key = "."
 
 [[tiles]]
 slug = "sand"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "sand"
 collision_mask = "full"
 
 [[tiles]]
 slug = "sand_wave"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "sand_wave"
 collision_mask = "full"
 
 [[tiles]]
 slug = "sand_lines"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "sand_lines"
 collision_mask = "full"
 
 [[tiles]]
 slug = "sand_dune"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "sand_dune"
 collision_mask = "full"
 
 [[tiles]]
 slug = "void"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "void"
 simple_key = "v"
 
 [[tiles]]
 slug = "arch_left"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "arch_left"
 collision_mask = "left_half"
 simple_key = "L"
 
 [[tiles]]
 slug = "arch_center"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "arch_center"
 simple_key = "A"
 
 [[tiles]]
 slug = "arch_right"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "arch_right"
 collision_mask = "right_half"
 simple_key = "R"
 
 [[tiles]]
 slug = "battlement"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "battlement"
 collision_mask = "full"
 
 [[tiles]]
 slug = "battlement_1"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "battlement_1"
 collision_mask = "full"
 simple_key = "H"
@@ -83,51 +83,51 @@ sprite = "bridge_rails"
 
 [[tiles]]
 slug = "cannon_top"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "cannon_top"
 collision_mask = "full"
 
 [[tiles]]
 slug = "cannon_center"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "cannon_center"
 collision_mask = "full"
 
 [[tiles]]
 slug = "cannon_bottom"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "cannon_bottom"
 collision_mask = "full"
 
 [[tiles]]
 slug = "conveyor_corner_left"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "conveyor_corner_left"
 
 [[tiles]]
 slug = "conveyor_horizontal"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "conveyor_horizontal"
 
 [[tiles]]
 slug = "conveyor_right"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "conveyor_right"
 
 [[tiles]]
 slug = "conveyor_vertical"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "conveyor_vertical"
 
 [[tiles]]
 slug = "ladder"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "ladder"
 collision_mask = "full"
 
 [[tiles]]
 slug = "beanstalk"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "beanstalk"
 collision_mask = "full"
 

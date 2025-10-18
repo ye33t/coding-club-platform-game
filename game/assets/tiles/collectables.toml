@@ -17,7 +17,7 @@ simple_key = "?"
 
 [[tiles]]
 slug = "item_box_used"
-sprite_sheet = "background"
+sprite_sheet = "item_box"
 sprite = "item_box_used"
 collision_mask = "full"
 
