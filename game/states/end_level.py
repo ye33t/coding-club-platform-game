@@ -255,7 +255,7 @@ class EndLevelState(State):
         if mario.screen != anchor.screen:
             return
 
-        trigger_x = anchor.world_x + TILE_SIZE * 0.5
+        trigger_x = anchor.world_x
         if mario.x < trigger_x:
             return
 
@@ -336,7 +336,7 @@ class EndLevelState(State):
             return None
 
         clamp_tile_y = unique_rows[-2] if len(unique_rows) >= 2 else unique_rows[-1]
-        return clamp_tile_y * TILE_SIZE
+        return float(clamp_tile_y * TILE_SIZE)
 
     def _apply_flagpole_top_clamp(self, mario) -> None:
         """Prevent Mario from hovering above the pole's top tiles."""

@@ -21,7 +21,13 @@ class TerrainLayer(RenderLayer):
 
         for tile_x, tile_y, tile_type in visible_tiles:
             tile_def = context.level.get_tile_definition(tile_type)
-            if not tile_def or not tile_def.sprite_name:
+            if not tile_def:
+                continue
+
+            sprite_name = tile_def.resolve_sprite_name(
+                context.game.world.animation_tick
+            )
+            if not sprite_name:
                 continue
 
             world_x: float = tile_x * TILE_SIZE
@@ -43,7 +49,7 @@ class TerrainLayer(RenderLayer):
             sprites.draw_at_position(
                 context.surface,
                 tile_def.sprite_sheet,
-                tile_def.sprite_name,
+                sprite_name,
                 int(screen_x),
                 int(screen_y),
             )
