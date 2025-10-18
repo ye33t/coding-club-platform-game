@@ -1,6 +1,6 @@
 version: 1
 sprite_sheets:
-  item_box:
+  coins:
     image: background.png
     colorkey: [146, 144, 255]
     sprites:
@@ -15,4 +15,8 @@ sprite_sheets:
         size: [2, 2]
       item_box_used:
         offset: [51, 32]
+        size: [2, 2]
+
+      coin_1:
+        offset: [298, 111]
         size: [2, 2]

@@ -95,7 +95,7 @@ class MushroomEntity(HorizontalMovementMixin, Entity):
 
         sprites.draw_at_position(
             surface,
-            "other",
+            "objects",
             "mushroom",
             int(screen_x),
             int(screen_y),

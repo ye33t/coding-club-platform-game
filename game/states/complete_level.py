@@ -101,7 +101,7 @@ class CompleteLevelState(State):
             return
 
         self._flag_effect = SpriteEffect(
-            sprite_sheet="other",
+            sprite_sheet="objects",
             sprite_name="flag_castle",
             world_x=self._flag_anchor.world_x,
             world_y=self._flag_anchor.initial_y,

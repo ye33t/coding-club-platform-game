@@ -5,60 +5,60 @@ full = 0b1111
 
 [[tiles]]
 slug = "pipe_left"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_left"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_right"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_right"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_mouth_left"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_mouth_left"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_mouth_right"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_mouth_right"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_horizontal_top"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_horizontal_top"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_horizontal_bottom"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_horizontal_bottom"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_horizontal_mouth_top"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_horizontal_mouth_top"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_horizontal_mouth_bottom"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_horizontal_mouth_bottom"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_junction_top"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_junction_top"
 collision_mask = "full"
 
 [[tiles]]
 slug = "pipe_junction_bottom"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "pipe_junction_bottom"
 collision_mask = "full"

@@ -1,6 +1,6 @@
 version: 1
 sprite_sheets:
-  background:
+  pipes_and_scenery:
     image: background.png
     colorkey: [146, 144, 255]
     sprites:
@@ -99,43 +99,4 @@ sprite_sheets:
         size: [2, 2]
       flagpole:
         offset: [136, 263]
-        size: [2, 2]
-      cloud_top_left:
-        offset: [298, 32]
-        size: [2, 2]
-      cloud_top:
-        offset: [315, 32]
-        size: [2, 2]
-      cloud_top_right:
-        offset: [332, 32]
-        size: [2, 2]
-      water_top:
-        offset: [349, 32]
-        size: [2, 2]
-      cloud_block:
-        offset: [366, 32]
-        size: [2, 2]
-      cloud_bottom_left:
-        offset: [298, 49]
-        size: [2, 2]
-      cloud_bottom:
-        offset: [315, 49]
-        size: [2, 2]
-      cloud_bottom_right:
-        offset: [332, 49]
-        size: [2, 2]
-      water:
-        offset: [349, 49]
-        size: [2, 2]
-      piano:
-        offset: [366, 49]
-        size: [2, 2]
-      item_box:
-        offset: [298, 94]
-        size: [2, 2]
-      coin:
-        offset: [298, 111]
-        size: [2, 2]
-      axe:
-        offset: [298, 141]
         size: [2, 2]

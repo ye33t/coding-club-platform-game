@@ -5,7 +5,7 @@ full = 0b1111
 
 [[tiles]]
 slug = "item_box"
-sprite_sheet = "item_box"
+sprite_sheet = "coins"
 sprites = [
     { sprite = "item_box_1", frames = 24 },
     { sprite = "item_box_2", frames = 8 },
@@ -17,11 +17,6 @@ simple_key = "?"
 
 [[tiles]]
 slug = "item_box_used"
-sprite_sheet = "item_box"
+sprite_sheet = "coins"
 sprite = "item_box_used"
 collision_mask = "full"
-
-[[tiles]]
-slug = "coin"
-sprite_sheet = "background"
-sprite = "coin"

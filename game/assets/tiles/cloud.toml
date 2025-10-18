@@ -2,35 +2,35 @@ version = 1
 
 [[tiles]]
 slug = "cloud_top_left"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_top_left"
 
 [[tiles]]
 slug = "cloud_top"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_top"
 
 [[tiles]]
 slug = "cloud_top_right"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_top_right"
 
 [[tiles]]
 slug = "cloud_bottom_left"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_bottom_left"
 
 [[tiles]]
 slug = "cloud_bottom"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_bottom"
 
 [[tiles]]
 slug = "cloud_bottom_right"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_bottom_right"
 
 [[tiles]]
 slug = "cloud_block"
-sprite_sheet = "background"
+sprite_sheet = "water_and_sky"
 sprite = "cloud_block"
