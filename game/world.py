@@ -28,6 +28,7 @@ class World:
         self.entity_factory = EntityFactory()
         self.props = PropManager()
         self.props.register("flagpole", FlagpoleProp())
+        self.animation_tick = 0
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -59,6 +60,7 @@ class World:
         # Reset camera position and ratchet
         self.camera.x = 0
         self.camera.max_x = 0
+        self.animation_tick = 0
 
     def update(self, keys, dt: float) -> Optional[PhysicsEvent]:
         """Process Mario's intent and update his state.
@@ -81,9 +83,15 @@ class World:
 
         processed_context = self.physics.process(context)
 
+        triggered_event: Optional[PhysicsEvent] = None
         for event in processed_context.events:
             if event.dispatch(self, processed_context):
-                return cast(PhysicsEvent, event)
+                triggered_event = cast(PhysicsEvent, event)
+                break
+
+        if triggered_event is not None:
+            self.animation_tick += 1
+            return triggered_event
 
         self.props.update(self, dt)
         self.effects.update(dt)
@@ -91,6 +99,8 @@ class World:
         self.camera.update(self.mario.x, self.level.width_pixels)
 
         self._check_spawn_triggers()
+
+        self.animation_tick += 1
 
         return None
 

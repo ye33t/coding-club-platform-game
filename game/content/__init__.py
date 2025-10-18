@@ -11,7 +11,15 @@ from .tile_definitions import (
     require_tile,
     simple_tile_mapping,
 )
-from .types import SpriteFrame, SpriteKey, SpriteSheetDef, TileConfig, TileDefinition
+from .types import (
+    SpriteFrame,
+    SpriteKey,
+    SpriteSheetDef,
+    TileAnimation,
+    TileAnimationFrame,
+    TileConfig,
+    TileDefinition,
+)
 
 __all__ = [
     "SpriteLibrary",
@@ -20,6 +28,8 @@ __all__ = [
     "SpriteKey",
     "SpriteFrame",
     "SpriteSheetDef",
+    "TileAnimationFrame",
+    "TileAnimation",
     "TileConfig",
     "TileDefinition",
     "TILE_DEFS",

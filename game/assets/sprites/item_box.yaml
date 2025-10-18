@@ -1,0 +1,15 @@
+version: 1
+sprite_sheets:
+  item_box:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      item_box_1:
+        offset: [298, 94]
+        size: [2, 2]
+      item_box_2:
+        offset: [315, 94]
+        size: [2, 2]
+      item_box_3:
+        offset: [332, 94]
+        size: [2, 2]

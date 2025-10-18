@@ -7,7 +7,13 @@ from typing import Dict, Mapping
 
 import yaml  # type: ignore[import]
 
-from .types import SpriteFrame, SpriteSheetDef, TileConfig
+from .types import (
+    SpriteFrame,
+    SpriteSheetDef,
+    TileAnimation,
+    TileAnimationFrame,
+    TileConfig,
+)
 
 ASSET_ROOT = Path(__file__).resolve().parent.parent / "assets"
 SPRITE_DEFINITION_DIR = ASSET_ROOT / "sprites"
@@ -264,18 +270,83 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                     f"'{sprite_sheet}'"
                 )
 
+            sheet = sprite_library.sheets[sprite_sheet]
+
             sprite = entry.get("sprite")
             if sprite is not None and not isinstance(sprite, str):
                 raise ValueError(
                     f"{path}: tile '{slug}' sprite must be null or a string"
                 )
             if sprite is not None:
-                sheet = sprite_library.sheets[sprite_sheet]
                 if sprite not in sheet.sprites:
                     raise ValueError(
                         f"{path}: tile '{slug}' references unknown sprite '{sprite}' "
                         f"in sheet '{sprite_sheet}'"
                     )
+
+            animation_entries = entry.get("sprites")
+            animation: TileAnimation | None = None
+            if animation_entries is not None:
+                if sprite is not None:
+                    raise ValueError(
+                        f"{path}: tile '{slug}' cannot define both 'sprite' "
+                        "and 'sprites'"
+                    )
+                if not isinstance(animation_entries, list):
+                    raise ValueError(
+                        f"{path}: tile '{slug}' sprites must be an array if provided"
+                    )
+                if not animation_entries:
+                    raise ValueError(
+                        f"{path}: tile '{slug}' sprites array must contain entries"
+                    )
+
+                frames: list[TileAnimationFrame] = []
+                total_frames = 0
+
+                for index, frame_entry in enumerate(animation_entries):
+                    if not isinstance(frame_entry, dict):
+                        raise ValueError(
+                            f"{path}: tile '{slug}' sprites[{index}] must be a table"
+                        )
+
+                    frame_sprite = frame_entry.get("sprite")
+                    if not isinstance(frame_sprite, str):
+                        raise ValueError(
+                            f"{path}: tile '{slug}' sprites[{index}] sprite must be a "
+                            "string"
+                        )
+                    if frame_sprite not in sheet.sprites:
+                        raise ValueError(
+                            f"{path}: tile '{slug}' references unknown sprite "
+                            f"'{frame_sprite}' in sheet '{sprite_sheet}'"
+                        )
+
+                    frame_duration = frame_entry.get("frames")
+                    if not isinstance(frame_duration, int):
+                        raise ValueError(
+                            f"{path}: tile '{slug}' sprites[{index}] frames must be an "
+                            "integer"
+                        )
+                    if frame_duration <= 0:
+                        raise ValueError(
+                            f"{path}: tile '{slug}' sprites[{index}] frames must be > 0"
+                        )
+
+                    frames.append(
+                        TileAnimationFrame(sprite=frame_sprite, frames=frame_duration)
+                    )
+                    total_frames += frame_duration
+
+                if total_frames <= 0:
+                    raise ValueError(
+                        f"{path}: tile '{slug}' total animation frames must be > 0"
+                    )
+
+                animation = TileAnimation(
+                    frames=tuple(frames),
+                    total_frames=total_frames,
+                )
 
             collision_mask_value = entry.get("collision_mask")
             if isinstance(collision_mask_value, str):
@@ -319,6 +390,7 @@ def _parse_tile_definitions(sprite_library: SpriteLibrary) -> TileLibrary:
                 collision_mask=mask,
                 category=category,
                 simple_key=simple_key,
+                animation=animation,
             )
 
             tiles_by_slug[slug] = definition
