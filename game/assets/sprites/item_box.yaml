@@ -13,3 +13,6 @@ sprite_sheets:
       item_box_3:
         offset: [332, 94]
         size: [2, 2]
+      item_box_used:
+        offset: [51, 32]
+        size: [2, 2]

@@ -6,46 +6,46 @@ top_half = 0b1100
 
 [[tiles]]
 slug = "bridge"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "bridge"
 collision_mask = "top_half"
 
 [[tiles]]
 slug = "rocks"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "rocks"
 collision_mask = "full"
 
 [[tiles]]
 slug = "ground"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "ground"
 collision_mask = "full"
 simple_key = "#"
 
 [[tiles]]
 slug = "brick"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "brick"
 collision_mask = "full"
 simple_key = "%"
 
 [[tiles]]
 slug = "brick_top"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "brick_top"
 collision_mask = "full"
 simple_key = "="
 
 [[tiles]]
 slug = "block"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "block"
 collision_mask = "full"
 simple_key = "@"
 
 [[tiles]]
 slug = "earth"
-sprite_sheet = "background"
+sprite_sheet = "ground_and_stone"
 sprite = "earth"
 collision_mask = "full"

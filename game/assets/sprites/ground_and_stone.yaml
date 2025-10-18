@@ -1,0 +1,87 @@
+version: 1
+sprite_sheets:
+  ground_and_stone:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      ground:
+        offset: [0, 32]
+        size: [2, 2]
+      brick_top:
+        offset: [17, 32]
+        size: [2, 2]
+      brick:
+        offset: [34, 32]
+        size: [2, 2]
+      item_box_used:
+        offset: [51, 32]
+        size: [2, 2]
+      battlement:
+        offset: [68, 32]
+        size: [2, 2]
+      battlement_1:
+        offset: [85, 32]
+        size: [2, 2]
+      arch_center:
+        offset: [102, 32]
+        size: [2, 2]
+      cannon_top:
+        offset: [119, 32]
+        size: [2, 2]
+      block:
+        offset: [0, 49]
+        size: [2, 2]
+      earth:
+        offset: [17, 49]
+        size: [2, 2]
+      bridge:
+        offset: [34, 49]
+        size: [2, 2]
+      arch_left:
+        offset: [51, 49]
+        size: [2, 2]
+      arch_right:
+        offset: [85, 49]
+        size: [2, 2]
+      void:
+        offset: [102, 49]
+        size: [2, 2]
+      cannon_center:
+        offset: [119, 49]
+        size: [2, 2]
+      rocks:
+        offset: [0, 66]
+        size: [2, 2]
+      conveyor_corner_left:
+        offset: [17, 66]
+        size: [2, 2]
+      conveyor_horizontal:
+        offset: [34, 66]
+        size: [2, 2]
+      conveyor_right:
+        offset: [51, 66]
+        size: [2, 2]
+      sand_wave:
+        offset: [68, 66]
+        size: [2, 2]
+      sand_lines:
+        offset: [85, 66]
+        size: [2, 2]
+      cannon_bottom:
+        offset: [119, 66]
+        size: [2, 2]
+      beanstalk:
+        offset: [0, 83]
+        size: [2, 2]
+      ladder:
+        offset: [17, 83]
+        size: [2, 2]
+      conveyor_vertical:
+        offset: [34, 83]
+        size: [2, 2]
+      sand:
+        offset: [51, 83]
+        size: [2, 2]
+      sand_dune:
+        offset: [68, 83]
+        size: [2, 2]
