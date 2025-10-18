@@ -98,7 +98,7 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             "koopa_troopa_walk1" if self.animation_frame == 0 else "koopa_troopa_walk2"
         )
         if self.knocked_out:
-            sprite = sprites.get("enemies", sprite_name)
+            sprite = sprites.get("koopas", sprite_name)
             if sprite is None:
                 return
             flipped = pygame.transform.flip(sprite, False, True)
@@ -109,7 +109,7 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
         else:
             sprites.draw_at_position(
                 surface,
-                "enemies",
+                "koopas",
                 sprite_name,
                 int(screen_x),
                 int(screen_y),
@@ -231,7 +231,7 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
         """Render the Koopa shell."""
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
         if self.knocked_out:
-            sprite = sprites.get("enemies", "koopa_troopa_shell")
+            sprite = sprites.get("koopas", "koopa_troopa_shell")
             if sprite is None:
                 return
             flipped = pygame.transform.flip(sprite, False, True)
@@ -242,7 +242,7 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
         else:
             sprites.draw_at_position(
                 surface,
-                "enemies",
+                "koopas",
                 "koopa_troopa_shell",
                 int(screen_x),
                 int(screen_y),

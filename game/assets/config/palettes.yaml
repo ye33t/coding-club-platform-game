@@ -1,0 +1,56 @@
+version: 1
+
+schemes:
+  overworld:
+    default: true
+    families:
+      ground_and_stone:
+        primary: 0x9c4a00
+        secondary: 0xffcec5
+        accent: 0x000000
+      coins:
+        primary: 0x9c4a00
+        secondary: 0xffcec5
+        accent: 0x000000
+      goombas:
+        primary: 0x9c4a00
+        secondary: 0xffcec5
+        accent: 0x000000
+      koopas:
+        primary: 0xffd966
+        secondary: 0xe69c21
+        accent: 0xffffff
+      pipes_and_scenery:
+        primary: 0x109400
+        secondary: 0x8cd600
+        accent: 0x000000
+      water_and_sky:
+        primary: 0x63adff
+        secondary: 0xffffff
+        accent: 0x000000
+  underground:
+    families:
+      ground_and_stone:
+        primary: 0x007b8c
+        secondary: 0xb5efef
+        accent: 0x000000
+      coins:
+        primary: 0x007b8c
+        secondary: 0xb5efef
+        accent: 0x007b8c
+      goombas:
+        primary: 0x007b8c
+        secondary: 0xb5efef
+        accent: 0x000000
+      koopas:
+        primary: 0x007b8c
+        secondary: 0x9c4a00
+        accent: 0xffcec5
+      pipes_and_scenery:
+        primary: 0x109400
+        secondary: 0x8cd600
+        accent: 0x084a00
+      water_and_sky:
+        primary: 0x63adff
+        secondary: 0xffffff
+        accent: 0x007b8c

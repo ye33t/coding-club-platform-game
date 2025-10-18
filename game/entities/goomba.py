@@ -117,7 +117,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
 
         if self.knocked_out:
-            sprite = sprites.get("enemies", "goomba_walk1")
+            sprite = sprites.get("goombas", "goomba_walk1")
             if sprite is None:
                 return
             flipped = pygame.transform.flip(sprite, False, True)
@@ -131,7 +131,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             # Draw squashed Goomba
             sprites.draw_at_position(
                 surface,
-                "enemies",
+                "goombas",
                 "goomba_dead",
                 int(screen_x),
                 int(screen_y),
@@ -143,7 +143,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             )
             sprites.draw_at_position(
                 surface,
-                "enemies",
+                "goombas",
                 sprite_name,
                 int(screen_x),
                 int(screen_y),
