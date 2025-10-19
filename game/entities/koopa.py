@@ -275,13 +275,18 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
 
         if self.is_moving:
             self._set_moving(False)
-        else:
-            self._set_moving(True, facing_right=facing_right)
-            self.kick_cooldown = self.SHELL_KICK_COOLDOWN
+            return CollisionResponse(
+                remove=False,
+                bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
+            )
+
+        self._set_moving(True, facing_right=facing_right)
+        self.kick_cooldown = self.SHELL_KICK_COOLDOWN
 
         return CollisionResponse(
             remove=False,
             bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
+            score_type=ScoreType.SHELL_KICK,
         )
 
     def on_collide_entity(self, source: Entity) -> bool:
