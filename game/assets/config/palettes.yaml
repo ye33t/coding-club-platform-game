@@ -3,6 +3,7 @@ version: 1
 schemes:
   overworld:
     default: true
+    background: 0x9494ff
     families:
       ground_and_stone:
         primary: 0x9c4a00
@@ -29,14 +30,15 @@ schemes:
         secondary: 0xffffff
         accent: 0x000000
   underground:
+    background: 0x000000
     families:
       ground_and_stone:
         primary: 0x007b8c
         secondary: 0xb5efef
         accent: 0x000000
       coins:
-        primary: 0x007b8c
-        secondary: 0xb5efef
+        primary: 0x9c4a00
+        secondary: 0xffcec5
         accent: 0x007b8c
       goombas:
         primary: 0x007b8c

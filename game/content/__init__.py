@@ -1,6 +1,7 @@
 """Helpers for loading structured asset metadata."""
 
 from .loader import SpriteLibrary, TileLibrary, load_sprite_sheets, load_tiles
+from .palettes import palettes
 from .sprite_sheet import SpriteSheet
 from .sprites import sprites
 from .tile_definitions import (
@@ -41,4 +42,5 @@ __all__ = [
     "load_sprite_sheets",
     "load_tiles",
     "sprites",
+    "palettes",
 ]

@@ -117,7 +117,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
         screen_x, screen_y = camera.world_to_screen(self.state.x, self.state.y)
 
         if self.knocked_out:
-            sprite = sprites.get("goombas", "goomba_walk1")
+            sprite = sprites.get_with_palette("goombas", "goomba_walk1")
             if sprite is None:
                 return
             flipped = pygame.transform.flip(sprite, False, True)

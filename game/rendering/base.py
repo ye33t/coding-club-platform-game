@@ -5,6 +5,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable, Iterator, Protocol
 
+from ..content.palettes import PaletteScheme
+
 if TYPE_CHECKING:
     from pygame import Surface
 
@@ -27,9 +29,15 @@ class Drawable(Protocol):
 class RenderContext:
     """Shared rendering data computed once per frame."""
 
-    def __init__(self, surface: Surface, game: Game) -> None:
+    def __init__(
+        self,
+        surface: Surface,
+        game: Game,
+        palette_scheme: PaletteScheme,
+    ) -> None:
         self._surface = surface
         self._game = game
+        self._palette_scheme = palette_scheme
 
     @property
     def surface(self) -> Surface:
@@ -58,6 +66,14 @@ class RenderContext:
     @property
     def camera(self) -> Camera:
         return self._game.world.camera
+
+    @property
+    def palette_scheme(self) -> PaletteScheme:
+        return self._palette_scheme
+
+    @property
+    def palette_scheme_name(self) -> str:
+        return self._palette_scheme.name
 
     @property
     def behind_background_drawables(self) -> Iterator[Drawable]:
