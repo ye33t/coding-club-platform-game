@@ -5,6 +5,7 @@ from typing import Iterator, Optional, cast
 from .camera import Camera
 from .constants import TILE_SIZE
 from .effects import EffectManager
+from .effects.score_popup import ScorePopupEffect
 from .entities import EntityFactory, EntityManager
 from .entities.base import Entity
 from .entities.koopa import ShellEntity
@@ -16,6 +17,9 @@ from .gameplay import (
     HUD_SCORE_DIGITS,
     HUD_TIMER_DIGITS,
     HUD_TIMER_FRAMES_PER_DECREMENT,
+    SCORE_POPUP_LIFETIME_FRAMES,
+    SCORE_POPUP_UPWARD_SPEED,
+    SCORE_POPUP_VERTICAL_OFFSET,
 )
 from .hud import HudDimensions, HudState
 from .levels import loader
@@ -202,18 +206,24 @@ class World:
         score_type: ScoreType,
         *,
         source: Entity | None = None,
+        position: tuple[float, float] | None = None,
     ) -> None:
         """Apply combo-based scoring derived from physics events."""
         points = self.score_tracker.record(score_type, source=source)
         if points > 0:
-            self.award_score(points)
+            self._apply_points(points, position)
 
-    def _handle_entity_defeat(self, source: Entity, target: Entity) -> None:
+    def _handle_entity_defeat(
+        self,
+        source: Entity,
+        target: Entity,
+        position: tuple[float, float],
+    ) -> None:
         """Award shell combo points when moving shells defeat enemies."""
         if isinstance(source, ShellEntity) and source.can_damage_entities:
             points = self.score_tracker.record(ScoreType.SHELL_CHAIN, source=source)
             if points > 0:
-                self.award_score(points)
+                self._apply_points(points, position)
 
     def _update_combo_states(self) -> None:
         """Maintain combo reset conditions each frame."""
@@ -223,3 +233,31 @@ class World:
         for entity in self.entities.items:
             if isinstance(entity, ShellEntity) and not entity.is_moving:
                 self.score_tracker.reset_shell_combo(entity)
+
+    def _apply_points(
+        self, points: int, position: tuple[float, float] | None
+    ) -> None:
+        self.award_score(points)
+        self._spawn_score_popup(points, position)
+
+    def _spawn_score_popup(
+        self, points: int, position: tuple[float, float] | None
+    ) -> None:
+        """Create a floating popup showing the awarded score."""
+        label = "1up" if points < 0 else str(points)
+        mario = self.mario
+        if position is None:
+            world_x = mario.x + mario.width / 2
+            world_y = mario.y + mario.height
+        else:
+            world_x, world_y = position
+        popup = ScorePopupEffect(
+            label=label,
+            world_x=world_x,
+            world_y=world_y,
+            horizontal_velocity=mario.vx,
+            upward_speed=SCORE_POPUP_UPWARD_SPEED,
+            lifetime_frames=SCORE_POPUP_LIFETIME_FRAMES,
+            vertical_offset=SCORE_POPUP_VERTICAL_OFFSET,
+        )
+        self.effects.spawn(popup)

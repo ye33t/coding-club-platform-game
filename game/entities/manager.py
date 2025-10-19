@@ -19,7 +19,9 @@ class EntityManager:
     """Manages active game entities (enemies and collectibles)."""
 
     _entities: List[Entity] = field(default_factory=list)
-    _enemy_defeat_handler: Optional[Callable[[Entity, Entity], None]] = None
+    _enemy_defeat_handler: Optional[
+        Callable[[Entity, Entity, tuple[float, float]], None]
+    ] = None
 
     def spawn(self, entity: Entity) -> None:
         """Add a new entity to the manager.
@@ -76,7 +78,10 @@ class EntityManager:
         return self._entities
 
     def set_enemy_defeat_handler(
-        self, handler: Optional[Callable[[Entity, Entity], None]]
+        self,
+        handler: Optional[
+            Callable[[Entity, Entity, tuple[float, float]], None]
+        ],
     ) -> None:
         """Install a callback invoked when an entity is defeated by another."""
 
@@ -115,7 +120,11 @@ class EntityManager:
                         and defeated_after
                         and target.awards_shell_combo
                     ):
-                        self._enemy_defeat_handler(source, target)
+                        impact_position = (
+                            target.state.x + target.state.width / 2,
+                            target.state.y + target.state.height,
+                        )
+                        self._enemy_defeat_handler(source, target, impact_position)
                     continue
 
                 if source.blocks_entities:

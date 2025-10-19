@@ -45,6 +45,7 @@ class CollisionResponse:
         bounce_velocity: Optional[float] = None,
         spawn_entity: Optional["Entity"] = None,
         score_type: "ScoreType | None" = None,
+        popup_position: tuple[float, float] | None = None,
     ):
         """Initialize collision response.
 
@@ -62,6 +63,7 @@ class CollisionResponse:
         self.bounce_velocity = bounce_velocity
         self.spawn_entity = spawn_entity
         self.score_type = score_type
+        self.popup_position = popup_position
 
 
 class Entity(ABC, Drawable):

@@ -26,6 +26,11 @@ try:
 except KeyError as exc:
     raise KeyError("Gameplay config missing required 'hud' section") from exc
 
+try:
+    _score_popup_config = _CONFIG["score_popups"]
+except KeyError as exc:
+    raise KeyError("Gameplay config missing required 'score_popups' section") from exc
+
 
 def _get_int(config: Mapping[str, Any], key: str) -> int:
     value = config.get(key)
@@ -41,3 +46,17 @@ HUD_COIN_DIGITS = _get_int(_hud_config, "coin_digits")
 HUD_TIMER_DIGITS = _get_int(_hud_config, "timer_digits")
 HUD_COIN_SCORE_VALUE = _get_int(_hud_config, "coin_score_value")
 HUD_COIN_INCREMENT = _get_int(_hud_config, "coin_increment")
+
+
+def _get_float(config: Mapping[str, Any], key: str) -> float:
+    value = config.get(key)
+    if isinstance(value, int):
+        return float(value)
+    if not isinstance(value, (float, int)):
+        raise ValueError(f"Gameplay config 'score_popups.{key}' must be numeric")
+    return float(value)
+
+
+SCORE_POPUP_VERTICAL_OFFSET = _get_float(_score_popup_config, "vertical_offset")
+SCORE_POPUP_UPWARD_SPEED = _get_float(_score_popup_config, "upward_speed")
+SCORE_POPUP_LIFETIME_FRAMES = _get_int(_score_popup_config, "lifetime_frames")

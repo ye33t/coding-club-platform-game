@@ -10,3 +10,11 @@ timer_digits = 3
 # Default values applied when collecting a single coin
 coin_score_value = 200
 coin_increment = 1
+
+[score_popups]
+# Vertical pixel offset above Mario's head for score popups
+vertical_offset = 12
+# Upward speed in pixels per second
+upward_speed = 40
+# Lifetime in frames before the popup disappears
+lifetime_frames = 60

@@ -27,10 +27,10 @@ class RenderPipeline:
         self._display = Display()
         self._base_layers: List[RenderLayer] = [
             BehindBackgroundDrawablesLayer(),
-            HudLayer(),
             BackgroundLayer(),
             BehindDrawablesLayer(),
             TerrainLayer(),
+            HudLayer(),
             FrontDrawablesLayer(),
         ]
         self._debug_overlay = DebugOverlayLayer()

@@ -164,6 +164,10 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
                 bounce_velocity=KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY,
                 spawn_entity=shell,
                 score_type=ScoreType.STOMP,
+                popup_position=(
+                    self.state.x + self.state.width / 2,
+                    self.state.y + self.state.height,
+                ),
             )
 
         return CollisionResponse(damage=True)
@@ -269,7 +273,13 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
 
             self._set_moving(True, facing_right=mario.facing_right)
             self.kick_cooldown = self.SHELL_KICK_COOLDOWN
-            return CollisionResponse(score_type=ScoreType.SHELL_KICK)
+            return CollisionResponse(
+                score_type=ScoreType.SHELL_KICK,
+                popup_position=(
+                    self.state.x + self.state.width / 2,
+                    self.state.y + self.state.height,
+                ),
+            )
 
         facing_right = mario.facing_right
 
@@ -287,6 +297,10 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             remove=False,
             bounce_velocity=KOOPA_SHELL_STOMP_BOUNCE_VELOCITY,
             score_type=ScoreType.SHELL_KICK,
+            popup_position=(
+                self.state.x + self.state.width / 2,
+                self.state.y + self.state.height,
+            ),
         )
 
     def on_collide_entity(self, source: Entity) -> bool:

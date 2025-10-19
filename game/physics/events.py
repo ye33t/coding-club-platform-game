@@ -135,7 +135,12 @@ class EnemyScoreEvent(PhysicsEvent):
 
     score_type: ScoreType
     source_entity: "Entity | None" = None
+    position: tuple[float, float] | None = None
 
     def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
-        world.handle_enemy_score(self.score_type, source=self.source_entity)
+        world.handle_enemy_score(
+            self.score_type,
+            source=self.source_entity,
+            position=self.position,
+        )
         return False
