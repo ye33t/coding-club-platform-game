@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Dict, Iterable, Mapping
+from typing import Dict, Iterable, Mapping, Optional, Tuple
 
 import pygame
 from pygame import Surface
@@ -34,7 +34,8 @@ class SpriteManager:
         self.sheets: Dict[str, SpriteSheet] = {}
         self.sprites: Dict[str, Dict[str, Surface]] = {}
         self.sheet_defs: Dict[str, SpriteSheetDef] = {}
-        self.palette_cache: Dict[str, Dict[str, Dict[str, Surface]]] = {}
+        self.palette_cache: Dict[Tuple[int, str], Dict[str, Dict[str, Surface]]] = {}
+        self._palette_cache_version: Optional[int] = None
         self._initialized = True
 
     def load_sheets(self, assets_path: str):
@@ -47,6 +48,7 @@ class SpriteManager:
         library: SpriteLibrary = load_sprite_sheets()
         self.sheet_defs = dict(library.sheets)
         self.palette_cache.clear()
+        self._palette_cache_version = None
 
         for sheet_name, sheet_def in self.sheet_defs.items():
             filename = sheet_def.image or f"{sheet_name}.png"
@@ -108,13 +110,19 @@ class SpriteManager:
             return None
 
         # Resolve palette mapping
+        version = palettes.version
+        if self._palette_cache_version != version:
+            self.palette_cache.clear()
+            self._palette_cache_version = version
+
         active_scheme = scheme_name or palettes.active_scheme_name
-        color_map = palettes.color_map_for(active_scheme, sheet_name)
+        scheme = palettes.get_scheme(active_scheme)
+        color_map = palettes.color_map_for(scheme.name, sheet_name)
         if not color_map:
             return base_surface
 
-        scheme_key = palettes.get_scheme(active_scheme).name
-        scheme_cache = self.palette_cache.setdefault(scheme_key, {})
+        cache_key = (version, scheme.name)
+        scheme_cache = self.palette_cache.setdefault(cache_key, {})
         sheet_cache = scheme_cache.setdefault(sheet_name, {})
         cached_surface = sheet_cache.get(sprite_name)
         if cached_surface is not None:
@@ -180,20 +188,32 @@ class SpriteManager:
         """Return a tinted copy of the base surface by applying color remaps."""
 
         tinted = base_surface.copy()
-        width, height = tinted.get_size()
-
-        tinted.lock()
         try:
-            for x in range(width):
-                for y in range(height):
-                    color = tinted.get_at((x, y))
-                    rgb = (color.r, color.g, color.b)
-                    target = color_map.get(rgb)
-                    if target is None:
+            pixel_array = pygame.PixelArray(tinted)
+        except pygame.error:
+            width, height = tinted.get_size()
+            tinted.lock()
+            try:
+                for x in range(width):
+                    for y in range(height):
+                        color = tinted.get_at((x, y))
+                        rgb = (color.r, color.g, color.b)
+                        target = color_map.get(rgb)
+                        if target is None:
+                            continue
+                        tinted.set_at((x, y), (*target, color.a))
+            finally:
+                tinted.unlock()
+        else:
+            try:
+                for base_color, target_color in color_map.items():
+                    if base_color == target_color:
                         continue
-                    tinted.set_at((x, y), (*target, color.a))
-        finally:
-            tinted.unlock()
+                    old_value = tinted.map_rgb(base_color)
+                    new_value = tinted.map_rgb(target_color)
+                    pixel_array.replace(old_value, new_value)
+            finally:
+                del pixel_array
 
         return tinted
 

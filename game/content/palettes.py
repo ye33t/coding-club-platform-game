@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Mapping, Optional, Tuple
@@ -33,6 +34,8 @@ class PaletteLibrary:
         self._base_family_colors: Dict[str, Dict[str, Color]] = {}
         self._active_scheme: Optional[str] = None
         self._loaded: bool = False
+        self._mapping_cache: Dict[Tuple[str, str], Optional[Mapping[Color, Color]]] = {}
+        self._version: int = 0
 
     # Public API -----------------------------------------------------------------
     def reload(self) -> None:
@@ -42,6 +45,7 @@ class PaletteLibrary:
         self._base_family_colors.clear()
         self._default_scheme = None
         self._active_scheme = None
+        self._mapping_cache.clear()
         self._ensure_loaded()
 
     @property
@@ -72,25 +76,31 @@ class PaletteLibrary:
         """Return base->target color mapping for a family within a scheme."""
         self._ensure_loaded()
         scheme = self.get_scheme(scheme_name)
+        key = (scheme.name, family)
+        if key in self._mapping_cache:
+            return self._mapping_cache[key]
+
         base_colors = self._base_family_colors.get(family)
         if not base_colors:
+            self._mapping_cache[key] = None
             return None
 
         scheme_family = scheme.families.get(family)
         if not scheme_family:
+            self._mapping_cache[key] = None
             return None
 
         mapping: Dict[Color, Color] = {}
         changed = False
         for channel, base_color in base_colors.items():
-            target_color = scheme_family.get(channel, base_color)
+            target_color = scheme_family.get(channel) or base_color
             mapping[base_color] = target_color
             if target_color != base_color:
                 changed = True
 
-        if not changed:
-            return None
-        return mapping
+        result: Optional[Mapping[Color, Color]] = mapping if changed else None
+        self._mapping_cache[key] = result
+        return result
 
     # Active scheme helpers ------------------------------------------------------
     @property
@@ -98,17 +108,38 @@ class PaletteLibrary:
         """Current scheme applied during rendering."""
         return self._active_scheme
 
-    def set_active_scheme(self, scheme_name: Optional[str]) -> None:
+    def set_active_scheme(self, scheme_name: Optional[str]) -> PaletteScheme:
         """Set the scheme currently in use for rendering."""
-        if scheme_name is None:
-            self._active_scheme = None
-            return
         scheme = self.get_scheme(scheme_name)
         self._active_scheme = scheme.name
+        return scheme
 
     def clear_active_scheme(self) -> None:
         """Clear any active scheme selection."""
         self._active_scheme = None
+
+    @contextmanager
+    def activate(self, scheme_name: Optional[str]):
+        """Context manager to temporarily activate a palette scheme."""
+
+        previous = self._active_scheme
+        scheme = self.set_active_scheme(scheme_name)
+        try:
+            yield scheme
+        finally:
+            if previous is None:
+                self._active_scheme = None
+            else:
+                try:
+                    self._active_scheme = self.get_scheme(previous).name
+                except KeyError:
+                    self._active_scheme = self.default_scheme_name
+
+    @property
+    def version(self) -> int:
+        """Monotonically increasing palette configuration version."""
+        self._ensure_loaded()
+        return self._version
 
     # Internal helpers -----------------------------------------------------------
     def _ensure_loaded(self) -> None:
@@ -204,6 +235,7 @@ class PaletteLibrary:
         self._schemes = parsed_schemes
         self._default_scheme = default_candidate
         self._build_base_colors()
+        self._version += 1
 
     def _build_base_colors(self) -> None:
         if self._default_scheme is None:
@@ -221,6 +253,7 @@ class PaletteLibrary:
             base_colors[family] = dict(colors)
 
         self._base_family_colors = base_colors
+        self._mapping_cache.clear()
 
 
 def _parse_color(value, context: str) -> Color:

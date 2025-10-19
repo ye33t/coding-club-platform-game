@@ -69,13 +69,12 @@ class RenderPipeline:
         level = game.world.level
         screen_palette = level.get_palette_for_screen(game.world.mario.screen)
         try:
-            scheme = palettes.get_scheme(screen_palette)
+            palettes.get_scheme(screen_palette)
+            palette_choice = screen_palette
         except KeyError:
-            scheme = palettes.get_scheme()
+            palette_choice = None
 
-        palettes.set_active_scheme(scheme.name)
-
-        try:
+        with palettes.activate(palette_choice) as scheme:
             self._display.clear(scheme.background)
             surface = self._display.get_native_surface()
 
@@ -84,8 +83,6 @@ class RenderPipeline:
                 layer.draw(context)
 
             self._display.present()
-        finally:
-            palettes.clear_active_scheme()
 
     @property
     def layers(self) -> Iterable[RenderLayer]:
