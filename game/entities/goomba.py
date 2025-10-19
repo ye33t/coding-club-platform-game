@@ -20,6 +20,7 @@ from ..physics.config import (
     GOOMBA_SPEED,
     GOOMBA_STOMP_BOUNCE_VELOCITY,
 )
+from ..score import ScoreType
 from .base import CollisionResponse, Entity
 from .mixins import (
     HorizontalMovementConfig,
@@ -176,6 +177,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             return CollisionResponse(
                 remove=False,
                 bounce_velocity=GOOMBA_STOMP_BOUNCE_VELOCITY,
+                score_type=ScoreType.STOMP,
             )
         else:
             # Mario ran into the Goomba - damage Mario
@@ -220,3 +222,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
 
     def on_knockout(self, source: Entity) -> None:
         self.is_dead = True
+
+    @property
+    def awards_shell_combo(self) -> bool:
+        return True

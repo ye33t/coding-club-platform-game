@@ -6,6 +6,8 @@ from .camera import Camera
 from .constants import TILE_SIZE
 from .effects import EffectManager
 from .entities import EntityFactory, EntityManager
+from .entities.base import Entity
+from .entities.koopa import ShellEntity
 from .gameplay import (
     HUD_COIN_DIGITS,
     HUD_COIN_INCREMENT,
@@ -22,6 +24,7 @@ from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
 from .props import FlagpoleProp, PropManager
 from .rendering.base import Drawable
+from .score import ScoreTracker, ScoreType
 
 
 class World:
@@ -53,7 +56,9 @@ class World:
             timer_digits=HUD_TIMER_DIGITS,
         )
         self.hud = HudState(hud_dimensions)
+        self.score_tracker = ScoreTracker()
         self._configure_hud_for_level(preserve_progress=False)
+        self.entities.set_enemy_defeat_handler(self._handle_entity_defeat)
 
         self.props.spawn_all(self)
 
@@ -119,6 +124,7 @@ class World:
         self.camera.update(self.mario.x, self.level.width_pixels)
 
         self._check_spawn_triggers()
+        self._update_combo_states()
 
         self.animation_tick += 1
 
@@ -177,6 +183,7 @@ class World:
             frames_per_decrement=frames_per_decrement,
             preserve_progress=preserve_progress,
         )
+        self.score_tracker.reset_all()
 
     def award_score(self, amount: int) -> None:
         """Increment the global score."""
@@ -189,3 +196,30 @@ class World:
             return
         self.hud.add_coins(coins_to_add)
         self.hud.add_score(HUD_COIN_SCORE_VALUE * coins_to_add)
+
+    def handle_enemy_score(
+        self,
+        score_type: ScoreType,
+        *,
+        source: Entity | None = None,
+    ) -> None:
+        """Apply combo-based scoring derived from physics events."""
+        points = self.score_tracker.record(score_type, source=source)
+        if points > 0:
+            self.award_score(points)
+
+    def _handle_entity_defeat(self, source: Entity, target: Entity) -> None:
+        """Award shell combo points when moving shells defeat enemies."""
+        if isinstance(source, ShellEntity) and source.can_damage_entities:
+            points = self.score_tracker.record(ScoreType.SHELL_CHAIN, source=source)
+            if points > 0:
+                self.award_score(points)
+
+    def _update_combo_states(self) -> None:
+        """Maintain combo reset conditions each frame."""
+        if self.mario.on_ground and not self.mario.is_stomping:
+            self.score_tracker.reset_stomp_chain()
+
+        for entity in self.entities.items:
+            if isinstance(entity, ShellEntity) and not entity.is_moving:
+                self.score_tracker.reset_shell_combo(entity)

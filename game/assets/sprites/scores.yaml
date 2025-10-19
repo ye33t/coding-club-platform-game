@@ -1,6 +1,6 @@
 version: 1
 sprite_sheets:
-  text:
+  scores:
     image: other.png
     colorkey: [146, 144, 255]
     sprites:

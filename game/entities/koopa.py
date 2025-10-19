@@ -24,6 +24,7 @@ from ..physics.config import (
     KOOPA_TROOPA_SPEED,
     KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY,
 )
+from ..score import ScoreType
 from .base import CollisionResponse, Entity
 from .mixins import (
     HorizontalMovementConfig,
@@ -120,6 +121,10 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
     def can_be_damaged_by_entities(self) -> bool:
         return not self._stomped
 
+    @property
+    def awards_shell_combo(self) -> bool:
+        return True
+
     def on_collide_entity(self, source: Entity) -> bool:
         if self.knocked_out:
             return False
@@ -158,6 +163,7 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
                 remove=True,
                 bounce_velocity=KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY,
                 spawn_entity=shell,
+                score_type=ScoreType.STOMP,
             )
 
         return CollisionResponse(damage=True)
@@ -263,7 +269,7 @@ class ShellEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
 
             self._set_moving(True, facing_right=mario.facing_right)
             self.kick_cooldown = self.SHELL_KICK_COOLDOWN
-            return None
+            return CollisionResponse(score_type=ScoreType.SHELL_KICK)
 
         facing_right = mario.facing_right
 
