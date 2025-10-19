@@ -12,19 +12,16 @@ from .base import RenderContext, RenderLayer
 class HudLayer(RenderLayer):
     """Render the static HUD at the top of the screen."""
 
-    LEFT_COLUMN = 2
-    COIN_ICON_COLUMN = 14
-    COIN_MULTIPLIER_COLUMN = 16
-    COIN_VALUE_COLUMN = 18
-    WORLD_LABEL_COLUMN = 20
-    TIME_LABEL_COLUMN = 27
-    TIME_VALUE_COLUMN = 27
+    SCORE_COLUMN = 3
+    COIN_COLUMN = 11
+    WORLD_COLUMN = 18
+    TIME_COLUMN = 25
 
     def __init__(self) -> None:
         self._font_sheet = "text"
         self._coin_sheet = "hud_coin"
         self._coin_frames = ("coin_1", "coin_2", "coin_3", "coin_2")
-        self._top_row_y = NATIVE_HEIGHT - SUB_TILE_SIZE
+        self._top_row_y = NATIVE_HEIGHT - 3 * SUB_TILE_SIZE
         self._bottom_row_y = self._top_row_y - SUB_TILE_SIZE
 
     def draw(self, context: RenderContext) -> None:
@@ -33,12 +30,12 @@ class HudLayer(RenderLayer):
 
         # Left block: name + score
         self._draw_text(
-            surface, "MARIO", self._column_to_x(self.LEFT_COLUMN), self._top_row_y
+            surface, "MARIO", self._column_to_x(self.SCORE_COLUMN), self._top_row_y
         )
         self._draw_text(
             surface,
             hud.formatted_score(),
-            self._column_to_x(self.LEFT_COLUMN),
+            self._column_to_x(self.SCORE_COLUMN),
             self._bottom_row_y,
         )
 
@@ -46,14 +43,14 @@ class HudLayer(RenderLayer):
         self._draw_coin(surface, context.world.animation_tick)
         self._draw_text(
             surface,
-            "x",
-            self._column_to_x(self.COIN_MULTIPLIER_COLUMN),
+            "*",
+            self._column_to_x(self.COIN_COLUMN + 1),
             self._bottom_row_y,
         )
         self._draw_text(
             surface,
             hud.formatted_coins(),
-            self._column_to_x(self.COIN_VALUE_COLUMN),
+            self._column_to_x(self.COIN_COLUMN + 2),
             self._bottom_row_y,
         )
 
@@ -61,7 +58,7 @@ class HudLayer(RenderLayer):
         self._draw_text(
             surface,
             "WORLD",
-            self._column_to_x(self.WORLD_LABEL_COLUMN),
+            self._column_to_x(self.WORLD_COLUMN),
             self._top_row_y,
         )
         world_label = hud.level_label or ""
@@ -69,20 +66,20 @@ class HudLayer(RenderLayer):
             self._draw_text(
                 surface,
                 world_label,
-                self._column_to_x(self.WORLD_LABEL_COLUMN),
+                self._column_to_x(self.WORLD_COLUMN + 1),
                 self._bottom_row_y,
             )
 
         self._draw_text(
             surface,
             "TIME",
-            self._column_to_x(self.TIME_LABEL_COLUMN),
+            self._column_to_x(self.TIME_COLUMN),
             self._top_row_y,
         )
         self._draw_text(
             surface,
             hud.formatted_timer(),
-            self._column_to_x(self.TIME_VALUE_COLUMN),
+            self._column_to_x(self.TIME_COLUMN + 1),
             self._bottom_row_y,
         )
 
@@ -106,7 +103,7 @@ class HudLayer(RenderLayer):
             surface,
             self._coin_sheet,
             sprite_name,
-            self._column_to_x(self.COIN_ICON_COLUMN),
+            self._column_to_x(self.COIN_COLUMN),
             self._bottom_row_y,
         )
 
