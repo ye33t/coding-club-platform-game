@@ -1,0 +1,102 @@
+version: 1
+sprite_sheets:
+  pipes_and_scenery:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      treetop_left:
+        offset: [0, 212]
+        size: [2, 2]
+      treetop_center:
+        offset: [17, 212]
+        size: [2, 2]
+      treetop_right:
+        offset: [34, 212]
+        size: [2, 2]
+      mushroom_left:
+        offset: [51, 212]
+        size: [2, 2]
+      mushroom_center:
+        offset: [68, 212]
+        size: [2, 2]
+      mushroom_right:
+        offset: [85, 212]
+        size: [2, 2]
+      lollipop_top:
+        offset: [102, 212]
+        size: [2, 2]
+      pipe_mouth_left:
+        offset: [119, 212]
+        size: [2, 2]
+      pipe_mouth_right:
+        offset: [136, 212]
+        size: [2, 2]
+      bush_left:
+        offset: [0, 229]
+        size: [2, 2]
+      bush_center:
+        offset: [17, 229]
+        size: [2, 2]
+      bush_right:
+        offset: [34, 229]
+        size: [2, 2]
+      leaves:
+        offset: [51, 229]
+        size: [2, 2]
+      lollipop:
+        offset: [85, 229]
+        size: [2, 2]
+      lollipop_bottom:
+        offset: [102, 229]
+        size: [2, 2]
+      pipe_left:
+        offset: [119, 229]
+        size: [2, 2]
+      pipe_right:
+        offset: [136, 229]
+        size: [2, 2]
+      bridge_rails:
+        offset: [0, 246]
+        size: [2, 2]
+      mound_top:
+        offset: [34, 246]
+        size: [2, 2]
+      pipe_horizontal_mouth_top:
+        offset: [85, 246]
+        size: [2, 2]
+      pipe_horizontal_top:
+        offset: [102, 246]
+        size: [2, 2]
+      pipe_junction_top:
+        offset: [119, 246]
+        size: [2, 2]
+      flagpole_top:
+        offset: [136, 246]
+        size: [2, 2]
+      mound_left_45:
+        offset: [0, 263]
+        size: [2, 2]
+      mound_left:
+        offset: [17, 263]
+        size: [2, 2]
+      mound_center:
+        offset: [34, 263]
+        size: [2, 2]
+      mound_right:
+        offset: [51, 263]
+        size: [2, 2]
+      mound_right_45:
+        offset: [68, 263]
+        size: [2, 2]
+      pipe_horizontal_mouth_bottom:
+        offset: [85, 263]
+        size: [2, 2]
+      pipe_horizontal_bottom:
+        offset: [102, 263]
+        size: [2, 2]
+      pipe_junction_bottom:
+        offset: [119, 263]
+        size: [2, 2]
+      flagpole:
+        offset: [136, 263]
+        size: [2, 2]

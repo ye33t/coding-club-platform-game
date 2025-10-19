@@ -1,6 +1,0 @@
-version: 1
-sprite_sheets:
-  blocks:
-    image: blocks.png
-    colorkey: "auto"
-    sprites: {}

@@ -59,6 +59,10 @@ class Level:
         # Initialize spawn manager for entity spawning
         self.spawn_manager = SpawnManager()
 
+        # Palette scheme selection (level-wide default + per-screen overrides)
+        self.default_palette: Optional[str] = None
+        self.screen_palettes: dict[int, str] = {}
+
     @property
     def spawn_x(self) -> float:
         """Get spawn X position in pixels."""
@@ -287,6 +291,14 @@ class Level:
         if instance is None:
             return None
         return cast(VisualState, instance.state.visual)
+
+    def set_palette_for_screen(self, screen: int, palette: str) -> None:
+        """Assign a palette scheme override for a screen."""
+        self.screen_palettes[screen] = palette
+
+    def get_palette_for_screen(self, screen: int) -> Optional[str]:
+        """Get palette scheme name for a screen (default fallback)."""
+        return self.screen_palettes.get(screen, self.default_palette)
 
     def check_collision(
         self, screen: int, x: float, y: float, width: float, height: float

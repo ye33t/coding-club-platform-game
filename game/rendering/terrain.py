@@ -52,4 +52,5 @@ class TerrainLayer(RenderLayer):
                 sprite_name,
                 int(screen_x),
                 int(screen_y),
+                palette=context.palette_scheme_name,
             )

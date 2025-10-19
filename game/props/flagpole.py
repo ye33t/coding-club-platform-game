@@ -53,7 +53,7 @@ class FlagpoleProp(Prop):
 
         self._state = FlagpoleState(
             effect=SpriteEffect(
-                sprite_sheet="other",
+                sprite_sheet="objects",
                 sprite_name="flag",
                 world_x=flag_world_x,
                 world_y=flag_world_y,

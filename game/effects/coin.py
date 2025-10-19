@@ -13,10 +13,10 @@ from game.content.types import SpriteKey
 from ..camera import Camera
 from .base import Effect
 
-COIN_ANIM_1 = SpriteKey(sprite_sheet="coin", sprite_name="anim_1")
-COIN_ANIM_2 = SpriteKey(sprite_sheet="coin", sprite_name="anim_2")
-COIN_ANIM_3 = SpriteKey(sprite_sheet="coin", sprite_name="anim_3")
-COIN_ANIM_4 = SpriteKey(sprite_sheet="coin", sprite_name="anim_4")
+COIN_ANIM_1 = SpriteKey(sprite_sheet="objects", sprite_name="coin_anim_1")
+COIN_ANIM_2 = SpriteKey(sprite_sheet="objects", sprite_name="coin_anim_2")
+COIN_ANIM_3 = SpriteKey(sprite_sheet="objects", sprite_name="coin_anim_3")
+COIN_ANIM_4 = SpriteKey(sprite_sheet="objects", sprite_name="coin_anim_4")
 
 COIN_ANIM: list[SpriteKey] = [COIN_ANIM_1, COIN_ANIM_2, COIN_ANIM_3, COIN_ANIM_4]
 

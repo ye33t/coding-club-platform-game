@@ -52,6 +52,12 @@ def load(filepath: str) -> Level:
     if "spawn" not in data:
         raise ParseError("Level file must have a 'spawn' section")
 
+    palette = data.get("palette")
+    if palette is not None:
+        if not isinstance(palette, str):
+            raise ParseError("Level palette must be a string if provided")
+        level.default_palette = palette
+
     # Parse spawn point
     spawn = data["spawn"]
     if not isinstance(spawn, dict):
@@ -128,6 +134,13 @@ def load(filepath: str) -> Level:
             _process_zones_and_behaviors(
                 level, screen_idx, screen_data, parser, level.terrain_tiles[screen_idx]
             )
+
+        # Palette override per screen (optional)
+        screen_palette = screen_data.get("palette")
+        if screen_palette is not None:
+            if not isinstance(screen_palette, str):
+                raise ParseError(f"Screen {screen_idx} palette must be a string")
+            level.set_palette_for_screen(screen_idx, screen_palette)
 
         # Process spawn data if present
         if "spawn" in screen_data:

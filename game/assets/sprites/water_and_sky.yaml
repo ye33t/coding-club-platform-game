@@ -1,0 +1,36 @@
+version: 1
+sprite_sheets:
+  water_and_sky:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      cloud_top_left:
+        offset: [298, 32]
+        size: [2, 2]
+      cloud_top:
+        offset: [315, 32]
+        size: [2, 2]
+      cloud_top_right:
+        offset: [332, 32]
+        size: [2, 2]
+      water_top:
+        offset: [349, 32]
+        size: [2, 2]
+      cloud_block:
+        offset: [366, 32]
+        size: [2, 2]
+      cloud_bottom_left:
+        offset: [298, 49]
+        size: [2, 2]
+      cloud_bottom:
+        offset: [315, 49]
+        size: [2, 2]
+      cloud_bottom_right:
+        offset: [332, 49]
+        size: [2, 2]
+      water:
+        offset: [349, 49]
+        size: [2, 2]
+      piano:
+        offset: [366, 49]
+        size: [2, 2]

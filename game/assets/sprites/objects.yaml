@@ -1,0 +1,29 @@
+version: 1
+sprite_sheets:
+  objects:
+    image: other.png
+    colorkey: [146, 144, 255]
+    sprites:
+      coin_anim_1:
+        offset: [180, 160]
+        size: [1, 2]
+      coin_anim_2:
+        offset: [190, 160]
+        size: [1, 2]
+      coin_anim_3:
+        offset: [200, 160]
+        size: [1, 2]
+      coin_anim_4:
+        offset: [210, 160]
+        size: [1, 2]
+
+      flag:
+        offset: [92, 106]
+        size: [2, 2]
+      flag_castle:
+        offset: [110, 106]
+        size: [2, 2]
+
+      mushroom:
+        offset: [0, 24]
+        size: [2, 2]

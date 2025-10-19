@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, List, Optional
 
-from game.constants import BACKGROUND_COLOR
+from game.content import palettes
 from game.display import Display
 from game.rendering.background import BackgroundLayer
 from game.rendering.behind_background_drawables import BehindBackgroundDrawablesLayer
@@ -66,14 +66,23 @@ class RenderPipeline:
             else:
                 self._effect_layer.update(game)
 
-        self._display.clear(BACKGROUND_COLOR)
-        surface = self._display.get_native_surface()
+        level = game.world.level
+        screen_palette = level.get_palette_for_screen(game.world.mario.screen)
+        try:
+            palettes.get_scheme(screen_palette)
+            palette_choice = screen_palette
+        except KeyError:
+            palette_choice = None
 
-        context = RenderContext(surface, game)
-        for layer in self.layers:
-            layer.draw(context)
+        with palettes.activate(palette_choice) as scheme:
+            self._display.clear(scheme.background)
+            surface = self._display.get_native_surface()
 
-        self._display.present()
+            context = RenderContext(surface, game, scheme)
+            for layer in self.layers:
+                layer.draw(context)
+
+            self._display.present()
 
     @property
     def layers(self) -> Iterable[RenderLayer]:

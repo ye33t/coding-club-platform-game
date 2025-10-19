@@ -2,15 +2,15 @@ version = 1
 
 [[tiles]]
 slug = "flagpole_top"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "flagpole_top"
 
 [[tiles]]
 slug = "flagpole"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "flagpole"
 
 [[tiles]]
 slug = "flag"
-sprite_sheet = "other"
+sprite_sheet = "objects"
 sprite = "flag"

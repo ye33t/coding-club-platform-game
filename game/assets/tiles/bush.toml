@@ -2,15 +2,15 @@ version = 1
 
 [[tiles]]
 slug = "bush_left"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "bush_left"
 
 [[tiles]]
 slug = "bush_center"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "bush_center"
 
 [[tiles]]
 slug = "bush_right"
-sprite_sheet = "background"
+sprite_sheet = "pipes_and_scenery"
 sprite = "bush_right"

@@ -1,4 +1,5 @@
 name: World 1-1
+palette: underground
 
 spawn:
   tile_x: 7
