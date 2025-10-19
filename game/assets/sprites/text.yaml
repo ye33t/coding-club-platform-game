@@ -1,0 +1,129 @@
+version: 1
+sprite_sheets:
+  text:
+    image: hud.png
+    colorkey: [146, 144, 255]
+    sprites:
+        '0':
+          offset: [0, 113]
+          size: [1, 1]
+        '1':
+          offset: [9, 113]
+          size: [1, 1]
+        '2':
+          offset: [18, 113]
+          size: [1, 1]
+        '3':
+          offset: [27, 113]
+          size: [1, 1]
+        '4':
+          offset: [36, 113]
+          size: [1, 1]
+        '5':
+          offset: [45, 113]
+          size: [1, 1]
+        '6':
+          offset: [54, 113]
+          size: [1, 1]
+        '7':
+          offset: [63, 113]
+          size: [1, 1]
+        '8':
+          offset: [72, 113]
+          size: [1, 1]
+        '9':
+          offset: [90, 113]
+          size: [1, 1]
+        a:
+          offset: [99, 113]
+          size: [1, 1]
+        b:
+          offset: [108, 113]
+          size: [1, 1]
+        c:
+          offset: [117, 113]
+          size: [1, 1]
+        d:
+          offset: [126, 113]
+          size: [1, 1]
+        e:
+          offset: [135, 113]
+          size: [1, 1]
+        f:
+          offset: [144, 113]
+          size: [1, 1]
+        g:
+          offset: [153, 113]
+          size: [1, 1]
+        h:
+          offset: [162, 113]
+          size: [1, 1]
+        i:
+          offset: [171, 113]
+          size: [1, 1]
+        j:
+          offset: [180, 113]
+          size: [1, 1]
+        k:
+          offset: [189, 113]
+          size: [1, 1]
+        l:
+          offset: [198, 113]
+          size: [1, 1]
+        m:
+          offset: [207, 113]
+          size: [1, 1]
+        n:
+          offset: [216, 113]
+          size: [1, 1]
+        o:
+          offset: [0, 122]
+          size: [1, 1]
+        p:
+          offset: [9, 122]
+          size: [1, 1]
+        q:
+          offset: [18, 122]
+          size: [1, 1]
+        r:
+          offset: [27, 122]
+          size: [1, 1]
+        s:
+          offset: [36, 122]
+          size: [1, 1]
+        t:
+          offset: [45, 122]
+          size: [1, 1]
+        u:
+          offset: [54, 122]
+          size: [1, 1]
+        v:
+          offset: [63, 122]
+          size: [1, 1]
+        w:
+          offset: [72, 122]
+          size: [1, 1]
+        x:
+          offset: [81, 122]
+          size: [1, 1]
+        y:
+          offset: [90, 122]
+          size: [1, 1]
+        z:
+          offset: [99, 122]
+          size: [1, 1]
+        '-':
+          offset: [108, 122]
+          size: [1, 1]
+        '*':
+          offset: [117, 122]
+          size: [1, 1]
+        '!':
+          offset: [126, 122]
+          size: [1, 1]
+        '.':
+          offset: [135, 122]
+          size: [1, 1]
+        '©':
+          offset: [144, 122]
+          size: [1, 1]
