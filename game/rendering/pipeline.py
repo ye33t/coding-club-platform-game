@@ -11,6 +11,7 @@ from game.rendering.behind_background_drawables import BehindBackgroundDrawables
 from game.rendering.behind_drawables import BehindDrawablesLayer
 from game.rendering.debug_overlay import DebugOverlayLayer
 from game.rendering.front_drawables import FrontDrawablesLayer
+from game.rendering.hud import HudLayer
 from game.rendering.terrain import TerrainLayer
 
 from .base import EffectLayer, RenderContext, RenderLayer
@@ -26,6 +27,7 @@ class RenderPipeline:
         self._display = Display()
         self._base_layers: List[RenderLayer] = [
             BehindBackgroundDrawablesLayer(),
+            HudLayer(),
             BackgroundLayer(),
             BehindDrawablesLayer(),
             TerrainLayer(),

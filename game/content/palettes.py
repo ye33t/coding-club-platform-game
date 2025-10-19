@@ -200,7 +200,8 @@ class PaletteLibrary:
                     continue
                 if not isinstance(family_payload, dict):
                     raise ValueError(
-                        f"Palette scheme '{scheme_name}' family '{family}' must be a mapping"
+                        "Palette scheme "
+                        f"'{scheme_name}' family '{family}' must be a mapping"
                     )
 
                 channel_colors: Dict[str, Color] = {}

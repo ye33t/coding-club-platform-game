@@ -1,0 +1,21 @@
+"""Gameplay configuration and shared HUD helpers."""
+
+from .config import (
+    HUD_COIN_DIGITS,
+    HUD_COIN_INCREMENT,
+    HUD_COIN_SCORE_VALUE,
+    HUD_DEFAULT_TIMER_START,
+    HUD_SCORE_DIGITS,
+    HUD_TIMER_DIGITS,
+    HUD_TIMER_FRAMES_PER_DECREMENT,
+)
+
+__all__ = [
+    "HUD_COIN_DIGITS",
+    "HUD_COIN_INCREMENT",
+    "HUD_COIN_SCORE_VALUE",
+    "HUD_DEFAULT_TIMER_START",
+    "HUD_SCORE_DIGITS",
+    "HUD_TIMER_DIGITS",
+    "HUD_TIMER_FRAMES_PER_DECREMENT",
+]

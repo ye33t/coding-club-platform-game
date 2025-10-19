@@ -103,3 +103,25 @@ class SpawnEntityEvent(PhysicsEvent):
     def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
         world.entities.spawn(self.entity)
         return False
+
+
+@dataclass(slots=True)
+class AwardScoreEvent(PhysicsEvent):
+    """Increment the global score."""
+
+    amount: int
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.award_score(self.amount)
+        return False
+
+
+@dataclass(slots=True)
+class CollectCoinEvent(PhysicsEvent):
+    """Increment the coin counter and associated score."""
+
+    amount: int = 1
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.collect_coin(self.amount)
+        return False

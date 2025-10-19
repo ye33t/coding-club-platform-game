@@ -24,6 +24,11 @@ class Level:
 
         The level will be populated by a loader after construction.
         """
+        self.name: Optional[str] = None
+        self.display_name: Optional[str] = None
+        self.timer_start_value: Optional[int] = None
+        self.timer_frames_per_decrement: Optional[int] = None
+
         self.width_tiles = 0
         self.height_tiles = 0
         self.width_pixels = 0
@@ -62,6 +67,14 @@ class Level:
         # Palette scheme selection (level-wide default + per-screen overrides)
         self.default_palette: Optional[str] = None
         self.screen_palettes: dict[int, str] = {}
+
+    def display_label(self) -> str:
+        """Return the preferred label for UI display."""
+        if self.display_name:
+            return self.display_name
+        if self.name:
+            return self.name
+        return ""
 
     @property
     def spawn_x(self) -> float:

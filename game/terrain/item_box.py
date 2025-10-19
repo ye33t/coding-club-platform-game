@@ -8,7 +8,13 @@ from enum import Enum
 from ..constants import TILE_SIZE
 from ..effects.coin import CoinEffect
 from ..entities.mushroom import MushroomEntity
-from ..physics.events import SpawnEffectEvent, SpawnEntityEvent, TerrainTileChangeEvent
+from ..gameplay import HUD_COIN_INCREMENT
+from ..physics.events import (
+    CollectCoinEvent,
+    SpawnEffectEvent,
+    SpawnEntityEvent,
+    TerrainTileChangeEvent,
+)
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 from .bounce import BounceBehavior
 
@@ -65,6 +71,7 @@ class ItemBoxBehavior(TerrainBehavior):
                         )
                     )
                 )
+                context.physics.add_event(CollectCoinEvent(amount=HUD_COIN_INCREMENT))
             elif self.spawn_type is ItemBoxSpawnType.MUSHROOM:
                 mushroom_x = context.tile_x * TILE_SIZE
                 mushroom_y = context.tile_y * TILE_SIZE + (TILE_SIZE // 4)
