@@ -1,0 +1,15 @@
+version: 1
+sprite_sheets:
+  hud_coin:
+    image: hud.png
+    colorkey: [146, 144, 255]
+    sprites:
+      coin_1:
+        offset: [0, 164]
+        size: [1, 1]
+      coin_2:
+        offset: [10, 164]
+        size: [1, 1]
+      coin_3:
+        offset: [20, 164]
+        size: [1, 1]
