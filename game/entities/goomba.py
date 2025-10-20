@@ -69,7 +69,7 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
             HorizontalMovementConfig(
                 gravity=GOOMBA_GRAVITY,
                 speed=GOOMBA_SPEED,
-                ground_snap_tolerance=GOOMBA_GROUND_TOLERANCE,
+                ground_snap_tolerance=float(GOOMBA_GROUND_TOLERANCE),
             )
         )
         self.init_knockout(
