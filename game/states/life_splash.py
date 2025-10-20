@@ -54,16 +54,16 @@ class LifeSplashState(State):
         draw_centered_text(surface, world_text, header_y)
 
         # Mario avatar centered with life multiplier
-        icon_y = (NATIVE_HEIGHT // 2) + SUB_TILE_SIZE
+        icon_y = NATIVE_HEIGHT // 2
         icon_width = 2 * SUB_TILE_SIZE
         spacing = SUB_TILE_SIZE
 
-        life_text = f"x {hud.lives}"
+        life_text = f"*  {hud.lives}"
         life_text_width = len(life_text) * SUB_TILE_SIZE
         total_width = icon_width + spacing + life_text_width
         start_x = (NATIVE_WIDTH - total_width) // 2
 
-        sprites.draw_at_position(surface, "objects", "mario_avatar", start_x, icon_y)
+        sprites.draw_at_position(surface, "characters", "small_mario_stand", start_x, icon_y)
         text_x = start_x + icon_width + spacing
         draw_text(surface, life_text, text_x, icon_y)
 

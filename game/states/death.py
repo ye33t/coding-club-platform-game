@@ -72,4 +72,4 @@ class DeathState(State):
         else:
             next_state = GameOverState()
 
-        game.transition(next_state, TransitionMode.BOTH)
+        game.transition(next_state, TransitionMode.FADE_OUT)

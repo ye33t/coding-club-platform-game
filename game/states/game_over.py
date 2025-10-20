@@ -51,4 +51,4 @@ class GameOverState(State):
         from ..rendering import TransitionMode
         from .title import TitleState
 
-        game.transition(TitleState(), TransitionMode.FADE_IN)
+        game.transition(TitleState(), TransitionMode.INSTANT)
