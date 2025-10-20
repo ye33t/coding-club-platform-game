@@ -16,6 +16,7 @@ from .physics import EntityPhysicsContext, EntityPipeline
 if TYPE_CHECKING:
     from ..level import Level
     from ..mario import Mario
+    from ..score import ScoreType
 
 
 @dataclass(slots=True)
@@ -43,6 +44,8 @@ class CollisionResponse:
         power_up_type: Optional[str] = None,
         bounce_velocity: Optional[float] = None,
         spawn_entity: Optional["Entity"] = None,
+        score_type: "ScoreType | None" = None,
+        popup_position: tuple[float, float] | None = None,
     ):
         """Initialize collision response.
 
@@ -52,12 +55,15 @@ class CollisionResponse:
             power_up_type: Specific power-up identifier (e.g., "mushroom")
             bounce_velocity: Upward velocity to apply to Mario (e.g., for stomping)
             spawn_entity: Entity to spawn after collision (e.g., Koopa shell)
+            score_type: Optional score classification for combo tracking
         """
         self.remove = remove
         self.damage = damage
         self.power_up_type = power_up_type
         self.bounce_velocity = bounce_velocity
         self.spawn_entity = spawn_entity
+        self.score_type = score_type
+        self.popup_position = popup_position
 
 
 class Entity(ABC, Drawable):
@@ -143,6 +149,11 @@ class Entity(ABC, Drawable):
     @property
     def blocks_entities(self) -> bool:
         """Whether this entity blocks other entities when colliding."""
+        return False
+
+    @property
+    def awards_shell_combo(self) -> bool:
+        """Whether defeating this entity with a shell advances the combo."""
         return False
 
     def on_collide_entity(self, source: "Entity") -> bool:

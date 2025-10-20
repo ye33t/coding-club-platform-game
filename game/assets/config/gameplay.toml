@@ -1,0 +1,20 @@
+[hud]
+# Initial timer value when a level does not override it
+default_timer_start = 400
+# Number of frames between each timer decrement (60 FPS -> 3 ticks per second)
+timer_frames_per_decrement = 20
+# Number of digits to display for score, coins, and timer values
+score_digits = 6
+coin_digits = 2
+timer_digits = 3
+# Default values applied when collecting a single coin
+coin_score_value = 200
+coin_increment = 1
+
+[score_popups]
+# Vertical pixel offset above Mario's head for score popups
+vertical_offset = 12
+# Upward speed in pixels per second
+upward_speed = 40
+# Lifetime in frames before the popup disappears
+lifetime_frames = 60

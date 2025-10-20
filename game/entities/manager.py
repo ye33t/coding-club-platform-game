@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Set
+from typing import TYPE_CHECKING, Callable, List, Optional, Set
 
 from pygame import Surface
 
@@ -19,6 +19,9 @@ class EntityManager:
     """Manages active game entities (enemies and collectibles)."""
 
     _entities: List[Entity] = field(default_factory=list)
+    _enemy_defeat_handler: Optional[
+        Callable[[Entity, Entity, tuple[float, float]], None]
+    ] = None
 
     def spawn(self, entity: Entity) -> None:
         """Add a new entity to the manager.
@@ -74,6 +77,14 @@ class EntityManager:
         """Get an iterable of all active entities."""
         return self._entities
 
+    def set_enemy_defeat_handler(
+        self,
+        handler: Optional[Callable[[Entity, Entity, tuple[float, float]], None]],
+    ) -> None:
+        """Install a callback invoked when an entity is defeated by another."""
+
+        self._enemy_defeat_handler = handler
+
     def _handle_entity_collisions(self) -> None:
         to_remove: Set[Entity] = set()
 
@@ -97,8 +108,21 @@ class EntityManager:
                     continue
 
                 if source.can_damage_entities and target.can_be_damaged_by_entities:
+                    defeated_before = self._is_defeated(target)
                     if target.on_collide_entity(source):
                         to_remove.add(target)
+                    defeated_after = self._is_defeated(target)
+                    if (
+                        self._enemy_defeat_handler is not None
+                        and not defeated_before
+                        and defeated_after
+                        and target.awards_shell_combo
+                    ):
+                        impact_position = (
+                            target.state.x + target.state.width / 2,
+                            target.state.y + target.state.height,
+                        )
+                        self._enemy_defeat_handler(source, target, impact_position)
                     continue
 
                 if source.blocks_entities:
@@ -108,3 +132,9 @@ class EntityManager:
             self._entities = [
                 entity for entity in self._entities if entity not in to_remove
             ]
+
+    @staticmethod
+    def _is_defeated(entity: Entity) -> bool:
+        return bool(
+            getattr(entity, "knocked_out", False) or getattr(entity, "is_dead", False)
+        )

@@ -52,6 +52,39 @@ def load(filepath: str) -> Level:
     if "spawn" not in data:
         raise ParseError("Level file must have a 'spawn' section")
 
+    name = data.get("name")
+    if name is not None:
+        if not isinstance(name, str):
+            raise ParseError("Level name must be a string if provided")
+        level.name = name
+
+    display_name = data.get("display_name")
+    if display_name is not None:
+        if not isinstance(display_name, str):
+            raise ParseError("Level display_name must be a string if provided")
+        level.display_name = display_name
+
+    timer_config = data.get("timer")
+    if timer_config is not None:
+        if not isinstance(timer_config, dict):
+            raise ParseError("Level timer must be a mapping if provided")
+
+        timer_start = timer_config.get("start")
+        if timer_start is not None:
+            try:
+                level.timer_start_value = int(timer_start)
+            except (TypeError, ValueError) as exc:
+                raise ParseError(f"Timer start must be an integer: {exc}") from exc
+
+        frames_per_decrement = timer_config.get("frames_per_decrement")
+        if frames_per_decrement is not None:
+            try:
+                level.timer_frames_per_decrement = int(frames_per_decrement)
+            except (TypeError, ValueError) as exc:
+                raise ParseError(
+                    f"Timer frames_per_decrement must be an integer: {exc}"
+                ) from exc
+
     palette = data.get("palette")
     if palette is not None:
         if not isinstance(palette, str):

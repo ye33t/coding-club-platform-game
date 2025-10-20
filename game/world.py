@@ -5,13 +5,30 @@ from typing import Iterator, Optional, cast
 from .camera import Camera
 from .constants import TILE_SIZE
 from .effects import EffectManager
+from .effects.score_popup import ScorePopupEffect
 from .entities import EntityFactory, EntityManager
+from .entities.base import Entity
+from .entities.koopa import ShellEntity
+from .gameplay import (
+    HUD_COIN_DIGITS,
+    HUD_COIN_INCREMENT,
+    HUD_COIN_SCORE_VALUE,
+    HUD_DEFAULT_TIMER_START,
+    HUD_SCORE_DIGITS,
+    HUD_TIMER_DIGITS,
+    HUD_TIMER_FRAMES_PER_DECREMENT,
+    SCORE_POPUP_LIFETIME_FRAMES,
+    SCORE_POPUP_UPWARD_SPEED,
+    SCORE_POPUP_VERTICAL_OFFSET,
+)
+from .hud import HudDimensions, HudState
 from .levels import loader
 from .mario import Mario
 from .physics import PhysicsContext, PhysicsPipeline
 from .physics.events import PhysicsEvent
 from .props import FlagpoleProp, PropManager
 from .rendering.base import Drawable
+from .score import ScoreTracker, ScoreType
 
 
 class World:
@@ -37,6 +54,16 @@ class World:
             self.level.spawn_screen,
         )
 
+        hud_dimensions = HudDimensions(
+            score_digits=HUD_SCORE_DIGITS,
+            coin_digits=HUD_COIN_DIGITS,
+            timer_digits=HUD_TIMER_DIGITS,
+        )
+        self.hud = HudState(hud_dimensions)
+        self.score_tracker = ScoreTracker()
+        self._configure_hud_for_level(preserve_progress=False)
+        self.entities.set_enemy_defeat_handler(self._handle_entity_defeat)
+
         self.props.spawn_all(self)
 
     def reset(self) -> None:
@@ -61,6 +88,7 @@ class World:
         self.camera.x = 0
         self.camera.max_x = 0
         self.animation_tick = 0
+        self._configure_hud_for_level(preserve_progress=False)
 
     def update(self, keys, dt: float) -> Optional[PhysicsEvent]:
         """Process Mario's intent and update his state.
@@ -69,6 +97,7 @@ class World:
             Physics event if one was raised (e.g., death, warp), None otherwise
         """
         self.mario.update_intent(keys)
+        self.hud.tick_timer()
 
         self.entities.update(dt, self.level, self.mario.screen, self.camera.x)
 
@@ -99,6 +128,7 @@ class World:
         self.camera.update(self.mario.x, self.level.width_pixels)
 
         self._check_spawn_triggers()
+        self._update_combo_states()
 
         self.animation_tick += 1
 
@@ -137,3 +167,95 @@ class World:
                     )
                     if entity:
                         self.entities.spawn(entity)
+
+    def _configure_hud_for_level(self, preserve_progress: bool) -> None:
+        """Apply level-specific HUD configuration."""
+        timer_start = (
+            self.level.timer_start_value
+            if self.level.timer_start_value is not None
+            else HUD_DEFAULT_TIMER_START
+        )
+        frames_per_decrement = (
+            self.level.timer_frames_per_decrement
+            if self.level.timer_frames_per_decrement is not None
+            else HUD_TIMER_FRAMES_PER_DECREMENT
+        )
+        display_label = self.level.display_label()
+        self.hud.configure_for_level(
+            display_label=display_label,
+            timer_start=timer_start,
+            frames_per_decrement=frames_per_decrement,
+            preserve_progress=preserve_progress,
+        )
+        self.score_tracker.reset_all()
+
+    def award_score(self, amount: int) -> None:
+        """Increment the global score."""
+        self.hud.add_score(amount)
+
+    def collect_coin(self, amount: Optional[int] = None) -> None:
+        """Increment coin counter and associated score bonus."""
+        coins_to_add = amount if amount is not None else HUD_COIN_INCREMENT
+        if coins_to_add <= 0:
+            return
+        self.hud.add_coins(coins_to_add)
+        self.hud.add_score(HUD_COIN_SCORE_VALUE * coins_to_add)
+
+    def handle_enemy_score(
+        self,
+        score_type: ScoreType,
+        *,
+        source: Entity | None = None,
+        position: tuple[float, float] | None = None,
+    ) -> None:
+        """Apply combo-based scoring derived from physics events."""
+        points = self.score_tracker.record(score_type, source=source)
+        if points > 0:
+            self._apply_points(points, position)
+
+    def _handle_entity_defeat(
+        self,
+        source: Entity,
+        target: Entity,
+        position: tuple[float, float],
+    ) -> None:
+        """Award shell combo points when moving shells defeat enemies."""
+        if isinstance(source, ShellEntity) and source.can_damage_entities:
+            points = self.score_tracker.record(ScoreType.SHELL_CHAIN, source=source)
+            if points > 0:
+                self._apply_points(points, position)
+
+    def _update_combo_states(self) -> None:
+        """Maintain combo reset conditions each frame."""
+        if self.mario.on_ground and not self.mario.is_stomping:
+            self.score_tracker.reset_stomp_chain()
+
+        for entity in self.entities.items:
+            if isinstance(entity, ShellEntity) and not entity.is_moving:
+                self.score_tracker.reset_shell_combo(entity)
+
+    def _apply_points(self, points: int, position: tuple[float, float] | None) -> None:
+        self.award_score(points)
+        self._spawn_score_popup(points, position)
+
+    def _spawn_score_popup(
+        self, points: int, position: tuple[float, float] | None
+    ) -> None:
+        """Create a floating popup showing the awarded score."""
+        label = "1up" if points < 0 else str(points)
+        mario = self.mario
+        if position is None:
+            world_x = mario.x + mario.width / 2
+            world_y = mario.y + mario.height
+        else:
+            world_x, world_y = position
+        popup = ScorePopupEffect(
+            label=label,
+            world_x=world_x,
+            world_y=world_y,
+            horizontal_velocity=mario.vx,
+            upward_speed=SCORE_POPUP_UPWARD_SPEED,
+            lifetime_frames=SCORE_POPUP_LIFETIME_FRAMES,
+            vertical_offset=SCORE_POPUP_VERTICAL_OFFSET,
+        )
+        self.effects.spawn(popup)

@@ -4,9 +4,10 @@ from pygame import Rect
 
 from game.constants import TILE_SIZE
 
+from ..score import ScoreType
 from .base import PhysicsContext, PhysicsProcessor
 from .config import STOMP_VELOCITY_Y_SCALE
-from .events import DeathEvent, RemoveEntityEvent, SpawnEntityEvent
+from .events import DeathEvent, EnemyScoreEvent, RemoveEntityEvent, SpawnEntityEvent
 
 
 class EntityCollisionProcessor(PhysicsProcessor):
@@ -89,6 +90,24 @@ class EntityCollisionProcessor(PhysicsProcessor):
 
             if response.spawn_entity is not None:
                 context.add_event(SpawnEntityEvent(response.spawn_entity))
+
+            if response.score_type is not None:
+                source_entity = (
+                    entity if response.score_type is ScoreType.SHELL_KICK else None
+                )
+                impact_position = response.popup_position
+                if impact_position is None:
+                    impact_position = (
+                        entity.state.x + entity.state.width / 2,
+                        entity.state.y + entity.state.height,
+                    )
+                context.add_event(
+                    EnemyScoreEvent(
+                        score_type=response.score_type,
+                        source_entity=source_entity,
+                        position=impact_position,
+                    )
+                )
 
         return context
 

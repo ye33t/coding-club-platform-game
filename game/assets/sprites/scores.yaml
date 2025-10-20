@@ -1,0 +1,45 @@
+version: 1
+sprite_sheets:
+  scores:
+    image: other.png
+    colorkey: [146, 144, 255]
+    sprites:
+      '100':
+        offset: [234, 34]
+        size: [2, 1]
+      '1000':
+        offset: [252, 34]
+        size: [2, 1]
+      '200':
+        offset: [234, 44]
+        size: [2, 1]
+      '2000':
+        offset: [252, 44]
+        size: [2, 1]
+      '300':
+        offset: [234, 54]
+        size: [2, 1]
+      '3000':
+        offset: [252, 54]
+        size: [2, 1]
+      '400':
+        offset: [234, 64]
+        size: [2, 1]
+      '4000':
+        offset: [252, 64]
+        size: [2, 1]
+      '500':
+        offset: [234, 74]
+        size: [2, 1]
+      '5000':
+        offset: [252, 74]
+        size: [2, 1]
+      '800':
+        offset: [234, 84]
+        size: [2, 1]
+      '8000':
+        offset: [252, 84]
+        size: [2, 1]
+      '1up':
+        offset: [234, 94]
+        size: [2, 1]

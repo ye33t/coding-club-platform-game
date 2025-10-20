@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from ..world import World
     from .base import PhysicsContext
 
+from ..score import ScoreType
+
 
 class PhysicsEvent(ABC):
     """Base class for physics events emitted by the pipeline."""
@@ -102,4 +104,43 @@ class SpawnEntityEvent(PhysicsEvent):
 
     def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
         world.entities.spawn(self.entity)
+        return False
+
+
+@dataclass(slots=True)
+class AwardScoreEvent(PhysicsEvent):
+    """Increment the global score."""
+
+    amount: int
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.award_score(self.amount)
+        return False
+
+
+@dataclass(slots=True)
+class CollectCoinEvent(PhysicsEvent):
+    """Increment the coin counter and associated score."""
+
+    amount: int = 1
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.collect_coin(self.amount)
+        return False
+
+
+@dataclass(slots=True)
+class EnemyScoreEvent(PhysicsEvent):
+    """Apply combo-based scoring for enemy defeats."""
+
+    score_type: ScoreType
+    source_entity: "Entity | None" = None
+    position: tuple[float, float] | None = None
+
+    def dispatch(self, world: "World", context: "PhysicsContext") -> bool:
+        world.handle_enemy_score(
+            self.score_type,
+            source=self.source_entity,
+            position=self.position,
+        )
         return False

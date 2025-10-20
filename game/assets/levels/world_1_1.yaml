@@ -1,4 +1,8 @@
 name: World 1-1
+display_name: 1-1
+timer:
+  start: 400
+  frames_per_decrement: 20
 palette: underground
 
 spawn:
