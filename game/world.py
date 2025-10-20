@@ -66,8 +66,13 @@ class World:
 
         self.props.spawn_all(self)
 
-    def reset(self) -> None:
-        """Reset the world to the level's spawn configuration."""
+    def reset(self, preserve_progress: bool = False) -> None:
+        """Reset the world to the level's spawn configuration.
+
+        Args:
+            preserve_progress: When True, keep HUD score/coins/lives while
+                refreshing terrain, entities, and timer settings.
+        """
         # Reset Mario to the spawn point defined by the level
         self.mario.reset(
             x=self.level.spawn_x,
@@ -88,7 +93,7 @@ class World:
         self.camera.x = 0
         self.camera.max_x = 0
         self.animation_tick = 0
-        self._configure_hud_for_level(preserve_progress=False)
+        self._configure_hud_for_level(preserve_progress=preserve_progress)
 
     def update(self, keys, dt: float) -> Optional[PhysicsEvent]:
         """Process Mario's intent and update his state.
@@ -198,8 +203,12 @@ class World:
         coins_to_add = amount if amount is not None else HUD_COIN_INCREMENT
         if coins_to_add <= 0:
             return
-        self.hud.add_coins(coins_to_add)
+        rollovers = self.hud.add_coins(coins_to_add)
         self.hud.add_score(HUD_COIN_SCORE_VALUE * coins_to_add)
+        if rollovers > 0:
+            self.hud.gain_life(rollovers)
+            for _ in range(rollovers):
+                self._spawn_score_popup(-1, None)
 
     def handle_enemy_score(
         self,

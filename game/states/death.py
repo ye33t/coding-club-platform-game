@@ -15,15 +15,17 @@ class DeathState(State):
     This state:
     - Gives Mario an upward leap
     - Applies gravity to make him fall
-    - Transitions to StartLevelState when animation is complete
+    - Transitions to either the life splash or game over screen once complete
     """
 
     def __init__(self) -> None:
         self._transition_started = False
+        self._life_applied = False
 
     def on_enter(self, game: "Game") -> None:
         """Initialize death animation."""
         self._transition_started = False
+        self._life_applied = False
         # Give Mario the death leap velocity
         game.world.mario.vy = DEATH_LEAP_VELOCITY
         game.world.mario.vx = 0
@@ -44,12 +46,30 @@ class DeathState(State):
 
         # Check if Mario has fallen far enough to end animation
         if mario.y < RESET_THRESHOLD_Y and not self._transition_started:
-            if game.transitioning:
-                return
+            self._on_animation_complete(game)
 
-            # Transition to start level with screen fade
-            from ..rendering import TransitionMode
-            from .start_level import StartLevelState
+    def _on_animation_complete(self, game: "Game") -> None:
+        if self._transition_started:
+            return
 
-            self._transition_started = True
-            game.transition(StartLevelState(), TransitionMode.BOTH)
+        if not self._life_applied:
+            remaining = game.world.hud.lose_life()
+            self._life_applied = True
+        else:
+            remaining = game.world.hud.lives
+
+        if game.transitioning:
+            return
+
+        from ..rendering import TransitionMode
+        from .game_over import GameOverState
+        from .life_splash import LifeSplashState
+
+        self._transition_started = True
+
+        if remaining > 0:
+            next_state = LifeSplashState(preserve_progress=True)
+        else:
+            next_state = GameOverState()
+
+        game.transition(next_state, TransitionMode.BOTH)

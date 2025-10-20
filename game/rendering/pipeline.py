@@ -12,6 +12,7 @@ from game.rendering.behind_drawables import BehindDrawablesLayer
 from game.rendering.debug_overlay import DebugOverlayLayer
 from game.rendering.front_drawables import FrontDrawablesLayer
 from game.rendering.hud import HudLayer
+from game.rendering.state_overlay import StateOverlayLayer
 from game.rendering.terrain import TerrainLayer
 
 from .base import EffectLayer, RenderContext, RenderLayer
@@ -25,13 +26,15 @@ class RenderPipeline:
 
     def __init__(self) -> None:
         self._display = Display()
+        self._hud_layer = HudLayer()
+        self._overlay_layer = StateOverlayLayer(self._hud_layer)
         self._base_layers: List[RenderLayer] = [
             BehindBackgroundDrawablesLayer(),
             BackgroundLayer(),
             BehindDrawablesLayer(),
             TerrainLayer(),
-            HudLayer(),
             FrontDrawablesLayer(),
+            self._overlay_layer,
         ]
         self._debug_overlay = DebugOverlayLayer()
         self._overlays: List[RenderLayer] = []
