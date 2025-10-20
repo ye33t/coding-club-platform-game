@@ -234,9 +234,7 @@ class World:
             if isinstance(entity, ShellEntity) and not entity.is_moving:
                 self.score_tracker.reset_shell_combo(entity)
 
-    def _apply_points(
-        self, points: int, position: tuple[float, float] | None
-    ) -> None:
+    def _apply_points(self, points: int, position: tuple[float, float] | None) -> None:
         self.award_score(points)
         self._spawn_score_popup(points, position)
 

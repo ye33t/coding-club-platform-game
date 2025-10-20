@@ -79,9 +79,7 @@ class EntityManager:
 
     def set_enemy_defeat_handler(
         self,
-        handler: Optional[
-            Callable[[Entity, Entity, tuple[float, float]], None]
-        ],
+        handler: Optional[Callable[[Entity, Entity, tuple[float, float]], None]],
     ) -> None:
         """Install a callback invoked when an entity is defeated by another."""
 

@@ -178,10 +178,6 @@ class GoombaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
                 remove=False,
                 bounce_velocity=GOOMBA_STOMP_BOUNCE_VELOCITY,
                 score_type=ScoreType.STOMP,
-                popup_position=(
-                    self.state.x + self.state.width / 2,
-                    self.state.y + self.state.height,
-                ),
             )
         else:
             # Mario ran into the Goomba - damage Mario

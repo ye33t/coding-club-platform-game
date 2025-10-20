@@ -164,10 +164,6 @@ class KoopaTroopaEntity(HorizontalMovementMixin, KnockoutMixin, Entity):
                 bounce_velocity=KOOPA_TROOPA_STOMP_BOUNCE_VELOCITY,
                 spawn_entity=shell,
                 score_type=ScoreType.STOMP,
-                popup_position=(
-                    self.state.x + self.state.width / 2,
-                    self.state.y + self.state.height,
-                ),
             )
 
         return CollisionResponse(damage=True)
