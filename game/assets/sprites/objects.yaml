@@ -27,3 +27,7 @@ sprite_sheets:
       mushroom:
         offset: [0, 24]
         size: [2, 2]
+
+      mario_avatar:
+        offset: [16, 24]
+        size: [2, 2]
