@@ -47,12 +47,17 @@ class TransitionTimeline:
 
     @property
     def trigger_time(self) -> float:
-        return {
-            TransitionMode.INSTANT: 0.0,
-            TransitionMode.FADE_IN: 0.0,
-            TransitionMode.FADE_OUT: self.duration,
-            TransitionMode.BOTH: self.duration / 2,
-        }[self._mode]
+        if self._mode is TransitionMode.INSTANT:
+            return 0.0
+        if self._mode is TransitionMode.FADE_IN:
+            return 0.0
+        if self._mode is TransitionMode.FADE_OUT:
+            # Swap slightly before completion so the new state renders under the
+            # final frames of the fade-out, preventing flashes of the previous scene.
+            return self.duration * 0.95
+        if self._mode is TransitionMode.BOTH:
+            return self.duration / 2
+        return 0.0
 
     @property
     def progress(self) -> float:
