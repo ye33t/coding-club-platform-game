@@ -1,4 +1,4 @@
-"""Detect collection of terrain coins and award HUD updates."""
+"""Detect collisions with coin terrain tiles and award HUD updates."""
 
 from __future__ import annotations
 
@@ -12,10 +12,10 @@ from .base import PhysicsContext, PhysicsProcessor
 from .events import CollectCoinEvent, SpawnEffectEvent, TerrainTileChangeEvent
 
 
-class CollectableCollisionProcessor(PhysicsProcessor):
-    """Detect intersecting collectable tiles and convert them into coin rewards."""
+class CoinCollisionProcessor(PhysicsProcessor):
+    """Detect intersecting coin tiles and convert them into coin rewards."""
 
-    _COLLECTABLE_CATEGORY = "collectable"
+    _COIN_TILE_CATEGORY = "collectable"
 
     def process(self, context: PhysicsContext) -> PhysicsContext:
         mario = context.mario
@@ -93,7 +93,7 @@ class CollectableCollisionProcessor(PhysicsProcessor):
                 tile_def = definition_lookup(tile_slug)
                 if tile_def is None:
                     continue
-                if tile_def.category != self._COLLECTABLE_CATEGORY:
+                if tile_def.category != self._COIN_TILE_CATEGORY:
                     continue
 
                 yield (tile_x, tile_y)
