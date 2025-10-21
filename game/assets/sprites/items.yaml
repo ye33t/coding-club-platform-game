@@ -8,8 +8,8 @@ sprite_sheets:
         offset: [298, 111]
         size: [2, 2]
       coin_2:
-        offset: [309, 111]
+        offset: [315, 111]
         size: [2, 2]
       coin_3:
-        offset: [320, 111]
+        offset: [332, 111]
         size: [2, 2]

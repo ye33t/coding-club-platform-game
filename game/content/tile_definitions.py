@@ -15,6 +15,7 @@ def _build_tile_definition(record: TileConfig) -> TileDefinition:
         sprite_sheet=record.sprite_sheet,
         sprite_name=record.sprite,
         collision_mask=record.collision_mask,
+        category=record.category,
         animation=record.animation,
     )
 

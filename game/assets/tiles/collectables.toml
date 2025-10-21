@@ -24,6 +24,7 @@ sprites = [
     { sprite = "coin_3", frames = 8 },
     { sprite = "coin_2", frames = 8 },
 ]
+category = "collectable"
 simple_key = "$"
 
 [[tiles]]

@@ -92,6 +92,7 @@ class TileDefinition:
     sprite_sheet: str
     sprite_name: str | None
     collision_mask: int
+    category: str | None = None
     animation: TileAnimation | None = None
 
     def resolve_sprite_name(self, animation_tick: int) -> str | None:

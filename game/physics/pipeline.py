@@ -6,6 +6,7 @@ from .action import ActionProcessor
 from .base import PhysicsContext, PhysicsProcessor
 from .boundaries import BoundaryProcessor
 from .ceiling_collision import CeilingCollisionProcessor
+from .collectable_collision import CollectableCollisionProcessor
 from .death_event import DeathEventProcessor
 from .end_level_event import EndLevelEventProcessor
 from .entity_collision import EntityCollisionProcessor
@@ -47,6 +48,7 @@ class PhysicsPipeline:
             FlagpoleClampProcessor(),
             EntityCollisionProcessor(),
             # post-movement processors
+            CollectableCollisionProcessor(),
             ActionProcessor(),
             TerrainBehaviorProcessor(),
             MarioTransitionProcessor(),

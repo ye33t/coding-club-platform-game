@@ -143,7 +143,9 @@ class CompleteLevelState(State):
 
         from .life_splash import LifeSplashState
 
-        game.transition(LifeSplashState(preserve_progress=True), TransitionMode.FADE_OUT)
+        game.transition(
+            LifeSplashState(preserve_progress=True), TransitionMode.FADE_OUT
+        )
 
     def _deactivate_flag_effect(self) -> None:
         """Ensure the spawned flag effect is cleaned up."""
