@@ -1,0 +1,15 @@
+version: 1
+sprite_sheets:
+  items:
+    image: background.png
+    colorkey: [146, 144, 255]
+    sprites:
+      coin_1:
+        offset: [298, 111]
+        size: [2, 2]
+      coin_2:
+        offset: [315, 111]
+        size: [2, 2]
+      coin_3:
+        offset: [332, 111]
+        size: [2, 2]

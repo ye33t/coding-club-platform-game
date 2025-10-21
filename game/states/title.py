@@ -57,7 +57,9 @@ class TitleState(State):
         from ..rendering import TransitionMode
         from .life_splash import LifeSplashState
 
-        game.transition(LifeSplashState(preserve_progress=False), TransitionMode.INSTANT)
+        game.transition(
+            LifeSplashState(preserve_progress=False), TransitionMode.INSTANT
+        )
 
 
 # Backwards compatibility for older imports

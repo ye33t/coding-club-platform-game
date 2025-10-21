@@ -67,6 +67,7 @@ class DeathState(State):
 
         self._transition_started = True
 
+        next_state: State
         if remaining > 0:
             next_state = LifeSplashState(preserve_progress=True)
         else:

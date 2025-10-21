@@ -63,7 +63,9 @@ class LifeSplashState(State):
         total_width = icon_width + spacing + life_text_width
         start_x = (NATIVE_WIDTH - total_width) // 2
 
-        sprites.draw_at_position(surface, "characters", "small_mario_stand", start_x, icon_y)
+        sprites.draw_at_position(
+            surface, "characters", "small_mario_stand", start_x, icon_y
+        )
         text_x = start_x + icon_width + spacing
         draw_text(surface, life_text, text_x, icon_y)
 
@@ -78,5 +80,5 @@ class LifeSplashState(State):
 
         game.transition(
             StartLevelState(preserve_progress=self._preserve_progress),
-            TransitionMode.FADE_IN,
+            TransitionMode.INSTANT,
         )
