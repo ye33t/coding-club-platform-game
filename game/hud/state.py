@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..constants import COIN_LIFE_THRESHOLD
+
 
 @dataclass(frozen=True, slots=True)
 class HudDimensions:
@@ -25,6 +27,7 @@ class HudState:
         self.level_label: str = ""
         self._timer_frames_per_decrement: int = 0
         self._timer_frame_accumulator: int = 0
+        self.lives: int = 0
 
     @property
     def score_digits(self) -> int:
@@ -50,6 +53,22 @@ class HudState:
         self.coins = 0
         self._apply_level_settings(display_label, timer_start, frames_per_decrement)
 
+    def reset_for_new_game(
+        self,
+        *,
+        initial_lives: int,
+        display_label: str,
+        timer_start: int,
+        frames_per_decrement: int,
+    ) -> None:
+        """Reset all HUD values, including lives, for a new run."""
+        self.set_lives(initial_lives)
+        self.reset(
+            display_label=display_label,
+            timer_start=timer_start,
+            frames_per_decrement=frames_per_decrement,
+        )
+
     def _apply_level_settings(
         self,
         display_label: str,
@@ -67,11 +86,36 @@ class HudState:
             return
         self.score = min(self.score + amount, self._max_value(self.score_digits))
 
-    def add_coins(self, amount: int) -> None:
-        """Increase the coin counter."""
+    def add_coins(self, amount: int) -> int:
+        """Increase the coin counter, returning the number of rollovers."""
         if amount <= 0:
+            return 0
+        threshold = COIN_LIFE_THRESHOLD
+        total = self.coins + amount
+        rollovers = total // threshold
+        self.coins = total % threshold
+        return rollovers
+
+    def set_lives(self, lives: int) -> None:
+        """Directly assign the life counter."""
+        self.lives = max(0, lives)
+
+    def gain_life(self, count: int = 1) -> None:
+        """Increment lives by the provided count."""
+        if count <= 0:
             return
-        self.coins = (self.coins + amount) % (self._max_value(self.coin_digits) + 1)
+        self.lives = max(0, self.lives + count)
+
+    def lose_life(self, count: int = 1) -> int:
+        """Decrement lives and return the remaining count."""
+        if count <= 0:
+            return self.lives
+        self.lives = max(0, self.lives - count)
+        return self.lives
+
+    def has_lives_remaining(self) -> bool:
+        """Whether Mario still has lives left."""
+        return self.lives > 0
 
     def tick_timer(self, frames: int = 1) -> None:
         """Advance the level timer using frame-based cadence."""

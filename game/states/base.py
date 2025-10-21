@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..game import Game
+    from ..rendering.base import RenderContext
 
 
 class State(ABC):
@@ -43,3 +44,7 @@ class State(ABC):
             dt: Time delta since last update in seconds
         """
         pass
+
+    def draw_overlay(self, game: "Game", context: "RenderContext") -> None:
+        """Optional hook for drawing full-screen overlays."""
+        return None

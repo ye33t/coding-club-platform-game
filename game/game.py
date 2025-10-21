@@ -14,7 +14,7 @@ from .rendering import (
     TransitionMode,
     TransitionTimeline,
 )
-from .states import InitialState, State
+from .states import State, TitleState
 from .world import World
 
 
@@ -33,7 +33,7 @@ class Game:
         sprites.load_sheets(assets_path)
 
         self.world = World()
-        self.state: State = InitialState()
+        self.state: State = TitleState()
         self.state.on_enter(self)
         self.dt: float = 0
         self._pending_state: Optional[State] = None

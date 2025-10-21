@@ -141,9 +141,9 @@ class CompleteLevelState(State):
         if self._completion_timer < CASTLE_COMPLETION_DELAY:
             return
 
-        from .start_level import StartLevelState
+        from .life_splash import LifeSplashState
 
-        game.transition(StartLevelState(), TransitionMode.BOTH)
+        game.transition(LifeSplashState(preserve_progress=True), TransitionMode.FADE_OUT)
 
     def _deactivate_flag_effect(self) -> None:
         """Ensure the spawned flag effect is cleaned up."""

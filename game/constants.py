@@ -26,3 +26,8 @@ FPS = 60  # NES runs at ~60 FPS (actually 60.0988 for NTSC)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BACKGROUND_COLOR = TRANSPARENT = (146, 144, 255)  # Light purple (NES background color)
+
+# Session defaults
+INITIAL_LIVES = 3
+COIN_LIFE_THRESHOLD = 100
+LIFE_SPLASH_FRAMES = FPS * 3  # Display the life splash for three seconds by default
