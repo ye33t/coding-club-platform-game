@@ -8,11 +8,7 @@ from ..constants import TILE_SIZE
 from ..content.tile_definitions import empty_tile_slug
 from ..effects.score_popup import ScorePopupEffect
 from ..effects.smash import SmashShardEffect
-from ..physics.events import (
-    AwardScoreEvent,
-    SpawnEffectEvent,
-    TerrainTileChangeEvent,
-)
+from ..physics.events import AwardScoreEvent, SpawnEffectEvent, TerrainTileChangeEvent
 from .base import BehaviorContext, TerrainBehavior, TileEvent
 from .bounce import BounceBehavior
 

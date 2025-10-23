@@ -199,7 +199,10 @@ class SpriteManager:
         rotated_center = pivot_screen - rotated_offset
 
         rotated_rect = rotated.get_rect()
-        rotated_rect.center = (int(round(rotated_center.x)), int(round(rotated_center.y)))
+        rotated_rect.center = (
+            int(round(rotated_center.x)),
+            int(round(rotated_center.y)),
+        )
 
         surface.blit(rotated, rotated_rect.topleft)
 
