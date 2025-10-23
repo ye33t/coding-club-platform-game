@@ -125,15 +125,15 @@ class EntityCollisionProcessor(PhysicsProcessor):
         mario.grow()
 
     def _apply_damage(self, context: PhysicsContext) -> None:
-        """Apply damage to Mario based on his current state.
+        """Apply damage to Mario based on his current state unless suppressed.
 
         - Small Mario: Dies
         - Big Mario: Shrinks to small
-        - Invincible: No effect
+        - Temporary invulnerability (transition or stomp): No effect
         """
         mario = context.mario
 
-        if mario.is_invincible:
+        if not mario.can_take_damage:
             return
 
         if mario.size == "small":
