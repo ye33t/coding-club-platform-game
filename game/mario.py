@@ -221,9 +221,14 @@ class Mario(Drawable):
         )
 
     @property
-    def is_invincible(self) -> bool:
-        """Check if Mario is invincible (during transition)."""
+    def is_temporarily_invulnerable(self) -> bool:
+        """Return True while transitions or stomps suppress incoming damage."""
         return self.transition is not None or self.action == "stomping"
+
+    @property
+    def can_take_damage(self) -> bool:
+        """Return False whenever damage should be ignored."""
+        return not self.is_temporarily_invulnerable
 
     @staticmethod
     def _small_action(mario: "Mario") -> None:
