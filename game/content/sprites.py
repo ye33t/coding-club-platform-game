@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 from typing import Dict, Iterable, Mapping, Optional, Tuple
 
@@ -137,10 +138,13 @@ class SpriteManager:
         surface: Surface,
         sheet_name: str,
         sprite_name: str,
-        x: int,
-        y: int,
+        x: float,
+        y: float,
         reflected: bool = False,
         palette: str | None = None,
+        *,
+        rotation_degrees: float = 0.0,
+        anchor: str = "bottomleft",
     ):
         """Draw a sprite at pixel coordinates with bottom-left alignment."""
 
@@ -156,10 +160,51 @@ class SpriteManager:
         if reflected:
             sprite = pygame.transform.flip(sprite, True, False)
 
-        screen_y = NATIVE_HEIGHT - y
-        draw_y = screen_y - sprite.get_height()
+        width, height = sprite.get_size()
 
-        surface.blit(sprite, (x, draw_y))
+        anchor_key = anchor.lower()
+        if anchor_key not in {"bottomleft", "center"}:
+            raise ValueError(
+                f"Unsupported anchor '{anchor}'. Expected 'bottomleft' or 'center'."
+            )
+
+        rotation_normalized = rotation_degrees % 360.0
+        if math.isclose(rotation_normalized, 0.0, abs_tol=1e-6):
+            rotation_normalized = 0.0
+
+        if rotation_normalized == 0.0:
+            if anchor_key == "bottomleft":
+                screen_bottom = NATIVE_HEIGHT - y
+                draw_x = int(round(x))
+                draw_y = int(round(screen_bottom - height))
+            else:  # center
+                screen_center_y = NATIVE_HEIGHT - y
+                draw_x = int(round(x - width / 2))
+                draw_y = int(round(screen_center_y - height / 2))
+            surface.blit(sprite, (draw_x, draw_y))
+            return
+
+        pivot_local: pygame.math.Vector2
+        if anchor_key == "bottomleft":
+            pivot_local = pygame.math.Vector2(0.0, float(height))
+        else:  # center
+            pivot_local = pygame.math.Vector2(width / 2, height / 2)
+
+        sprite_center = pygame.math.Vector2(width / 2, height / 2)
+        offset_to_pivot = pivot_local - sprite_center
+        rotated_offset = offset_to_pivot.rotate(rotation_normalized)
+
+        rotated = pygame.transform.rotate(sprite, rotation_normalized)
+        pivot_screen = pygame.math.Vector2(float(x), float(NATIVE_HEIGHT - y))
+        rotated_center = pivot_screen - rotated_offset
+
+        rotated_rect = rotated.get_rect()
+        rotated_rect.center = (
+            int(round(rotated_center.x)),
+            int(round(rotated_center.y)),
+        )
+
+        surface.blit(rotated, rotated_rect.topleft)
 
     def preload_sprites(
         self, sheet_name: str, sprite_names: Iterable[str] | None = None

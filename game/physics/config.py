@@ -60,6 +60,14 @@ BOUNCE_VELOCITY = config["terrain"]["bounce_velocity"]
 BOUNCE_GRAVITY = config["terrain"]["bounce_gravity"]
 BOUNCE_DURATION = config["terrain"]["bounce_duration"]
 
+# Smash
+SMASH_SHARD_HORIZONTAL_VELOCITY = config["smash"]["shard_horizontal_velocity"]
+SMASH_SHARD_TOP_VELOCITY_Y = config["smash"]["shard_top_velocity_y"]
+SMASH_SHARD_BOTTOM_VELOCITY_Y = config["smash"]["shard_bottom_velocity_y"]
+SMASH_SHARD_GRAVITY = config["smash"]["shard_gravity"]
+SMASH_SHARD_ANGULAR_SPEED = config["smash"]["shard_angular_speed"]
+SMASH_SHARD_LIFETIME = config["smash"]["shard_lifetime"]
+
 # Death
 DEATH_LEAP_VELOCITY = config["death"]["death_leap_velocity"]
 RESET_THRESHOLD_Y = config["death"]["reset_threshold_y"]

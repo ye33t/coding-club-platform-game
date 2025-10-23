@@ -1,0 +1,18 @@
+version: 1
+sprite_sheets:
+  block_shards:
+    image: other.png
+    colorkey: [146, 144, 255]
+    sprites:
+      brick_tl:
+        offset: [180, 34]
+        size: [1, 1]
+      brick_tr:
+        offset: [190, 34]
+        size: [1, 1]
+      brick_bl:
+        offset: [200, 34]
+        size: [1, 1]
+      brick_br:
+        offset: [210, 34]
+        size: [1, 1]

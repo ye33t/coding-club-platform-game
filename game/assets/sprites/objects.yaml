@@ -32,15 +32,12 @@ sprite_sheets:
         offset: [16, 24]
         size: [2, 2]
 
-      brick_tl:
-        offset: [180, 34]
-        size: [1, 1]
-      brick_tr:
-        offset: [190, 34]
-        size: [1, 1]
-      brick_bl:
-        offset: [200, 34]
-        size: [1, 1]
-      brick_br:
-        offset: [210, 34]
-        size: [1, 1]
+      firework_1:
+        offset: [180, 80]
+        size: [2, 2]
+      firework_2:
+        offset: [198, 80]
+        size: [2, 2]
+      firework_3:
+        offset: [216, 80]
+        size: [2, 2]

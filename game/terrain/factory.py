@@ -8,6 +8,7 @@ from .castle_exit import CastleExitBehavior
 from .flagpole import FlagpoleBehavior
 from .item_box import ItemBoxBehavior, ItemBoxSpawnType
 from .none import NoneBehavior
+from .smash import SmashBehavior
 from .warp import WarpBehavior
 
 
@@ -40,6 +41,20 @@ class BehaviorFactory:
             return BounceBehavior(one_shot=one_shot)
         elif behavior_type == "none":
             return NoneBehavior()
+        elif behavior_type == "smash":
+            score_value = 50
+            if params and "score" in params:
+                raw_score = params["score"]
+                if not isinstance(raw_score, int):
+                    raise BehaviorFactoryError(
+                        "smash behavior 'score' parameter must be an integer."
+                    )
+                if raw_score <= 0:
+                    raise BehaviorFactoryError(
+                        "smash behavior 'score' parameter must be positive."
+                    )
+                score_value = raw_score
+            return SmashBehavior(score_value=score_value)
         elif behavior_type == "warp":
             if not params:
                 raise BehaviorFactoryError("Warp behavior requires parameters")
@@ -117,5 +132,5 @@ class BehaviorFactory:
         else:
             raise BehaviorFactoryError(
                 f"Unknown behavior type '{behavior_type}'. "
-                "Available types: bounce, none, warp, flagpole, item_box, castle_exit"
+                "Available types: bounce, none, warp, flagpole, item_box, castle_exit, smash"
             )
