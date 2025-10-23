@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import pygame
 from pygame import Surface
@@ -11,6 +11,7 @@ from pygame import Surface
 from ..camera import Camera
 from ..constants import NATIVE_HEIGHT, SUB_TILE_SIZE, TILE_SIZE
 from ..content import sprites
+from ..content.palettes import palettes as palette_library
 from ..physics import config as physics_config
 from .base import Effect
 
@@ -43,6 +44,9 @@ class SmashShardEffect(Effect):
     _lifetime: float = field(init=False)
     _gravity: float = field(init=False)
     _sprite_cache: Dict[str, Surface | None] = field(init=False, default_factory=dict)
+    _palette_cache_key: Optional[Tuple[int, Optional[str]]] = field(
+        init=False, default=None
+    )
 
     def __post_init__(self) -> None:
         horizontal_speed = physics_config.SMASH_SHARD_HORIZONTAL_VELOCITY
@@ -101,10 +105,6 @@ class SmashShardEffect(Effect):
 
         self._gravity = physics_config.SMASH_SHARD_GRAVITY
         self._lifetime = physics_config.SMASH_SHARD_LIFETIME
-        self._sprite_cache = {
-            sprite: sprites.get_with_palette(_SPRITE_SHEET, sprite)
-            for sprite in _SHARD_SPRITES
-        }
 
     def update(self, dt: float) -> bool:  # noqa: D401
         """Move shards and return True while the effect is active."""
@@ -124,6 +124,14 @@ class SmashShardEffect(Effect):
 
     def draw(self, surface: Surface, camera: Camera) -> None:
         """Render each shard with rotation relative to the camera."""
+        palette_key = (palette_library.version, palette_library.active_scheme_name)
+        if self._palette_cache_key != palette_key:
+            self._sprite_cache = {
+                sprite: sprites.get_with_palette(_SPRITE_SHEET, sprite)
+                for sprite in _SHARD_SPRITES
+            }
+            self._palette_cache_key = palette_key
+
         for shard in self._shards:
             base_surface = self._sprite_cache.get(shard.sprite_name)
             if base_surface is None:

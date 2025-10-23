@@ -31,3 +31,13 @@ sprite_sheets:
       mario_avatar:
         offset: [16, 24]
         size: [2, 2]
+
+      firework_1:
+        offset: [180, 80]
+        size: [2, 2]
+      firework_2:
+        offset: [198, 80]
+        size: [2, 2]
+      firework_3:
+        offset: [216, 80]
+        size: [2, 2]
