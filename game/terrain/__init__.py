@@ -8,6 +8,7 @@ from .flagpole import FlagpoleBehavior
 from .item_box import ItemBoxBehavior, ItemBoxSpawnType
 from .manager import TerrainManager
 from .none import NoneBehavior
+from .smash import SmashBehavior
 from .warp import WarpBehavior
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "ItemBoxBehavior",
     "ItemBoxSpawnType",
     "NoneBehavior",
+    "SmashBehavior",
     "WarpBehavior",
     "BehaviorFactory",
     "BehaviorFactoryError",

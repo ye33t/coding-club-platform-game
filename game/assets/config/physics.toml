@@ -107,6 +107,25 @@ bounce_gravity = 400.0
 # Duration of bounce animation (seconds)
 bounce_duration = 0.25
 
+[smash]
+# Horizontal launch speed magnitude for smash shards (px/s)
+shard_horizontal_velocity = 90.0
+
+# Initial upward velocity for top shards (px/s)
+shard_top_velocity_y = 200.0
+
+# Initial upward velocity for bottom shards (px/s)
+shard_bottom_velocity_y = 140.0
+
+# Gravity applied to smash shards (px/s²)
+shard_gravity = 500.0
+
+# Angular speed for shard rotation (degrees/s)
+shard_angular_speed = 540.0
+
+# Lifetime of the smash shard effect (seconds)
+shard_lifetime = 0.9
+
 [death]
 # Initial upward velocity for death animation leap (px/s)
 # Mario leaps up before falling off screen
