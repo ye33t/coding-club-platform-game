@@ -428,7 +428,7 @@ class EndLevelState(State):
         if amount <= 0:
             return
 
-        popup_position = (mario.x + mario.width / 2, mario.y + mario.height)
+        popup_position = (mario.x + mario.width / 2, mario.y + mario.height + TILE_SIZE)
         self._flagpole_score_amount = amount
         self._flagpole_score_position = popup_position
 
@@ -440,7 +440,10 @@ class EndLevelState(State):
         popup_position = self._flagpole_score_position
         if popup_position is None:
             mario = game.world.mario
-            popup_position = (mario.x + mario.width / 2, mario.y + mario.height)
+            popup_position = (
+                mario.x + mario.width / 2,
+                mario.y + mario.height + TILE_SIZE,
+            )
 
         game.world.award_score_with_popup(self._flagpole_score_amount, popup_position)
         self._flagpole_score_awarded = True
