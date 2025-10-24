@@ -20,6 +20,7 @@ CASTLE_FLAG_SPEED_SCALE = 0.6
 CASTLE_COMPLETION_DELAY = 1.0
 FIREWORK_SCORE_VALUE = 500
 FIREWORK_SPAWN_INTERVAL = 0.45
+FIREWORK_VERTICAL_SHIFT_TILES = 5.0
 FIREWORK_OFFSET_TILES: tuple[tuple[float, float], ...] = (
     (-2.5, 3.5),
     (2.5, 3.0),
@@ -179,7 +180,7 @@ class CompleteLevelState(State):
                 index % len(FIREWORK_OFFSET_TILES)
             ]
             world_x = anchor_x + offset_x * TILE_SIZE
-            world_y = anchor_y + offset_y * TILE_SIZE
+            world_y = anchor_y + (offset_y - FIREWORK_VERTICAL_SHIFT_TILES) * TILE_SIZE
             spawn_time = index * FIREWORK_SPAWN_INTERVAL
             self._firework_queue.append(
                 FireworkPlan(spawn_time=spawn_time, world_x=world_x, world_y=world_y)
