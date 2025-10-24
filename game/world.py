@@ -46,6 +46,7 @@ class World:
         self.props = PropManager()
         self.props.register("flagpole", FlagpoleProp())
         self.animation_tick = 0
+        self._timer_paused = False
 
         # Create Mario at the level's spawn point
         self.mario = Mario(
@@ -89,6 +90,7 @@ class World:
         # Reset all spawn triggers back to their pending state
         self.level.spawn_manager.reset_all_triggers()
 
+        self._timer_paused = False
         # Reset camera position and ratchet
         self.camera.x = 0
         self.camera.max_x = 0
@@ -102,7 +104,8 @@ class World:
             Physics event if one was raised (e.g., death, warp), None otherwise
         """
         self.mario.update_intent(keys)
-        self.hud.tick_timer()
+        if not self._timer_paused:
+            self.hud.tick_timer()
 
         self.entities.update(dt, self.level, self.mario.screen, self.camera.x)
 
@@ -175,6 +178,7 @@ class World:
 
     def _configure_hud_for_level(self, preserve_progress: bool) -> None:
         """Apply level-specific HUD configuration."""
+        self._timer_paused = False
         timer_start = (
             self.level.timer_start_value
             if self.level.timer_start_value is not None
@@ -197,6 +201,15 @@ class World:
     def award_score(self, amount: int) -> None:
         """Increment the global score."""
         self.hud.add_score(amount)
+
+    def award_score_with_popup(
+        self, amount: int, position: tuple[float, float] | None = None
+    ) -> None:
+        """Increment score and display the corresponding popup."""
+        if amount <= 0:
+            return
+        self.award_score(amount)
+        self._spawn_score_popup(amount, position)
 
     def collect_coin(self, amount: Optional[int] = None) -> None:
         """Increment coin counter and associated score bonus."""
@@ -268,3 +281,11 @@ class World:
             vertical_offset=SCORE_POPUP_VERTICAL_OFFSET,
         )
         self.effects.spawn(popup)
+
+    def pause_timer(self) -> None:
+        """Suspend the HUD timer countdown."""
+        self._timer_paused = True
+
+    def resume_timer(self) -> None:
+        """Resume the HUD timer countdown."""
+        self._timer_paused = False

@@ -7,7 +7,7 @@ from enum import Enum, auto
 
 import pygame
 
-from game.constants import NATIVE_WIDTH, TILE_SIZE
+from game.constants import NATIVE_WIDTH, SUB_TILE_SIZE, TILE_SIZE
 
 from ..mario import MarioIntent
 from ..physics.config import FLAGPOLE_DESCENT_SPEED, WALK_SPEED
@@ -86,6 +86,9 @@ class CameraEaseState:
         return True
 
 
+FLAGPOLE_SCORE_VALUES = (100, 400, 800, 2000, 5000)
+
+
 class EndLevelState(State):
     """Coordinates the flagpole descent, camera pan, and castle handoff.
 
@@ -110,6 +113,10 @@ class EndLevelState(State):
         self._camera_ease = CameraEaseState(duration=self.CAMERA_EASE_DURATION)
         self._transition_started = False
         self._victory_walk_speed = WALK_SPEED * self.VICTORY_WALK_SPEED_SCALE
+        self._flagpole_rows: list[int] = []
+        self._flagpole_base_y: float | None = None
+        self._flagpole_top_y: float | None = None
+        self._flagpole_score_awarded = False
 
     def on_enter(self, game) -> None:
         """Lock Mario to the pole and gather sequence metadata."""
@@ -122,11 +129,15 @@ class EndLevelState(State):
 
         self._phase = SequencePhase.DESCENT
         self._transition_started = False
+        self._flagpole_score_awarded = False
         self._flag_prop = self._resolve_flag_prop(game)
         self._anchors = self._collect_castle_anchors(game)
-        self._flagpole_clamp_y = self._determine_flagpole_clamp(game)
+        self._cache_flagpole_geometry(game)
+        self._flagpole_clamp_y = self._determine_flagpole_clamp()
         self._camera_ease.reset(game.world.camera.x)
         self._apply_flagpole_top_clamp(mario)
+        game.world.pause_timer()
+        self._award_flagpole_score(game)
 
     def update(self, game, dt: float) -> None:
         """Advance the current phase of the finale."""
@@ -157,6 +168,10 @@ class EndLevelState(State):
         self._flagpole_clamp_y = None
         self._transition_started = False
         self._camera_ease.reset(game.world.camera.x)
+        self._flagpole_rows = []
+        self._flagpole_base_y = None
+        self._flagpole_top_y = None
+        self._flagpole_score_awarded = False
 
     @staticmethod
     def _victory_walk_intent(_: pygame.key.ScancodeWrapper) -> MarioIntent:
@@ -276,6 +291,32 @@ class EndLevelState(State):
         """Clamp Mario's scripted walk speed for the victory march."""
         mario.vx = max(0.0, min(mario.vx, self._victory_walk_speed))
 
+    def _cache_flagpole_geometry(self, game) -> None:
+        """Store reusable flagpole geometry for scoring and clamping."""
+        flagpole_tiles = [
+            instance
+            for instance in game.world.level.terrain_manager.instances.values()
+            if isinstance(instance.behavior, FlagpoleBehavior)
+        ]
+
+        if not flagpole_tiles:
+            self._flagpole_rows = []
+            self._flagpole_base_y = None
+            self._flagpole_top_y = None
+            return
+
+        rows = sorted({instance.y for instance in flagpole_tiles})
+        self._flagpole_rows = rows
+        if not rows:
+            self._flagpole_base_y = None
+            self._flagpole_top_y = None
+            return
+
+        base_row = rows[0]
+        top_row = rows[-1]
+        self._flagpole_base_y = float(base_row * TILE_SIZE)
+        self._flagpole_top_y = float((top_row + 1) * TILE_SIZE)
+
     def _collect_castle_anchors(self, game) -> CastleAnchors:
         """Collect required castle markers from terrain behaviors."""
         walk_anchor: CastleWalkAnchor | None = None
@@ -320,22 +361,16 @@ class EndLevelState(State):
 
         return CastleAnchors(walk=walk_anchor, flag=flag_anchor)
 
-    def _determine_flagpole_clamp(self, game) -> float | None:
+    def _determine_flagpole_clamp(self) -> float | None:
         """Determine the highest Y Mario should reach during descent."""
-        flagpole_tiles = [
-            instance
-            for instance in game.world.level.terrain_manager.instances.values()
-            if isinstance(instance.behavior, FlagpoleBehavior)
-        ]
-
-        if not flagpole_tiles:
+        if not self._flagpole_rows:
             return None
 
-        unique_rows = sorted({instance.y for instance in flagpole_tiles})
-        if not unique_rows:
-            return None
-
-        clamp_tile_y = unique_rows[-2] if len(unique_rows) >= 2 else unique_rows[-1]
+        clamp_tile_y = (
+            self._flagpole_rows[-2]
+            if len(self._flagpole_rows) >= 2
+            else self._flagpole_rows[-1]
+        )
         return float(clamp_tile_y * TILE_SIZE)
 
     def _apply_flagpole_top_clamp(self, mario) -> None:
@@ -344,6 +379,53 @@ class EndLevelState(State):
             return
         if mario.y > self._flagpole_clamp_y:
             mario.y = self._flagpole_clamp_y
+
+    def _award_flagpole_score(self, game) -> None:
+        """Grant score based on the height Mario grabbed the pole."""
+        if self._flagpole_score_awarded:
+            return
+
+        top = self._flagpole_top_y
+        base = (
+            self._flagpole_base_y
+            if self._flagpole_base_y is not None
+            else float(self.flagpole_base_y)
+        )
+        if top is None or top <= base:
+            return
+
+        mario = game.world.mario
+        touch_y = max(base, min(mario.y, top))
+
+        scores = FLAGPOLE_SCORE_VALUES
+        bottom_threshold = min(base + SUB_TILE_SIZE, top)
+        effective_span = max(0.0, top - bottom_threshold)
+
+        boundaries: list[float] = [bottom_threshold]
+        steps = len(scores) - 1
+        if steps > 1:
+            if effective_span <= 0:
+                for _ in range(1, steps):
+                    boundaries.append(bottom_threshold)
+            else:
+                segment = effective_span / (steps - 1)
+                for index in range(1, steps):
+                    boundary = bottom_threshold + segment * index
+                    boundaries.append(min(boundary, top))
+
+        tier = len(scores) - 1
+        for idx, boundary in enumerate(boundaries):
+            if touch_y < boundary:
+                tier = idx
+                break
+
+        amount = scores[tier]
+        if amount <= 0:
+            return
+
+        popup_position = (mario.x + mario.width / 2, mario.y + mario.height)
+        game.world.award_score_with_popup(amount, popup_position)
+        self._flagpole_score_awarded = True
 
     def _resolve_flag_prop(self, game) -> FlagpoleProp | None:
         """Fetch the decorative flag prop if one was registered."""
