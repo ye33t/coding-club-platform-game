@@ -388,8 +388,6 @@ class EndLevelState(State):
     def _plan_flagpole_score(self, game) -> None:
         """Compute the flagpole score tier based on Mario's grab height."""
         self._flagpole_score_amount = 0
-        self._flagpole_score_position = None
-
         top = self._flagpole_top_y
         base = (
             self._flagpole_base_y
@@ -428,22 +426,18 @@ class EndLevelState(State):
         if amount <= 0:
             return
 
-        popup_position = (mario.x + mario.width / 2, mario.y + mario.height + TILE_SIZE)
         self._flagpole_score_amount = amount
-        self._flagpole_score_position = popup_position
 
     def _award_flagpole_score(self, game) -> None:
         """Grant the pre-calculated flagpole score once Mario dismounts."""
         if self._flagpole_score_awarded or self._flagpole_score_amount <= 0:
             return
 
-        popup_position = self._flagpole_score_position
-        if popup_position is None:
-            mario = game.world.mario
-            popup_position = (
-                mario.x + mario.width / 2,
-                mario.y + mario.height + TILE_SIZE,
-            )
+        mario = game.world.mario
+        popup_position = (
+            mario.x + mario.width + SUB_TILE_SIZE,
+            mario.y + mario.height,
+        )
 
         game.world.award_score_with_popup(self._flagpole_score_amount, popup_position)
         self._flagpole_score_awarded = True
